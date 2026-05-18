@@ -15,11 +15,11 @@
         </div>
 
         <div class="flex gap-2 mb-5 overflow-x-auto scroll-hide pb-1">
-            <button onclick="filterNotifs(this,'all')" class="notif-tab active-ntab shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-teal-700 text-white whitespace-nowrap">All</button>
-            <button onclick="filterNotifs(this,'lead')" class="notif-tab shrink-0 px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition">New Leads</button>
-            <button onclick="filterNotifs(this,'booking')" class="notif-tab shrink-0 px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition">Bookings</button>
-            <button onclick="filterNotifs(this,'review')" class="notif-tab shrink-0 px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition">Reviews</button>
-            <button onclick="filterNotifs(this,'payment')" class="notif-tab shrink-0 px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition">Payments</button>
+            <button onclick="filterNotifs(this,'all')" class="notif-tab active-ntab shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs font-bold bg-teal-700 text-white whitespace-nowrap">All</button>
+            <button onclick="filterNotifs(this,'lead')" class="notif-tab shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition">New Leads</button>
+            <button onclick="filterNotifs(this,'booking')" class="notif-tab shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition">Bookings</button>
+            <button onclick="filterNotifs(this,'review')" class="notif-tab shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition">Reviews</button>
+            <button onclick="filterNotifs(this,'payment')" class="notif-tab shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 whitespace-nowrap transition">Payments</button>
         </div>
 
         <div class="space-y-2" id="notifList">

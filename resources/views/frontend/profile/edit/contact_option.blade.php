@@ -1,7 +1,7 @@
 @extends('frontend.layouts.__app')
 
 @section('content')
-    <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-slate-100">
+    <div class="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-4 sm:p-8 md:p-12 border border-slate-100">
         <form id="proSignupForm"
             action="{{ route('save.seller.profile', ['type' => $user->type, 'setup' => 'contact_option']) }}" method="POST"
             class="space-y-10">
@@ -14,7 +14,7 @@
 
                 <div class="space-y-10">
                     <!-- In-App Messaging -->
-                    <div class="bg-gradient-to-r from-slate-900 to-teal-900 p-10 rounded-3xl text-white shadow-lg">
+                    <div class="bg-gradient-to-r from-slate-900 to-teal-900 p-5 sm:p-10 rounded-3xl text-white shadow-lg">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <h3 class="text-2xl font-bold mb-4">Zonely Secure Messaging (Recommended)</h3>
@@ -27,7 +27,7 @@
                                     <li>✓ Verified customers only</li>
                                 </ul>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer ml-8">
+                            <label class="relative inline-flex items-center cursor-pointer ml-3 sm:ml-8 shrink-0">
                                 <input type="checkbox" checked class="sr-only peer">
                                 <div
                                     class="w-16 h-9 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-teal-600">
@@ -38,7 +38,7 @@
 
                     <!-- Phone -->
                     <div
-                        class="bg-white border-2 border-slate-200 rounded-3xl p-10 hover:border-teal-700 transition-all shadow-sm">
+                        class="bg-white border-2 border-slate-200 rounded-3xl p-5 sm:p-10 hover:border-teal-700 transition-all shadow-sm">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center gap-6 mb-6">
@@ -54,7 +54,7 @@
                                     class="w-full px-6 py-5 rounded-3xl border border-slate-300 focus:border-teal-700 focus:ring-4 focus:ring-teal-100 outline-none transition">
                                 <p class="text-sm text-slate-500 mt-4">Tracked calls = high-intent paid leads</p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer ml-8">
+                            <label class="relative inline-flex items-center cursor-pointer ml-3 sm:ml-8 shrink-0">
                                 <input type="checkbox" checked class="sr-only peer">
                                 <div
                                     class="w-16 h-9 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-teal-600">
@@ -65,7 +65,7 @@
 
                     <!-- WhatsApp -->
                     <div
-                        class="bg-white border-2 border-slate-200 rounded-3xl p-10 hover:border-emerald-600 transition-all shadow-sm">
+                        class="bg-white border-2 border-slate-200 rounded-3xl p-5 sm:p-10 hover:border-emerald-600 transition-all shadow-sm">
                         <div class="flex items-start justify-between">
                             <div class="flex-1">
                                 <div class="flex items-center gap-6 mb-6">
@@ -82,7 +82,7 @@
                                 <p class="text-sm text-emerald-600 font-medium mt-4">Converts 3x faster than forms
                                 </p>
                             </div>
-                            <label class="relative inline-flex items-center cursor-pointer ml-8">
+                            <label class="relative inline-flex items-center cursor-pointer ml-3 sm:ml-8 shrink-0">
                                 <input type="checkbox" class="sr-only peer">
                                 <div
                                     class="w-16 h-9 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-emerald-500">
@@ -94,7 +94,7 @@
                     <!-- Zonely Booking -->
                     @if ($user->type === 'seller')
                         <div
-                            class="bg-white border-2 border-slate-200 rounded-3xl p-10 hover:border-indigo-600 transition-all shadow-sm">
+                            class="bg-white border-2 border-slate-200 rounded-3xl p-5 sm:p-10 hover:border-indigo-600 transition-all shadow-sm">
                             <div class="flex items-start justify-between">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-6 mb-6">
@@ -203,7 +203,7 @@
                                     <p class="text-sm text-indigo-600 font-medium mt-8">Best conversion method –
                                         customers book instantly!</p>
                                 </div>
-                                <label class="relative inline-flex items-center cursor-pointer ml-8">
+                                <label class="relative inline-flex items-center cursor-pointer ml-3 sm:ml-8 shrink-0">
                                     <input type="checkbox" checked class="sr-only peer enable-zonely-booking">
                                     <div
                                         class="w-16 h-9 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:rounded-full after:h-7 after:w-7 after:transition-all peer-checked:bg-indigo-500">

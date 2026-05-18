@@ -14,19 +14,19 @@
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 text-center">
             <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm text-center">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Referrals</p>
-                <p class="text-3xl font-black text-slate-900">{{ $stats['referrals'] ?? 0 }}</p>
+                <p class="text-2xl sm:text-3xl font-black text-slate-900">{{ $stats['referrals'] ?? 0 }}</p>
             </div>
             <div class="bg-teal-700 rounded-2xl p-5 text-white text-center shadow-sm">
                 <p class="text-[10px] font-bold opacity-70 uppercase tracking-widest mb-1">Earned</p>
-                <p class="text-3xl font-black">${{ number_format($stats['earned'] ?? 0, 2) }}</p>
+                <p class="text-2xl sm:text-3xl font-black">${{ number_format($stats['earned'] ?? 0, 2) }}</p>
             </div>
             <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm text-center">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Pending</p>
-                <p class="text-3xl font-black text-amber-500">${{ number_format($stats['pending'] ?? 0, 2) }}</p>
+                <p class="text-2xl sm:text-3xl font-black text-amber-500">${{ number_format($stats['pending'] ?? 0, 2) }}</p>
             </div>
             <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm text-center">
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Paid Out</p>
-                <p class="text-3xl font-black text-emerald-600">${{ number_format($stats['paid_out'] ?? 0, 2) }}</p>
+                <p class="text-2xl sm:text-3xl font-black text-emerald-600">${{ number_format($stats['paid_out'] ?? 0, 2) }}</p>
             </div>
         </div>
 

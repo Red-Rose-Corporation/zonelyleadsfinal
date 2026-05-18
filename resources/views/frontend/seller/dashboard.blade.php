@@ -301,7 +301,7 @@
             <div class="relative">
                 <input id="searchInput" type="text" placeholder="Search leads..."
                        oninput="searchLeads()"
-                       class="pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm w-44 focus:border-teal-400 focus:ring-2 focus:ring-teal-50 transition">
+                       class="pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm w-full sm:w-44 focus:border-teal-400 focus:ring-2 focus:ring-teal-50 transition">
                 <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400 text-sm pointer-events-none"></i>
             </div>
             <button onclick="exportLeads()"

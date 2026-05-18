@@ -63,7 +63,7 @@
                                 <i class="fa-solid fa-times"></i>
                             </button>
                         </div>
-                        <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3">
                             <div>
                                 <label class="text-xs font-semibold text-slate-500 mb-1 block">From</label>
                                 <input type="time" name="periods[{{ $i }}][from]" value="{{ $period['from'] }}" onchange="updatePreview()"
