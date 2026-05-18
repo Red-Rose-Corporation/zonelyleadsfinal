@@ -104,7 +104,8 @@ Route::post('/r/{token}', [ReviewController::class, 'store'])->name('review.stor
 Route::post('/webhook/twilio/voice',  [TwilioWebhookController::class, 'voice'])->name('twilio.webhook.voice');
 Route::post('/webhook/twilio/status', [TwilioWebhookController::class, 'status'])->name('twilio.webhook.status');
 Route::get('/blog/{slug}', [HomeController::class, 'blog_show'])->name('blog.show');
-Route::get('/sitemap', [HomeController::class, 'sitemap'])->name('sitemap');
+Route::get('/sitemap.xml', [HomeController::class, 'sitemap'])->name('sitemap');
+Route::get('/sitemap', [HomeController::class, 'sitemap']); // legacy redirect
 
 /*
 |--------------------------------------------------------------------------

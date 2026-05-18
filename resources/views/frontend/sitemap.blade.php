@@ -4,8 +4,8 @@
     <url>
         <loc>{{ $entry['loc'] }}</loc>
         <lastmod>{{ $entry['lastmod'] }}</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>0.8</priority>
+        <changefreq>{{ $entry['changefreq'] }}</changefreq>
+        <priority>{{ $entry['priority'] }}</priority>
     </url>
 @endforeach
 </urlset>

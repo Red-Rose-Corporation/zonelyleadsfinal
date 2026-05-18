@@ -628,25 +628,59 @@ class HomeController extends Controller
     }
     function sitemap()
     {
-        $frontendRoutes = collect(Route::getRoutes())
-            ->filter(function ($route) {
-                return $route->getName() && str_starts_with($route->getName(), 'frontend.');
-            })
-            ->map(function ($route) {
-                return [
-                    'loc' => url($route->uri()),
-                    'lastmod' => Carbon::now()->toAtomString(),
-                ];
-            });
+        $now = Carbon::now()->toAtomString();
+
+        // Static pages
+        $static = collect([
+            ['loc' => route('frontend.home'),              'priority' => '1.0', 'changefreq' => 'daily',   'lastmod' => $now],
+            ['loc' => route('frontend.service.all'),       'priority' => '0.9', 'changefreq' => 'daily',   'lastmod' => $now],
+            ['loc' => route('frontend.blog'),              'priority' => '0.8', 'changefreq' => 'weekly',  'lastmod' => $now],
+            ['loc' => route('frontend.tools'),             'priority' => '0.7', 'changefreq' => 'monthly', 'lastmod' => $now],
+            ['loc' => route('frontend.about-us'),          'priority' => '0.6', 'changefreq' => 'monthly', 'lastmod' => $now],
+            ['loc' => route('frontend.help'),              'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => $now],
+            ['loc' => route('frontend.privacy-policy'),    'priority' => '0.3', 'changefreq' => 'yearly',  'lastmod' => $now],
+            ['loc' => route('frontend.terms-and-condition'), 'priority' => '0.3', 'changefreq' => 'yearly', 'lastmod' => $now],
+        ]);
+
+        // Seller profile pages (verified sellers with slugs)
+        $sellers = User::where('type', 'seller')
+            ->where('status', true)
+            ->whereNotNull('slug')
+            ->select('slug', 'updated_at')
+            ->get()
+            ->map(fn($u) => [
+                'loc'        => route('frontend.service.show', $u->slug),
+                'priority'   => '0.8',
+                'changefreq' => 'weekly',
+                'lastmod'    => optional($u->updated_at)->toAtomString() ?? $now,
+            ]);
+
+        // Category pages
+        $categories = Category::where('is_active', 1)
+            ->whereNotNull('slug')
+            ->select('slug', 'updated_at')
+            ->get()
+            ->map(fn($c) => [
+                'loc'        => route('frontend.category', $c->slug),
+                'priority'   => '0.7',
+                'changefreq' => 'weekly',
+                'lastmod'    => optional($c->updated_at)->toAtomString() ?? $now,
+            ]);
+
+        // Blog posts
         $blogs = Blog::select('slug', 'updated_at')
             ->get()
-            ->map(function ($blog) {
-                return [
-                    'loc' => route('blog.show', $blog->slug),
-                    'lastmod' => optional($blog->updated_at)->toAtomString() ?? Carbon::now()->toAtomString(),
-                ];
-            });
-        $sitemapEntries = $frontendRoutes->merge($blogs);
-        return response()->view('frontend.sitemap', compact('sitemapEntries'))->header('Content-Type', 'application/xml');
+            ->map(fn($b) => [
+                'loc'        => route('blog.show', $b->slug),
+                'priority'   => '0.6',
+                'changefreq' => 'monthly',
+                'lastmod'    => optional($b->updated_at)->toAtomString() ?? $now,
+            ]);
+
+        $sitemapEntries = $static->merge($sellers)->merge($categories)->merge($blogs);
+
+        return response()
+            ->view('frontend.sitemap', compact('sitemapEntries'))
+            ->header('Content-Type', 'application/xml');
     }
 }
