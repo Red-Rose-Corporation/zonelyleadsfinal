@@ -1,6 +1,6 @@
 @php
-    $meta_title       = $user->name . ' - ' . $user->designation;
-    $meta_description = $user->name . ' - ' . $user->designation . ' - ' . ($user->about ?? '');
+    $meta_title       = ($user->category?->title ? 'Trusted ' . $user->category->title . ' in ' : '') . ($user->city ? $user->city . ($user->state ? ', ' . $user->state : '') . ' | ' : '') . $user->name;
+    $meta_description = $user->name . ($user->category?->title ? ' — verified ' . $user->category->title : '') . ($user->city ? ' in ' . $user->city : '') . '. ' . Str::limit(strip_tags($user->about ?? $user->bio ?? ''), 120);
 @endphp
 @extends('frontend.layouts._app')
 @section('title', $meta_title)
