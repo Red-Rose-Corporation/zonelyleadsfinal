@@ -1,10 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /downloads/
+Disallow: /uploads/
 
-user-agent: *
-disallow: /downloads/
-
-user-agent: magicsearchbot
-disallow: /uploads/
-
-Sitemap: https://thezonely.com/sitemap
+Sitemap: https://www.zonelyleads.com/sitemap.xml
