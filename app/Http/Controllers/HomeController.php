@@ -206,7 +206,22 @@ class HomeController extends Controller
             ->with(['services', 'category', 'reviews'])
             ->firstOrFail();
 
-        $W = 1200; $H = 630;
+        // Cache: serve previously generated PNG instantly so Facebook/LinkedIn/
+        // Twitter crawlers (which have short timeouts) actually get the image.
+        // Cache key includes updated_at so it auto-busts when the profile changes.
+        $cacheDir  = storage_path('app/public/og-cache');
+        $cacheFile = $cacheDir . '/' . $user->slug . '-' . $user->updated_at->timestamp . '.png';
+        if (file_exists($cacheFile)) {
+            header('Content-Type: image/png');
+            header('Cache-Control: public, max-age=31536000, immutable');
+            readfile($cacheFile);
+            exit;
+        }
+        if (!is_dir($cacheDir)) {
+            @mkdir($cacheDir, 0755, true);
+        }
+
+        $W = 1080; $H = 1080;
         $img = imagecreatetruecolor($W, $H);
         imagealphablending($img, true);
 
@@ -235,8 +250,8 @@ class HomeController extends Controller
         $fontR = collect($fontRegPaths)->first(fn($p) => file_exists($p)) ?? $fontB;
         $ttf   = (bool)$fontB;
 
-        // Two-panel background
-        $photoW = 460;
+        // Two-panel background — 50/50 split for square format
+        $photoW = 540;
         imagefilledrectangle($img, 0,       0, $photoW, $H, $cBg);
         imagefilledrectangle($img, $photoW, 0, $W,      $H, $cPanel);
 
@@ -472,6 +487,19 @@ class HomeController extends Controller
             imagettftext($img, 23, 0, $txX, $btnY1 + (int)($btnH / 2) + 9, $cBg, $fontB, $btnTx);
         }
 
+        // Save the generated image to cache, then serve it.
+        // Subsequent requests will be served from the cache check at the top.
+        if (is_dir($cacheDir) && is_writable($cacheDir)) {
+            @imagepng($img, $cacheFile, 6);
+            imagedestroy($img);
+            if (file_exists($cacheFile)) {
+                header('Content-Type: image/png');
+                header('Cache-Control: public, max-age=31536000, immutable');
+                readfile($cacheFile);
+                exit;
+            }
+        }
+        // Fallback if cache write failed — stream directly
         header('Content-Type: image/png');
         header('Cache-Control: public, max-age=3600');
         imagepng($img, null, 6);

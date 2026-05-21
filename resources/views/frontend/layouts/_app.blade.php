@@ -29,15 +29,17 @@
     <meta property="og:url"         content="{{ $canonicalUrl }}">
     <meta property="og:title"       content="{{ $ogTitle }}">
     <meta property="og:description" content="{{ Str::limit(strip_tags($ogDescription), 200) }}">
-    <meta property="og:image"       content="{{ $ogImage }}">
-    <meta property="og:image:width"  content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:type"   content="image/png">
+    <meta property="og:image"            content="{{ $ogImage }}">
+    <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    <meta property="og:image:width"      content="1080">
+    <meta property="og:image:height"     content="1080">
+    <meta property="og:image:type"       content="image/png">
+    <meta property="og:image:alt"        content="{{ $ogTitle }}">
     <meta property="og:site_name"   content="Zonely">
     @yield('og_extra')
 
     {{-- Twitter Card ────────────────────────────────── --}}
-    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:card"        content="summary">
     <meta name="twitter:title"       content="{{ $ogTitle }}">
     <meta name="twitter:description" content="{{ Str::limit(strip_tags($ogDescription), 200) }}">
     <meta name="twitter:image"       content="{{ $ogImage }}">

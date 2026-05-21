@@ -58,7 +58,7 @@
                         <option value="per_hour"    {{ old('pricing_type')=='per_hour'    ? 'selected' : '' }}>per hour</option>
                         <option value="flat_rate"   {{ old('pricing_type')=='flat_rate'   ? 'selected' : '' }}>flat rate</option>
                         <option value="free"        {{ old('pricing_type')=='free'        ? 'selected' : '' }}>free</option>
-                        <option value="contact"     {{ old('pricing_type')=='contact'     ? 'selected' : '' }}>contact us</option>
+                        <option value="contact"     {{ old('pricing_type')=='contact'     ? 'selected' : '' }}>Negotiable</option>
                     </select>
                 </div>
             </div>

@@ -64,7 +64,7 @@
                         <option value="per_hour"    {{ $currentPt=='per_hour'    ? 'selected' : '' }}>per hour</option>
                         <option value="flat_rate"   {{ $currentPt=='flat_rate'   ? 'selected' : '' }}>flat rate</option>
                         <option value="free"        {{ $currentPt=='free'        ? 'selected' : '' }}>free</option>
-                        <option value="contact"     {{ $currentPt=='contact'     ? 'selected' : '' }}>contact us</option>
+                        <option value="contact"     {{ $currentPt=='contact'     ? 'selected' : '' }}>Negotiable</option>
                     </select>
                 </div>
             </div>
