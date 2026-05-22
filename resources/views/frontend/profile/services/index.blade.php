@@ -31,7 +31,7 @@
     <div class="space-y-3">
         @forelse($services as $service)
         @php
-            $ptMap = ['starting_at'=>'starting at','per_month'=>'per month','per_hour'=>'per hour','flat_rate'=>'flat rate','free'=>'free','contact'=>'contact us'];
+            $ptMap = ['starting_at'=>'starting at','per_month'=>'per month','per_hour'=>'per hour','flat_rate'=>'flat rate','free'=>'free','contact'=>'Negotiable'];
             $ptLabel = $ptMap[$service->pricing_type ?? 'starting_at'] ?? 'starting at';
             $features = array_filter(array_map('trim', explode("\n", $service->features ?? '')));
         @endphp
@@ -54,7 +54,7 @@
                         <p class="text-xl font-black text-teal-800">${{ $service->price }}</p>
                         <p class="text-xs text-slate-400">{{ $ptLabel }}</p>
                         @else
-                        <p class="text-sm font-bold text-slate-400">Contact</p>
+                        <p class="text-sm font-bold text-slate-400">{{ $service->pricing_type === 'contact' ? 'Negotiable' : 'Contact' }}</p>
                         @endif
                     </div>
                     <span class="text-[10px] px-2 py-1 rounded-lg font-bold {{ $service->is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500' }}">

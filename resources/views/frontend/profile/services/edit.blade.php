@@ -77,7 +77,7 @@
                         {{ $service->price ? '$'.number_format($service->price, 0) : '—' }}
                     </div>
                     <div class="text-xs text-teal-600 font-semibold" id="previewType">
-                        {{ ['starting_at'=>'starting at','per_month'=>'per month','per_hour'=>'per hour','flat_rate'=>'flat rate','free'=>'free','contact'=>'contact us'][$service->pricing_type ?? 'starting_at'] ?? 'starting at' }}
+                        {{ ['starting_at'=>'starting at','per_month'=>'per month','per_hour'=>'per hour','flat_rate'=>'flat rate','free'=>'free','contact'=>'Negotiable'][$service->pricing_type ?? 'starting_at'] ?? 'starting at' }}
                     </div>
                 </div>
             </div>
@@ -153,7 +153,7 @@
 </div>
 
 <script>
-const ptLabels = {starting_at:'starting at',per_month:'per month',per_hour:'per hour',flat_rate:'flat rate',free:'free',contact:'contact us'};
+const ptLabels = {starting_at:'starting at',per_month:'per month',per_hour:'per hour',flat_rate:'flat rate',free:'free',contact:'Negotiable'};
 function updatePreview() {
     const title = document.querySelector('[name=title]').value || 'Your service name';
     const price = document.querySelector('[name=price]').value;

@@ -240,7 +240,7 @@
 
         {{-- ── ROW 1: Bio (left) + Pricing (right) ────────────────────── --}}
         @php
-            $ptMap = ['starting_at'=>'Starting at','per_month'=>'Per month','per_hour'=>'Per hour','flat_rate'=>'Flat rate','free'=>'Free','contact'=>'Contact us'];
+            $ptMap = ['starting_at'=>'Starting at','per_month'=>'Per month','per_hour'=>'Per hour','flat_rate'=>'Flat rate','free'=>'Free','contact'=>'Negotiable'];
             $hasPricing       = $activeServices->count() || count($tags);
             $hasMemberships   = $user->memberships->count();
             $hasEducation     = $user->educations->count();
@@ -321,7 +321,7 @@
                                     @elseif($svc->pricing_type === 'free')
                                         <div class="text-xl font-black text-emerald-600">Free</div>
                                     @else
-                                        <div class="text-sm font-bold text-slate-400">Contact us</div>
+                                        <div class="text-sm font-bold text-slate-400">Negotiable</div>
                                     @endif
                                 </div>
                                 <div class="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-teal-100 flex items-center justify-center transition-colors flex-shrink-0">
