@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ManagerController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
 use App\Http\Controllers\Admin\TwilioController;
 use App\Http\Controllers\Admin\PhonePoolController;
+use App\Http\Controllers\Admin\PricingController;
 use App\Http\Controllers\TwilioWebhookController;
 use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\BuyerController;
@@ -313,6 +314,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('sellers',              [TwilioController::class, 'sellers'])->name('sellers');
             Route::post('sellers/{id}/toggle', [TwilioController::class, 'toggle'])->name('toggle');
             Route::post('sellers/{id}/test',   [TwilioController::class, 'testSms'])->name('test');
+        });
+
+        // Pricing Rules
+        Route::prefix('pricing')->name('pricing.')->group(function () {
+            Route::get('/',                  [PricingController::class, 'index'])->name('index');
+            Route::post('/',                 [PricingController::class, 'store'])->name('store');
+            Route::put('{id}',               [PricingController::class, 'update'])->name('update');
+            Route::delete('{id}',            [PricingController::class, 'destroy'])->name('destroy');
+            Route::post('{id}/toggle',       [PricingController::class, 'toggle'])->name('toggle');
+            Route::post('defaults',          [PricingController::class, 'updateDefaults'])->name('defaults');
+            Route::get('cities/{stateId}',   [PricingController::class, 'citiesByState'])->name('cities');
         });
 
         // Phone number pool

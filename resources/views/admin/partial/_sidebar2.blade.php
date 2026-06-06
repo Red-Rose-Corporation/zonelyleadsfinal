@@ -116,6 +116,14 @@
         {{-- Managers section — admin and COO --}}
         @if($isAdmin || $isCoo)
         <li class="nav-item">
+            <a href="{{ route('admin.pricing.index') }}"
+               class="{{ Route::is('admin.pricing.*') ? 'active' : '' }}">
+                <i class="fas fa-tags"></i>
+                <span class="nav-text ms-2">Pricing Rules</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
             <a href="{{ route('admin.managers.index') }}"
                class="{{ Route::is('admin.managers.*') ? 'active' : '' }}">
                 <i class="fas fa-user-shield"></i>
