@@ -66,7 +66,9 @@
 
 <body class="bg-[#fcfdfe] text-slate-900 @auth has-bottom-nav @endauth">
 
-    @include('frontend.layouts._header')
+    @unless(View::hasSection('hideHeader'))
+        @include('frontend.layouts._header')
+    @endunless
 
     @yield('content')
 

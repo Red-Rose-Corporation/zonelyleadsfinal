@@ -1,11 +1,12 @@
 @extends('frontend.layouts._app')
 @section('title', 'My Dashboard')
+@section('hideHeader')@endsection
 
 @section('content')
 <div class="min-h-screen bg-slate-50 pb-28">
 
     {{-- ── HERO HEADER ── --}}
-    <div class="bg-gradient-to-br from-teal-800 via-teal-700 to-teal-600 pt-20 pb-10 px-4">
+    <div class="bg-gradient-to-br from-teal-800 via-teal-700 to-teal-600 pt-10 pb-10 px-4">
         <div class="max-w-2xl mx-auto">
             <div class="flex items-center justify-between">
                 <div>
