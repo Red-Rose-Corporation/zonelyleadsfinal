@@ -185,13 +185,14 @@ class BuyerController extends Controller
             'profile_photo' => 'nullable|image|max:10240',
         ]);
 
+        // Remove profile_photo from $data — only set it if a new file was uploaded
+        unset($data['profile_photo']);
         if ($request->hasFile('profile_photo')) {
             $data['profile_photo'] = ImageOptimizer::saveProfilePhoto($request->file('profile_photo'));
         }
 
         $this->handleEmailChange($user, $request);
         $user->update($data);
-        $this->handlePasswordChange($user, $request);
 
         return back()->with('success', 'Profile updated.');
     }
@@ -213,8 +214,8 @@ class BuyerController extends Controller
         if (!Hash::check($request->password, $user->password)) {
             return back()->withErrors(['password' => 'Incorrect password.']);
         }
-        Auth::logout();
         $user->delete();
+        Auth::logout();
         return redirect('/')->with('success', 'Account deleted.');
     }
 
