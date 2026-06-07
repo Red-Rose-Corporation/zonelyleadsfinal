@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lead;
+use App\Models\PlatformCharge;
 use App\Models\Review;
 use App\Models\User;
 use App\Services\ImageOptimizer;
@@ -17,25 +18,24 @@ class BuyerController extends Controller
     {
         $user = Auth::user();
 
-        $myLeads = Lead::where('email', $user->email)
+        // Run two focused DB queries instead of loading everything into PHP
+        $activeLeads = Lead::where('email', $user->email)
+            ->whereIn('status', ['new', 'pending'])
             ->with('seller')
             ->latest()
+            ->limit(50)
             ->get();
 
-        $activeLeads   = $myLeads->whereIn('status', ['new', 'pending']);
-        $resolvedLeads = $myLeads->whereIn('status', ['won', 'lost', 'closed']);
+        $resolvedLeads = Lead::where('email', $user->email)
+            ->whereIn('status', ['won', 'lost', 'closed'])
+            ->with('seller')
+            ->latest()
+            ->limit(20)
+            ->get();
 
-        // Leads marked won that don't yet have a submitted review
-        $reviewedLeadIds = Review::where('reviewer_id', $user->id)
-            ->whereNotNull('token_used_at')
-            ->pluck('lead_id')
-            ->merge(
-                Review::where('reviewer_email', $user->email)
-                    ->whereNotNull('token_used_at')
-                    ->pluck('lead_id')
-            )->unique();
+        $totalLeads = Lead::where('email', $user->email)->count();
 
-        $pendingReviews = Review::with('seller')
+        $pendingReviews = Review::with('lead.seller')
             ->where(function ($q) use ($user) {
                 $q->where('reviewer_id', $user->id)
                   ->orWhere('reviewer_email', $user->email);
@@ -44,14 +44,16 @@ class BuyerController extends Controller
             ->whereNotNull('review_token')
             ->get();
 
+        $commRate = '$' . number_format(PlatformCharge::resolve('buyer_referral_commission'), 0);
+
         $stats = [
-            'bookings' => $myLeads->count(),
+            'bookings' => $totalLeads,
             'active'   => $activeLeads->count(),
             'resolved' => $resolvedLeads->count(),
         ];
 
         return view('frontend.buyer.dashboard', compact(
-            'stats', 'pendingReviews', 'activeLeads', 'resolvedLeads'
+            'stats', 'pendingReviews', 'activeLeads', 'resolvedLeads', 'commRate'
         ));
     }
 
