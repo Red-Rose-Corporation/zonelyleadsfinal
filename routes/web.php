@@ -225,6 +225,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('review/{booking}', [BuyerController::class, 'reviewStore'])->name('review.store');
         Route::get('profile', [BuyerController::class, 'profile'])->name('profile');
         Route::put('profile', [BuyerController::class, 'profileUpdate'])->name('profile.update');
+        Route::put('profile/password', [BuyerController::class, 'profilePasswordUpdate'])->name('profile.password');
         Route::delete('profile', [BuyerController::class, 'profileDestroy'])->name('profile.destroy');
         Route::get('booking/{id}/confirmation', [BuyerController::class, 'bookingConfirmation'])->name('booking.confirmation');
         Route::get('affiliate', [BuyerController::class, 'affiliate'])->name('affiliate');

@@ -196,6 +196,16 @@ class BuyerController extends Controller
         return back()->with('success', 'Profile updated.');
     }
 
+    public function profilePasswordUpdate(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password'         => ['required', 'confirmed', 'min:8'],
+        ]);
+        Auth::user()->update(['password' => Hash::make($request->password)]);
+        return back()->with('success', 'Password updated successfully.');
+    }
+
     public function profileDestroy(Request $request)
     {
         $request->validate(['password' => 'required']);

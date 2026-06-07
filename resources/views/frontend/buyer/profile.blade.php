@@ -121,7 +121,7 @@
         </form>
 
         {{-- Change Password --}}
-        <form action="{{ route('buyer.profile.update') }}" method="POST">
+        <form action="{{ route('buyer.profile.password') }}" method="POST">
             @csrf @method('PUT')
 
             <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-4">
