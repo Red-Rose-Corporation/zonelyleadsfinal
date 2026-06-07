@@ -259,12 +259,14 @@ class BuyerController extends Controller
         $tierPct    = min(100, $nextMilestone > 0 ? round($totalRefs / $nextMilestone * 100) : 100);
         $remaining  = max(0, $nextMilestone - $totalRefs);
 
-        // Earnings projection
+        // Resolve once — reuse for projections and pass to blade
+        $commRate = PlatformCharge::resolve('buyer_referral_commission');
+
         $projections = [
-            ['refs' => 1,  'cash' => \App\Models\PlatformCharge::resolve('buyer_referral_commission'),    'pts' => 35],
-            ['refs' => 3,  'cash' => \App\Models\PlatformCharge::resolve('buyer_referral_commission') * 3, 'pts' => 105],
-            ['refs' => 5,  'cash' => \App\Models\PlatformCharge::resolve('buyer_referral_commission') * 5, 'pts' => 175],
-            ['refs' => 10, 'cash' => \App\Models\PlatformCharge::resolve('buyer_referral_commission') * 10,'pts' => 380],
+            ['refs' => 1,  'cash' => $commRate,      'pts' => 35],
+            ['refs' => 3,  'cash' => $commRate * 3,  'pts' => 105],
+            ['refs' => 5,  'cash' => $commRate * 5,  'pts' => 175],
+            ['refs' => 10, 'cash' => $commRate * 10, 'pts' => 380],
         ];
 
         $stats = [
@@ -279,7 +281,7 @@ class BuyerController extends Controller
         return view('frontend.buyer.affiliate', compact(
             'user', 'commissions', 'stats',
             'totalRefs', 'tierLabel', 'nextLabel', 'tierPct', 'remaining',
-            'projections', 'refUrl'
+            'projections', 'refUrl', 'commRate'
         ));
     }
 

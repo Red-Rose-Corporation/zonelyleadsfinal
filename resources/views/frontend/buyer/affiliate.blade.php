@@ -15,9 +15,7 @@
 @endsection
 
 @section('content')
-@php
-    $commissionAmount = \App\Models\PlatformCharge::resolve('buyer_referral_commission');
-@endphp
+@php $commissionAmount = $commRate; @endphp
 
 <div class="min-h-screen bg-slate-50 pt-20 pb-16 px-4">
 <div class="max-w-3xl mx-auto py-6">
