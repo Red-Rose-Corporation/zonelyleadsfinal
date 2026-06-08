@@ -27,7 +27,7 @@ class PricingController extends Controller
             ->withQueryString();
 
         $categories      = Category::whereNull('parent_id')->with('children')->orderBy('title')->get();
-        $states          = State::orderBy('name')->get();
+        $states          = State::orderBy('title')->get();
         $defaultLeadFee       = Setting::where('key', 'default_lead_fee')->value('value') ?? 35;
         $defaultAffComm       = Setting::where('key', 'default_affiliate_commission')->value('value') ?? 10;
         $defaultBuyerRefComm  = Setting::where('key', 'default_buyer_referral_commission')->value('value') ?? 5;
@@ -44,8 +44,8 @@ class PricingController extends Controller
                     $request->preview_city,
                 ),
                 'category' => $request->preview_category ? Category::find($request->preview_category)?->title : null,
-                'state'    => $request->preview_state    ? State::find($request->preview_state)?->name        : null,
-                'city'     => $request->preview_city     ? City::find($request->preview_city)?->name          : null,
+                'state'    => $request->preview_state    ? State::find($request->preview_state)?->title       : null,
+                'city'     => $request->preview_city     ? City::find($request->preview_city)?->title         : null,
             ];
         }
 
@@ -129,7 +129,7 @@ class PricingController extends Controller
 
     public function citiesByState($stateId)
     {
-        $cities = City::where('state_id', $stateId)->orderBy('name')->get(['id', 'name']);
+        $cities = City::where('state_id', $stateId)->orderBy('title')->get(['id', 'title']);
         return response()->json($cities);
     }
 }

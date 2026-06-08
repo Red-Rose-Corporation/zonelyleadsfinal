@@ -44,7 +44,7 @@
                 onchange="loadCities(this.value, '{{ $p('city_id') }}')">
             <option value="">All states</option>
             @foreach($states as $st)
-            <option value="{{ $st->id }}">{{ $st->name }}</option>
+            <option value="{{ $st->id }}">{{ $st->title }}</option>
             @endforeach
         </select>
     </div>

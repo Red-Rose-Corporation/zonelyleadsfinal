@@ -110,7 +110,7 @@
                         <select name="preview_state" class="form-select" id="previewState" onchange="loadPreviewCities(this.value,'previewCitySelect')">
                             <option value="">All states</option>
                             @foreach($states as $st)
-                            <option value="{{ $st->id }}" {{ request('preview_state') == $st->id ? 'selected' : '' }}>{{ $st->name }}</option>
+                            <option value="{{ $st->id }}" {{ request('preview_state') == $st->id ? 'selected' : '' }}>{{ $st->title }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -179,7 +179,7 @@
                     <select name="state_id" class="form-select form-select-sm">
                         <option value="">All States</option>
                         @foreach($states as $st)
-                        <option value="{{ $st->id }}" {{ request('state_id') == $st->id ? 'selected' : '' }}>{{ $st->name }}</option>
+                        <option value="{{ $st->id }}" {{ request('state_id') == $st->id ? 'selected' : '' }}>{{ $st->title }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -232,10 +232,10 @@
                         <td>
                             <div class="d-flex flex-column gap-1">
                                 @if($charge->city)
-                                <span class="badge bg-success-subtle text-success"><i class="fas fa-city me-1" style="font-size:10px"></i>{{ $charge->city->name }}</span>
+                                <span class="badge bg-success-subtle text-success"><i class="fas fa-city me-1" style="font-size:10px"></i>{{ $charge->city->title }}</span>
                                 @endif
                                 @if($charge->state)
-                                <span class="badge bg-info-subtle text-info"><i class="fas fa-map me-1" style="font-size:10px"></i>{{ $charge->state->name }}</span>
+                                <span class="badge bg-info-subtle text-info"><i class="fas fa-map me-1" style="font-size:10px"></i>{{ $charge->state->title }}</span>
                                 @endif
                                 @if($charge->category)
                                 <span class="badge bg-warning-subtle text-warning"><i class="fas fa-tag me-1" style="font-size:10px"></i>{{ $charge->category->title }}</span>
