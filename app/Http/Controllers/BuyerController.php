@@ -276,7 +276,7 @@ class BuyerController extends Controller
             'paid_out'  => $commissions->where('status', 'paid')->sum('amount'),
         ];
 
-        $refUrl = url('/user/register?ref=' . ($user->slug ?? $user->id));
+        $refUrl = url('/user/register/user?ref=' . ($user->slug ?? $user->id));
 
         return view('frontend.buyer.affiliate', compact(
             'user', 'commissions', 'stats',

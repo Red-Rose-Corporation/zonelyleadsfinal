@@ -242,11 +242,40 @@ class HomeController extends Controller
         ]);
 
         // Auto-create affiliate commission on seller's FIRST lead
-        if ($seller->referred_by && $lead && $seller->leads()->count() === 1) {
-            AffiliateCommission::firstOrCreate(
-                ['referrer_id' => $seller->referred_by, 'referred_user_id' => $seller->id],
-                ['amount' => $affComm, 'status' => 'pending', 'referral_type' => 'seller']
-            );
+        // Use firstOrCreate keyed on referrer+referred — safe against double submissions
+        if ($seller->referred_by) {
+            $alreadyPaid = AffiliateCommission::where('referrer_id', $seller->referred_by)
+                ->where('referred_user_id', $seller->id)
+                ->where('referral_type', 'seller')
+                ->exists();
+            if (!$alreadyPaid) {
+                AffiliateCommission::create([
+                    'referrer_id'      => $seller->referred_by,
+                    'referred_user_id' => $seller->id,
+                    'amount'           => $affComm,
+                    'status'           => 'pending',
+                    'referral_type'    => 'seller',
+                ]);
+            }
+        }
+
+        // Auto-create buyer referral commission on buyer's FIRST booking
+        $buyer = Auth::user();
+        if ($buyer && $buyer->referred_by) {
+            $buyerRefComm = PlatformCharge::resolve('buyer_referral_commission');
+            $buyerAlreadyPaid = AffiliateCommission::where('referrer_id', $buyer->referred_by)
+                ->where('referred_user_id', $buyer->id)
+                ->where('referral_type', 'buyer')
+                ->exists();
+            if (!$buyerAlreadyPaid) {
+                AffiliateCommission::create([
+                    'referrer_id'      => $buyer->referred_by,
+                    'referred_user_id' => $buyer->id,
+                    'amount'           => $buyerRefComm,
+                    'status'           => 'pending',
+                    'referral_type'    => 'buyer',
+                ]);
+            }
         }
 
         if ($seller->twilio_enabled && $seller->phone) {

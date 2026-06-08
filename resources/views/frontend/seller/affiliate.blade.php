@@ -59,7 +59,7 @@
             <div class="flex gap-2 mb-3">
                 <input type="text" id="refLink" value="{{ $refUrl }}" readonly
                     class="flex-1 text-xs bg-white/10 border border-white/20 text-white rounded-xl px-4 py-3 focus:outline-none font-mono placeholder-teal-300 truncate">
-                <button onclick="copyRef(this)"
+                <button id="copyRefBtn" onclick="copyRef(this)"
                     class="bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-5 py-3 rounded-xl text-sm transition shrink-0 flex items-center gap-2">
                     <i class="fa-solid fa-copy text-xs"></i> Copy Link
                 </button>
@@ -331,7 +331,7 @@
             </div>
             <p class="font-bold text-slate-700 mb-1">No referrals yet</p>
             <p class="text-sm text-slate-400 mb-5 max-w-xs mx-auto">Share your link above. Every business you bring earns you cash and points — permanently.</p>
-            <button onclick="copyRef(document.querySelector('button'))"
+            <button onclick="copyRef(null)"
                 class="bg-teal-700 hover:bg-teal-800 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition">
                 <i class="fa-solid fa-copy mr-2"></i> Copy My Referral Link
             </button>
@@ -346,15 +346,18 @@
 const _refUrl = "{{ $refUrl }}";
 
 function copyRef(btn) {
-    const input = document.getElementById('refLink');
-    if (input) input.select();
     navigator.clipboard.writeText(_refUrl).then(() => {
-        if (!btn) return;
-        const orig = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Copied!';
-        btn.classList.add('bg-emerald-500');
-        btn.classList.remove('bg-teal-700', 'bg-emerald-500');
-        setTimeout(() => { btn.innerHTML = orig; }, 2000);
+        const copyBtn = document.getElementById('copyRefBtn');
+        if (!copyBtn) return;
+        const orig = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Copied!';
+        copyBtn.classList.add('bg-green-600');
+        copyBtn.classList.remove('bg-emerald-500');
+        setTimeout(() => {
+            copyBtn.innerHTML = orig;
+            copyBtn.classList.remove('bg-green-600');
+            copyBtn.classList.add('bg-emerald-500');
+        }, 2000);
     });
 }
 
