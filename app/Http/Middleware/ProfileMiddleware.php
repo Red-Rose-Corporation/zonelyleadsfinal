@@ -23,9 +23,6 @@ class ProfileMiddleware
         $user = Auth::user();
 
         if ($user->type === 'seller') {
-            if (!$user->status) {
-                return redirect()->route('profile.edit');
-            }
             if (empty($user->phone) || empty($user->work_address)) {
                 if (!$request->routeIs('profile.first')) {
                     return redirect()->route('profile.first')->with('warning', 'Please complete your profile before proceeding.');

@@ -95,17 +95,38 @@
     </div>
     @endif
 
+    {{-- ── PROFILE COMPLETION HINT ── --}}
+    @php
+        $missingFields = collect([
+            !$user->profile_photo  => 'profile photo',
+            !$user->bio            => 'short bio',
+            !$user->phone          => 'phone number',
+            !$user->city           => 'city',
+            !$user->category_id    => 'service category',
+        ])->filter()->values();
+    @endphp
+    @if($missingFields->count())
+    <div class="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 mb-5 flex items-start gap-3">
+        <i class="fa-solid fa-circle-info text-amber-500 mt-0.5 shrink-0"></i>
+        <div class="flex-1">
+            <p class="font-semibold text-amber-800 text-sm">Your profile is live but looks incomplete</p>
+            <p class="text-amber-700 text-xs mt-0.5">
+                Add your {{ $missingFields->join(', ', ' and ') }} to attract more clients and get better leads.
+            </p>
+        </div>
+        <a href="{{ route('seller.onboarding') }}" class="shrink-0 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-white px-4 py-2 rounded-xl transition">
+            Complete →
+        </a>
+    </div>
+    @endif
+
     {{-- ── WELCOME ── --}}
     <div class="mb-6">
         <h2 class="text-xl font-bold text-slate-900">Welcome back, {{ $user->name }}!</h2>
         <p class="text-sm text-slate-500 mt-0.5">
             <span class="font-semibold text-teal-700">{{ $stats['total'] }} leads this month</span>
             &nbsp;&bull;&nbsp;
-            @if($user->status)
-                {{ $user->title ?? 'Your page' }} is <span class="text-emerald-600 font-bold">live</span>
-            @else
-                Your page is <span class="text-amber-600 font-bold">pending admin review</span>
-            @endif
+            {{ $user->title ?? 'Your page' }} is <span class="text-emerald-600 font-bold">live</span>
             @if($unpaidCount > 0)
             &nbsp;&bull;&nbsp; <a href="{{ route('seller.billing') }}" class="text-red-500 font-semibold">{{ $unpaidCount }} unpaid →</a>
             @else
@@ -145,11 +166,7 @@
                 <p class="text-teal-200 text-sm mt-0.5 truncate">zonelyleads.com/{{ $user->slug }}</p>
             </div>
             <div class="flex flex-col items-end gap-1.5 shrink-0">
-                @if($user->status)
-                    <span class="text-xs bg-white/20 px-3 py-1 rounded-lg font-bold">LIVE</span>
-                @else
-                    <span class="text-xs bg-amber-400 text-amber-900 px-3 py-1 rounded-lg font-bold">Pending Review</span>
-                @endif
+                <span class="text-xs bg-white/20 px-3 py-1 rounded-lg font-bold">LIVE</span>
                 <span class="text-xs bg-emerald-500 px-3 py-1 rounded-lg font-bold flex items-center gap-1">
                     <span class="pulse-dot" style="width:6px;height:6px;background:white;"></span>Twilio
                 </span>

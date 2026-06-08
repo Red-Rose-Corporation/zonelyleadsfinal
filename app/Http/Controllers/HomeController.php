@@ -91,6 +91,7 @@ class HomeController extends Controller
             'password'      => Hash::make($validated['password']),
             'slug'          => generateUniqueSlug(User::class, $validated['name']),
             'referred_by'   => $referrer?->id,
+            'status'        => true, // live immediately — no approval freeze
         ]);
         Auth::login($user);
 
