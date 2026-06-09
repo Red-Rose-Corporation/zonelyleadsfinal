@@ -216,38 +216,10 @@
         </div>
 
         {{-- Lead Sources --}}
-        <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm">
+        <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center min-h-[130px]">
+            <i class="fa-solid fa-chart-pie text-2xl text-slate-200 mb-2"></i>
             <p class="font-semibold text-slate-700 text-sm">Lead Sources</p>
-            <p class="text-xs text-slate-400 mt-0.5 mb-4">Where your leads come from</p>
-            <div class="space-y-3.5">
-                <div>
-                    <div class="flex justify-between text-sm mb-1.5">
-                        <span class="text-slate-600">Google Search</span>
-                        <span class="font-bold text-slate-800">58%</span>
-                    </div>
-                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div class="h-full rounded-full bg-gradient-to-r from-teal-600 to-teal-400" style="width:58%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between text-sm mb-1.5">
-                        <span class="text-slate-600">Facebook Ads</span>
-                        <span class="font-bold text-slate-800">25%</span>
-                    </div>
-                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div class="h-full rounded-full bg-gradient-to-r from-purple-500 to-pink-400" style="width:25%"></div>
-                    </div>
-                </div>
-                <div>
-                    <div class="flex justify-between text-sm mb-1.5">
-                        <span class="text-slate-600">Direct / Referral</span>
-                        <span class="font-bold text-slate-800">17%</span>
-                    </div>
-                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div class="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-400" style="width:17%"></div>
-                    </div>
-                </div>
-            </div>
+            <p class="text-xs text-slate-400 mt-1">Analytics coming soon</p>
         </div>
 
         {{-- Conversion Funnel --}}

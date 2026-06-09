@@ -126,6 +126,17 @@ class SellerController extends Controller
         return back()->with('success', 'Password updated successfully.');
     }
 
+    public function settingsNotifications(Request $request)
+    {
+        $allowed = ['notify_new_lead', 'notify_payment', 'notify_review', 'notify_booking'];
+        $key     = $request->input('key');
+        if (!in_array($key, $allowed)) {
+            return response()->json(['error' => 'Invalid key'], 422);
+        }
+        Auth::user()->update([$key => (bool) $request->input('value')]);
+        return response()->json(['ok' => true]);
+    }
+
     public function settingsDestroy(Request $request)
     {
         $request->validate(['password' => 'required']);

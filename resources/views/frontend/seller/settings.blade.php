@@ -224,7 +224,7 @@
 
 <script>
 function saveNotification(key, val) {
-    fetch('/user/settings/notifications', {
+    fetch('{{ route('seller.settings.notifications') }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]')?.content || '' },
         body: JSON.stringify({ key, value: val })

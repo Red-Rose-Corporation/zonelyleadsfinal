@@ -1,8 +1,8 @@
-@extends('frontend.layouts._app')
+@extends('frontend.layouts.__prof_app')
 @section('title', 'My Pricing Rates — Zonely')
+@section('page-title', 'My Pricing Rates')
 
 @section('content')
-@include('frontend.seller._nav')
 
 <div class="min-h-screen bg-slate-50 pt-32 pb-24 px-4">
 <div class="max-w-3xl mx-auto">
@@ -92,7 +92,7 @@
                     <p class="font-semibold text-sm text-slate-900">
                         {{ $rule->type === 'lead_fee' ? 'Lead Fee' : 'Affiliate Commission' }}
                         <span class="text-xs font-normal text-slate-400 ml-1">
-                            — {{ $rule->city?->name ?? $rule->state?->name ?? $rule->category?->title ?? 'Global Default' }}
+                            — {{ $rule->city?->title ?? $rule->state?->title ?? $rule->category?->title ?? 'Global Default' }}
                         </span>
                     </p>
                     <p class="text-xs text-slate-400 mt-0.5">

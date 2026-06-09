@@ -38,7 +38,7 @@
         <div class="flex items-center gap-2 min-w-0">
             <span class="w-2 h-2 bg-emerald-400 rounded-full shrink-0 animate-pulse"></span>
             <span class="text-xs text-slate-400 font-medium shrink-0">Your live page:</span>
-            <span class="text-sm text-white font-mono truncate">zonelyleads.com/{{ $user->slug }}</span>
+            <span class="text-sm text-white font-mono truncate">{{ parse_url(config('app.url'), PHP_URL_HOST) }}/{{ $user->slug }}</span>
         </div>
         <a href="{{ route('frontend.service.show', $user->slug ?? $user->id) }}" target="_blank"
            class="shrink-0 flex items-center gap-1.5 text-xs font-bold text-teal-400 hover:text-teal-300 transition">
@@ -167,7 +167,7 @@
                     </div>
                     <div>
                         <p class="font-bold text-slate-900 text-sm">How Clients Contact You</p>
-                        <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide">→ Phone, WhatsApp, website & social links</p>
+                        <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide">→ Phone & WhatsApp number</p>
                     </div>
                 </div>
                 <span class="shrink-0 text-[10px] font-bold px-2 py-1 rounded-lg {{ $isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500' }}">
@@ -178,10 +178,9 @@
                 <div class="bg-slate-50 rounded-xl px-3 py-2.5 text-xs text-slate-600 space-y-0.5">
                     @if($user->whatsapp)<p><i class="fab fa-whatsapp text-emerald-500 mr-1"></i>{{ $user->whatsapp }}</p>@endif
                     @if($user->phone)<p><i class="fa-solid fa-phone text-teal-600 mr-1"></i>{{ $user->phone }}</p>@endif
-                    @if($user->website)<p><i class="fa-solid fa-globe text-teal-600 mr-1"></i>{{ $user->website }}</p>@endif
                 </div>
             @else
-                <p class="text-xs text-slate-400">WhatsApp number, phone, website, Facebook or Instagram — make it easy for clients to reach you</p>
+                <p class="text-xs text-slate-400">WhatsApp number and phone — make it easy for clients to reach you</p>
             @endif
             <div class="mt-3 flex items-center justify-end">
                 <span class="text-xs font-bold {{ $isDone ? 'text-slate-400 group-hover:text-teal-700' : 'text-teal-700' }} flex items-center gap-1 transition">

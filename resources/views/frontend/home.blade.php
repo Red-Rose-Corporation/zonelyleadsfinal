@@ -66,8 +66,8 @@
                            placeholder="Who are you looking for?"
                            class="flex-1 text-sm text-slate-800 placeholder-slate-400 bg-transparent py-3 font-medium focus:outline-none">
                     <button type="submit"
-                            class="shrink-0 bg-amber-500 hover:bg-amber-400 text-slate-900 text-sm font-bold px-6 py-2.5 rounded-full transition" style="min-height:unset;">
-                        Search
+                            class="shrink-0 bg-amber-500 hover:bg-amber-400 text-slate-900 px-4 py-2.5 rounded-full transition" style="min-height:unset;">
+                        <i class="fa-solid fa-magnifying-glass text-base"></i>
                     </button>
                 </div>
             </form>
