@@ -101,6 +101,8 @@ class SellerController extends Controller
             'phone'         => 'nullable|string|max:50',
             'whatsapp'      => 'nullable|string|max:50',
             'title'         => 'nullable|string|max:255',
+            'city'          => 'nullable|string|max:100',
+            'state'         => 'nullable|string|max:100',
             'profile_photo' => 'nullable|image|max:10240',
         ]);
 

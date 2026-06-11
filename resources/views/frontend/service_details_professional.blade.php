@@ -128,6 +128,9 @@
                         </div>
                         <div class="mt-4">
                             <h3 class="text-xl font-bold">{{ $user->name }}</h3>
+                            @if($user->business_name)
+                            <p class="text-white/80 text-sm font-semibold mt-0.5">{{ $user->business_name }}</p>
+                            @endif
                             <p class="text-teal-200 text-base mt-0.5">
                                 {{ $user->title ?? $user->designation ?? $user->category?->title }}
                             </p>

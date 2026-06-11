@@ -77,6 +77,18 @@
                             class="w-full px-4 py-3 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-50 transition">
                         <p class="text-xs text-slate-400 mt-1"><span id="titleCount">{{ strlen(old('title', auth()->user()->title ?? '')) }}</span>/20 characters</p>
                     </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">City</label>
+                        <input type="text" name="city" value="{{ old('city', auth()->user()->city) }}"
+                            placeholder="e.g. New York"
+                            class="w-full px-4 py-3 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-50 transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">State</label>
+                        <input type="text" name="state" value="{{ old('state', auth()->user()->state) }}"
+                            placeholder="e.g. New York"
+                            class="w-full px-4 py-3 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-50 transition">
+                    </div>
                 </div>
                 <button type="submit" class="bg-teal-700 hover:bg-teal-800 text-white font-bold px-8 py-3 rounded-2xl text-base transition">
                     <i class="fa-solid fa-floppy-disk mr-2"></i> Save Changes
