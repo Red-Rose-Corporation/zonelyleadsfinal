@@ -42,6 +42,11 @@ class User extends Authenticatable
         'schedule' => 'array',
     ];
 
+    public function gallery()
+    {
+        return $this->hasMany(SellerGallery::class)->orderBy('sort_order');
+    }
+
     public function services()
     {
         return $this->hasMany(Service::class);

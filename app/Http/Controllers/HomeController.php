@@ -203,6 +203,11 @@ class HomeController extends Controller
         } else {
             $user->setRelation('certifications', collect());
         }
+        if (\Illuminate\Support\Facades\Schema::hasTable('seller_galleries')) {
+            $user->load('gallery');
+        } else {
+            $user->setRelation('gallery', collect());
+        }
 
         return view('frontend.service_details_professional', compact('user'));
     }

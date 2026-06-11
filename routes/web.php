@@ -25,6 +25,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\PostalCodeController;
+use App\Http\Controllers\GalleryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\StaffController;
@@ -203,6 +204,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('leads/{id}/status', [SellerController::class, 'leadStatus'])->name('lead.status');
         Route::post('leads/{id}/notes', [SellerController::class, 'leadNotes'])->name('lead.notes');
         Route::post('leads/{id}/review-request', [SellerController::class, 'reviewRequest'])->name('lead.review-request');
+
+        // Gallery
+        Route::get('gallery',                  [GalleryController::class, 'index'])->name('gallery');
+        Route::post('gallery',                 [GalleryController::class, 'store'])->name('gallery.store');
+        Route::delete('gallery/{id}',          [GalleryController::class, 'destroy'])->name('gallery.destroy');
+        Route::post('gallery/{id}/caption',    [GalleryController::class, 'captionUpdate'])->name('gallery.caption');
     });
 
     /*

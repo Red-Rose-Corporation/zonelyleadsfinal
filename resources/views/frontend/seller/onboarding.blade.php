@@ -437,6 +437,47 @@
 
     </div>
 
+    {{-- Gallery card — Home Services & Beauty only --}}
+    @if($isHome || $isBeauty)
+    @php $galleryCount = $user->gallery()->count(); $galleryDone = $galleryCount >= 3; @endphp
+    <a href="{{ route('seller.gallery') }}"
+       class="group mt-4 block bg-white rounded-2xl border-2 {{ $galleryDone ? 'border-emerald-200' : 'border-dashed border-slate-200 hover:border-teal-300' }} shadow-sm p-5 transition-all hover:shadow-md">
+        <div class="flex items-start justify-between gap-3 mb-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 {{ $galleryDone ? 'bg-emerald-100' : 'bg-teal-50' }} rounded-xl flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-images {{ $galleryDone ? 'text-emerald-600' : 'text-teal-600' }} text-sm"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-slate-900 text-sm">Work Gallery</p>
+                    <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide">→ Show your best work photos</p>
+                </div>
+            </div>
+            @if($galleryDone)
+            <span class="shrink-0 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-check text-white text-[10px]"></i>
+            </span>
+            @else
+            <span class="shrink-0 w-6 h-6 border-2 border-slate-200 rounded-full group-hover:border-teal-400 transition"></span>
+            @endif
+        </div>
+        @if($galleryDone)
+        <div class="flex gap-1.5 mt-2">
+            @foreach($user->gallery()->limit(4)->get() as $gp)
+            <img src="{{ $gp->image_url }}" class="w-12 h-10 rounded-lg object-cover border border-slate-100">
+            @endforeach
+            @if($galleryCount > 4)
+            <div class="w-12 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-xs text-slate-500 font-bold">+{{ $galleryCount - 4 }}</div>
+            @endif
+        </div>
+        @else
+        <p class="text-xs text-slate-400">
+            @if($isBeauty) Upload 3+ photos of your work — hairstyles, nail art, before & afters
+            @else Upload 3+ photos of completed jobs — kitchens, bathrooms, installations @endif
+        </p>
+        @endif
+    </a>
+    @endif
+
     {{-- Bottom CTA --}}
     <div class="mt-6 bg-white rounded-3xl border border-slate-100 shadow-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>

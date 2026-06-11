@@ -399,6 +399,95 @@
         </section>
         @endif
 
+        {{-- ── WORK GALLERY (Home Services & Beauty only) ─────────────── --}}
+        @if(($isHome || $isBeauty) && $user->gallery->count())
+        <section id="gallery">
+            <div class="mb-6">
+                <h3 class="font-bold text-2xl sm:text-3xl sh">Our Work</h3>
+                <p class="text-slate-500 mt-2 text-sm font-medium">{{ $user->gallery->count() }} photo{{ $user->gallery->count() > 1 ? 's' : '' }}</p>
+            </div>
+
+            {{-- Masonry-style responsive grid --}}
+            <div class="columns-2 sm:columns-3 gap-3 space-y-3">
+                @foreach($user->gallery as $i => $photo)
+                <div class="break-inside-avoid rounded-2xl overflow-hidden shadow-sm border border-slate-100 cursor-pointer group"
+                     onclick="openLightbox({{ $i }})">
+                    <div class="relative">
+                        <img src="{{ $photo->image_url }}"
+                             alt="{{ $photo->caption ?: 'Work photo by ' . $user->name }}"
+                             loading="lazy"
+                             class="w-full object-cover transition duration-300 group-hover:scale-105 group-hover:brightness-90">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition duration-300 flex items-center justify-center">
+                            <i class="fa-solid fa-magnifying-glass-plus text-white text-xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
+                        </div>
+                    </div>
+                    @if($photo->caption)
+                    <div class="px-3 py-2 bg-white">
+                        <p class="text-xs text-slate-500 font-medium truncate">{{ $photo->caption }}</p>
+                    </div>
+                    @endif
+                </div>
+                @endforeach
+            </div>
+        </section>
+
+        {{-- Lightbox --}}
+        <div id="galleryLightbox"
+             class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center p-4"
+             onclick="if(event.target===this)closeLightbox()">
+            <button onclick="closeLightbox()"
+                    class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <button onclick="prevPhoto()"
+                    class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button onclick="nextPhoto()"
+                    class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <div class="max-w-4xl max-h-[85vh] w-full flex flex-col items-center gap-3">
+                <img id="lightboxImg" src="" alt="" class="max-h-[75vh] max-w-full rounded-2xl object-contain shadow-2xl">
+                <p id="lightboxCaption" class="text-white/70 text-sm font-medium text-center"></p>
+                <p id="lightboxCounter" class="text-white/40 text-xs"></p>
+            </div>
+        </div>
+
+        @php $galleryJson = $user->gallery->map(fn($p) => ['src' => $p->image_url, 'caption' => $p->caption ?? ''])->toJson(); @endphp
+        <script>
+        const galleryPhotos = {!! $galleryJson !!};
+        let currentPhoto = 0;
+        function openLightbox(i) {
+            currentPhoto = i;
+            showPhoto();
+            document.getElementById('galleryLightbox').classList.remove('hidden');
+            document.getElementById('galleryLightbox').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox() {
+            document.getElementById('galleryLightbox').classList.add('hidden');
+            document.getElementById('galleryLightbox').classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+        function showPhoto() {
+            const p = galleryPhotos[currentPhoto];
+            document.getElementById('lightboxImg').src = p.src;
+            document.getElementById('lightboxCaption').textContent = p.caption;
+            document.getElementById('lightboxCounter').textContent = (currentPhoto + 1) + ' / ' + galleryPhotos.length;
+        }
+        function prevPhoto() { currentPhoto = (currentPhoto - 1 + galleryPhotos.length) % galleryPhotos.length; showPhoto(); }
+        function nextPhoto() { currentPhoto = (currentPhoto + 1) % galleryPhotos.length; showPhoto(); }
+        document.addEventListener('keydown', e => {
+            if (!document.getElementById('galleryLightbox').classList.contains('hidden')) {
+                if (e.key === 'ArrowLeft') prevPhoto();
+                if (e.key === 'ArrowRight') nextPhoto();
+                if (e.key === 'Escape') closeLightbox();
+            }
+        });
+        </script>
+        @endif
+
         {{-- ── REVIEWS / TESTIMONIALS ───────────────────────────────── --}}
         @if($user->reviews->count())
         <section id="testimonials">
