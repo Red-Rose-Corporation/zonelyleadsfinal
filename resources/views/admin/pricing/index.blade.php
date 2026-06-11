@@ -225,8 +225,10 @@
                         <td>
                             @if($charge->type === 'lead_fee')
                             <span class="badge bg-primary-subtle text-primary">Lead Fee</span>
+                            @elseif($charge->type === 'affiliate_commission')
+                            <span class="badge" style="background:#f3e8ff;color:#7c3aed">Seller Affiliate</span>
                             @else
-                            <span class="badge bg-purple-subtle" style="background:#f3e8ff;color:#7c3aed">Affiliate Comm.</span>
+                            <span class="badge" style="background:#fef9c3;color:#854d0e">Buyer Referral</span>
                             @endif
                         </td>
                         <td>

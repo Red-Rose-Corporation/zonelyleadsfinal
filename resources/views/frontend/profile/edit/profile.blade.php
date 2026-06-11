@@ -3,6 +3,36 @@
 @section('page-title', 'Profile & Bio')
 
 @section('content')
+@php
+    $motherCat   = strtolower($user->category?->parent?->title ?? $user->category?->title ?? '');
+    $isHealthcare = str_contains($motherCat, 'health') || str_contains($motherCat, 'wellness') || str_contains($motherCat, 'medical');
+    $isHome       = str_contains($motherCat, 'home')   || str_contains($motherCat, 'repair')  || str_contains($motherCat, 'service');
+    $isBeauty     = str_contains($motherCat, 'beauty') || str_contains($motherCat, 'personal care') || str_contains($motherCat, 'salon');
+
+    $photoHint      = $isHealthcare
+        ? 'Professional headshot — patients want to see who they\'re meeting before they book'
+        : ($isHome
+            ? 'Clear photo of yourself or your team — builds trust before you arrive at the job'
+            : ($isBeauty
+                ? 'Clear headshot or a photo at your workspace — your look is part of your brand'
+                : 'Professional headshot — clients hire you personally, a face builds trust'));
+
+    $titlePlaceholder = $isHealthcare
+        ? 'e.g. Board-Certified Family Physician'
+        : ($isHome
+            ? 'e.g. Licensed Master Plumber & Gas Fitter'
+            : ($isBeauty
+                ? 'e.g. Licensed Cosmetologist & Color Specialist'
+                : 'e.g. Certified Public Accountant'));
+
+    $bioPlaceholder = $isHealthcare
+        ? 'e.g. Board-certified family physician with 10 years of experience in preventive care, chronic disease management, and patient wellness...'
+        : ($isHome
+            ? 'e.g. Licensed master plumber with 12 years serving homeowners in the Bronx. Specialising in emergency repairs, remodeling, and gas line work...'
+            : ($isBeauty
+                ? 'e.g. Licensed cosmetologist with 8 years specialising in balayage, color correction, and keratin treatments. Based in Brooklyn...'
+                : 'e.g. Certified public accountant with 14 years helping small businesses with tax planning, bookkeeping, and financial strategy...'));
+@endphp
 <div class="pb-10 max-w-2xl mx-auto">
 
     <div class="mb-6 flex items-center gap-3">
@@ -36,7 +66,7 @@
         {{-- Profile Photo --}}
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
             <label class="block text-sm font-bold text-slate-700 mb-1">Profile Photo</label>
-            <p class="text-xs text-slate-400 mb-4">Square photo works best — shown on your public page hero card</p>
+            <p class="text-xs text-slate-400 mb-4">{{ $photoHint }}</p>
             <div class="flex items-center gap-5">
                 <div class="relative flex-shrink-0">
                     @if($user->profile_photo)
@@ -66,9 +96,9 @@
         {{-- Professional Title --}}
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
             <label class="block text-sm font-bold text-slate-700 mb-1">Professional Title</label>
-            <p class="text-xs text-slate-400 mb-3">Shown under your name — e.g. "Certified Public Accountant" or "Licensed Plumber"</p>
+            <p class="text-xs text-slate-400 mb-3">Shown under your name on your public page</p>
             <input type="text" name="title" value="{{ old('title', $user->title ?? $user->designation) }}"
-                placeholder="e.g. Certified Public Accountant"
+                placeholder="{{ $titlePlaceholder }}"
                 class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-50 transition">
         </div>
 
@@ -77,7 +107,7 @@
             <label class="block text-sm font-bold text-slate-700 mb-1">Short Bio <span class="text-red-500">*</span></label>
             <p class="text-xs text-slate-400 mb-3">2–3 sentences about your expertise and what you offer clients</p>
             <textarea name="bio" rows="4" required
-                placeholder="e.g. Certified public accountant with 14 years of experience helping small businesses with tax planning, bookkeeping, and financial strategy..."
+                placeholder="{{ $bioPlaceholder }}"
                 class="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-50 transition resize-none">{{ old('bio', $user->bio) }}</textarea>
             <p class="text-xs text-slate-400 mt-2 text-right" id="bioCount">{{ strlen($user->bio ?? '') }} / 2000</p>
         </div>

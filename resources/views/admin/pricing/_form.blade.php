@@ -7,8 +7,9 @@
         <label class="form-label fw-semibold small">Charge Type <span class="text-danger">*</span></label>
         <select name="type" id="{{ $p('type') }}" class="form-select" required>
             <option value="">-- Select type --</option>
-            <option value="lead_fee">Lead Fee (charged to seller per lead)</option>
-            <option value="affiliate_commission">Affiliate Commission (paid to referrer)</option>
+            <option value="lead_fee">Lead Fee — charged to seller per lead received</option>
+            <option value="affiliate_commission">Seller Affiliate Commission — paid to seller who refers another seller</option>
+            <option value="buyer_referral_commission">Buyer Referral Commission — paid to buyer who refers another buyer</option>
         </select>
     </div>
 

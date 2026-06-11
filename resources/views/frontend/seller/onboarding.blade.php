@@ -155,7 +155,7 @@
                     </div>
                     <div>
                         <p class="font-bold text-slate-900 text-sm">Profile Photo & Bio</p>
-                        <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide">→ Your photo, story & experience summary</p>
+                        <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide">→ Your photo, professional title & bio</p>
                     </div>
                 </div>
                 <span class="shrink-0 text-[10px] font-bold px-2 py-1 rounded-lg {{ $isDone ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-500' }}">
@@ -167,7 +167,12 @@
                     <p class="line-clamp-2 leading-relaxed">{{ $user->bio }}</p>
                 </div>
             @else
-                <p class="text-xs text-slate-400">Professional photo, years of experience, about you — clients trust profiles with photos 3× more</p>
+                <p class="text-xs text-slate-400">
+                    @if($isHealthcare) Clear headshot + bio — patients decide in seconds who to trust
+                    @elseif($isHome) Your photo + bio — homeowners want to know who's coming to their door
+                    @elseif($isBeauty) Your photo + bio — clients book the person, not just the service
+                    @else Professional headshot + bio — clients hire you personally, a face converts 3× more @endif
+                </p>
             @endif
             <div class="mt-3 flex items-center justify-end">
                 <span class="text-xs font-bold {{ $isDone ? 'text-slate-400 group-hover:text-teal-700' : 'text-teal-700' }} flex items-center gap-1 transition">
