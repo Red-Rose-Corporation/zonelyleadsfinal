@@ -46,17 +46,41 @@
             </ul>
         </div>
 
-        {{-- CTA --}}
+        {{-- CTA + Contact --}}
         <div>
             <p class="text-[11px] font-black uppercase tracking-widest text-slate-500 mb-5">For Professionals</p>
             <p class="text-sm text-slate-400 leading-relaxed mb-5">
                 Get qualified leads in your area. Free to join. Pay per verified lead only.
             </p>
             <a href="{{ route('user.register', 'seller') }}"
-               class="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-600 text-white text-sm font-bold px-5 py-3 rounded-xl transition shadow-lg shadow-teal-900/30" style="min-height:unset;">
+               class="inline-flex items-center gap-2 bg-teal-700 hover:bg-teal-600 text-white text-sm font-bold px-5 py-3 rounded-xl transition shadow-lg shadow-teal-900/30 mb-6" style="min-height:unset;">
                 <i class="fa-solid fa-briefcase text-xs"></i>
                 List Your Business — It's Free
             </a>
+            @php
+                $footerEmail    = \App\Models\Setting::get('support_email');
+                $footerWhatsapp = \App\Models\Setting::get('support_whatsapp');
+                $footerWaLink   = $footerWhatsapp ? 'https://wa.me/' . preg_replace('/[^0-9]/', '', $footerWhatsapp) : null;
+            @endphp
+            @if($footerEmail || $footerWhatsapp)
+            <p class="text-[11px] font-black uppercase tracking-widest text-slate-500 mb-3">Support</p>
+            <ul class="space-y-2">
+                @if($footerEmail)
+                <li>
+                    <a href="mailto:{{ $footerEmail }}" class="text-sm text-slate-400 hover:text-white transition flex items-center gap-2" style="min-height:unset;">
+                        <i class="fas fa-envelope text-xs text-teal-500"></i> {{ $footerEmail }}
+                    </a>
+                </li>
+                @endif
+                @if($footerWaLink)
+                <li>
+                    <a href="{{ $footerWaLink }}" target="_blank" rel="noopener" class="text-sm text-slate-400 hover:text-white transition flex items-center gap-2" style="min-height:unset;">
+                        <i class="fab fa-whatsapp text-xs text-green-500"></i> WhatsApp Us
+                    </a>
+                </li>
+                @endif
+            </ul>
+            @endif
         </div>
 
     </div>

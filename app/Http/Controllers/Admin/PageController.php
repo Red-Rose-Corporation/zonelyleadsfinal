@@ -10,12 +10,14 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\Lead;
 use App\Models\PostalCode;
+use App\Models\Setting;
 use App\Models\State;
 use App\Models\StaffProfile;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class PageController extends Controller
 {
@@ -140,7 +142,16 @@ class PageController extends Controller
 
         $users = $query->paginate(50)->withQueryString();
 
-        return view('admin.profiles2.index', compact('users', 'status', 'type', 'search'));
+        $sellerStats = [
+            'today'   => User::where('type','seller')->whereDate('created_at', today())->count(),
+            'week'    => User::where('type','seller')->whereBetween('created_at',[now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'month'   => User::where('type','seller')->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+            'year'    => User::where('type','seller')->whereYear('created_at', now()->year)->count(),
+            'total'   => User::where('type','seller')->count(),
+            'disabled'=> User::where('type','seller')->where('status', false)->count(),
+        ];
+
+        return view('admin.profiles2.index', compact('users', 'status', 'type', 'search', 'sellerStats'));
     }
 
     public function profiles_verify($id)
@@ -202,10 +213,48 @@ class PageController extends Controller
         ]);
 
         $validated['twilio_enabled'] = $request->boolean('twilio_enabled');
+
+        $oldStatus = $user->status;
+        $newStatus = (bool) $validated['status'];
         $user->update($validated);
 
+        if ($user->type === 'seller' && $oldStatus !== $newStatus) {
+            $supportEmail    = Setting::get('support_email', 'support@zonely.com');
+            $supportWhatsapp = Setting::get('support_whatsapp', '');
+            $waLink          = $supportWhatsapp ? 'https://wa.me/' . preg_replace('/[^0-9]/', '', $supportWhatsapp) : null;
+
+            if (!$newStatus) {
+                // Account disabled
+                Mail::raw(
+                    "Hi {$user->name},\n\n"
+                    . "Your Zonely seller account has been temporarily suspended by our admin team.\n\n"
+                    . "This may be due to incomplete profile information, a policy concern, or a routine review. "
+                    . "Please contact us immediately so we can resolve this quickly.\n\n"
+                    . "Contact us:\n"
+                    . "📧 Email: {$supportEmail}\n"
+                    . ($waLink ? "💬 WhatsApp: {$supportWhatsapp}\n" : '')
+                    . "\nWe aim to resolve all account issues within 24 hours.\n\n"
+                    . "— Zonely Admin Team",
+                    fn($m) => $m->to($user->email)->subject('Your Zonely Account Has Been Suspended')
+                );
+            } else {
+                // Account re-enabled
+                Mail::raw(
+                    "Hi {$user->name},\n\n"
+                    . "Great news! Your Zonely seller account has been reactivated and is now live again.\n\n"
+                    . "Your profile is visible to buyers and you can start receiving leads immediately.\n\n"
+                    . "If you have any questions, feel free to contact us:\n"
+                    . "📧 Email: {$supportEmail}\n"
+                    . ($waLink ? "💬 WhatsApp: {$supportWhatsapp}\n" : '')
+                    . "\nWelcome back!\n\n"
+                    . "— Zonely Admin Team",
+                    fn($m) => $m->to($user->email)->subject('Your Zonely Account Has Been Reactivated')
+                );
+            }
+        }
+
         return redirect()
-            ->route('admin.profiles.index', ['status' => $user->status ? 'verified' : 'unverified'])
+            ->route('admin.profiles.index', ['status' => $user->fresh()->status ? 'verified' : 'unverified'])
             ->with('success', 'Profile updated successfully.');
     }
     function profiles_destroy($id)
@@ -498,5 +547,28 @@ class PageController extends Controller
         };
         $profile->update(['status' => $next]);
         return back()->with('success', 'Status updated to ' . $next . '.');
+    }
+
+    public function contactSettings()
+    {
+        $settings = [
+            'support_email'    => Setting::get('support_email', ''),
+            'support_whatsapp' => Setting::get('support_whatsapp', ''),
+            'support_name'     => Setting::get('support_name', 'Zonely Admin Team'),
+        ];
+        return view('admin.settings.contact', compact('settings'));
+    }
+
+    public function contactSettingsUpdate(Request $request)
+    {
+        $request->validate([
+            'support_email'    => 'required|email|max:255',
+            'support_whatsapp' => 'nullable|string|max:30',
+            'support_name'     => 'nullable|string|max:100',
+        ]);
+        Setting::set('support_email',    $request->support_email);
+        Setting::set('support_whatsapp', $request->support_whatsapp ?? '');
+        Setting::set('support_name',     $request->support_name ?? 'Zonely Admin Team');
+        return back()->with('success', 'Contact settings updated successfully.');
     }
 }

@@ -56,6 +56,41 @@
 <div class="pb-10">
 <div class="max-w-3xl mx-auto px-4 py-6 lg:px-6 lg:py-8">
 
+    {{-- ── SUSPENSION BANNER ── --}}
+    @if(!auth()->user()->status)
+    @php
+        $supportEmail    = \App\Models\Setting::get('support_email', 'support@zonely.com');
+        $supportWhatsapp = \App\Models\Setting::get('support_whatsapp', '');
+        $waLink          = $supportWhatsapp ? 'https://wa.me/' . preg_replace('/[^0-9]/', '', $supportWhatsapp) : null;
+    @endphp
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+            </div>
+            <div class="flex-1">
+                <h3 class="font-bold text-red-800 text-sm mb-1">Your account has been suspended</h3>
+                <p class="text-red-600 text-xs leading-relaxed mb-3">
+                    Your seller account has been temporarily suspended by our admin team. Your profile is not visible to buyers.
+                    Please contact us immediately to resolve this issue.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                    @if($waLink)
+                    <a href="{{ $waLink }}" target="_blank"
+                       class="inline-flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition" style="min-height:unset">
+                        <i class="fab fa-whatsapp text-xs"></i> WhatsApp Us
+                    </a>
+                    @endif
+                    <a href="mailto:{{ $supportEmail }}"
+                       class="inline-flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-2 rounded-lg transition" style="min-height:unset">
+                        <i class="fas fa-envelope text-xs"></i> Email: {{ $supportEmail }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- ── HEADER ── --}}
     <div class="flex items-center justify-between mb-6">
         <div>

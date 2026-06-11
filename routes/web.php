@@ -342,6 +342,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::delete('{id}',        [PhonePoolController::class, 'destroy'])->name('destroy');
             Route::get('call-logs',      [PhonePoolController::class, 'callLogs'])->name('call-logs');
         });
+
+        // Contact Settings
+        Route::get('settings/contact',  [PageController::class, 'contactSettings'])->name('settings.contact');
+        Route::post('settings/contact', [PageController::class, 'contactSettingsUpdate'])->name('settings.contact.update');
     });
 
 });

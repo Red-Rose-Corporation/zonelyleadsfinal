@@ -7,6 +7,23 @@
 @section('content')
     <div class="mt-5 pt-4">
 
+        {{-- Seller Period Stats --}}
+        <div class="kpi-grid mb-4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+            @foreach([
+                ['val'=>$sellerStats['today'],   'label'=>'Joined Today',    'icon'=>'fa-user-plus',    'color'=>'#0ea5e9'],
+                ['val'=>$sellerStats['week'],     'label'=>'This Week',       'icon'=>'fa-calendar-week','color'=>'#8b5cf6'],
+                ['val'=>$sellerStats['month'],    'label'=>'This Month',      'icon'=>'fa-calendar-alt', 'color'=>'#10b981'],
+                ['val'=>$sellerStats['year'],     'label'=>'This Year',       'icon'=>'fa-calendar',     'color'=>'#f59e0b'],
+                ['val'=>$sellerStats['total'],    'label'=>'All Sellers',     'icon'=>'fa-users',        'color'=>'#06b6d4'],
+                ['val'=>$sellerStats['disabled'], 'label'=>'Disabled',        'icon'=>'fa-user-slash',   'color'=>'#ef4444'],
+            ] as $s)
+            <div class="kpi-card" style="border-left-color:{{ $s['color'] }}">
+                <h3>{{ $s['val'] }}</h3>
+                <p><i class="fas {{ $s['icon'] }}"></i> {{ $s['label'] }}</p>
+            </div>
+            @endforeach
+        </div>
+
         <!-- Page Header -->
         <div class="section-card">
             <div class="card-header bg-primary text-white p-4">
@@ -41,7 +58,7 @@
                             <a href="{{ route('admin.profiles.index', ['status' => 'verified']) }}"
                                 class="btn btn-sm {{ ($status ?? '') == 'verified' ? 'btn-light' : 'btn-outline-light' }}">Verified</a>
                             <a href="{{ route('admin.profiles.index', ['status' => 'unverified']) }}"
-                                class="btn btn-sm {{ ($status ?? '') == 'unverified' ? 'btn-light' : 'btn-outline-light' }}">Pending</a>
+                                class="btn btn-sm {{ ($status ?? '') == 'unverified' ? 'btn-light' : 'btn-outline-light' }}">Disabled</a>
                         </div>
                     </div>
                 </div>
@@ -100,7 +117,7 @@
                                         <td class="small">{{ $user->city ?? '—' }}</td>
                                         <td>
                                             <span class="badge {{ $user->status ? 'bg-success' : 'bg-warning text-dark' }}">
-                                                {{ $user->status ? 'Verified' : 'Pending' }}
+                                                {{ $user->status ? 'Active' : 'Disabled' }}
                                             </span>
                                         </td>
                                         <td class="small text-muted">{{ $user->created_at?->format('M d, Y') }}</td>

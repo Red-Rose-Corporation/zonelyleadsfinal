@@ -17,6 +17,7 @@
 
     <ul class="nav flex-column gap-1">
 
+        {{-- Dashboard --}}
         <li class="nav-item">
             <a href="{{ route('admin.dashboard') }}"
                class="{{ Route::is('admin.dashboard') ? 'active' : '' }}">
@@ -25,30 +26,43 @@
             </a>
         </li>
 
+        {{-- ── USERS ── --}}
         @if($canSee('profiles'))
+        <li class="nav-item mt-3">
+            <span class="nav-text ms-1 text-uppercase fw-bold" style="font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.35)">Users</span>
+        </li>
         <li class="nav-item">
             <a href="{{ route('admin.profiles.index') }}"
                class="{{ Route::is('admin.profiles.*') ? 'active' : '' }}">
                 <i class="fas fa-users"></i>
-                <span class="nav-text ms-2">All Profiles</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="{{ route('admin.profiles.index', ['type' => 'seller', 'status' => 'unverified']) }}"
-               class="{{ request('status') === 'unverified' ? 'active' : '' }}">
-                <i class="fas fa-user-check"></i>
-                <span class="nav-text ms-2">Pending Verification</span>
+                <span class="nav-text ms-2">All Users</span>
             </a>
         </li>
         @endif
 
+        {{-- ── LEADS & REVENUE ── --}}
+        @if($canSee('leads') || $canSee('affiliate') || ($isAdmin || $isCoo))
+        <li class="nav-item mt-3">
+            <span class="nav-text ms-1 text-uppercase fw-bold" style="font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.35)">Leads & Revenue</span>
+        </li>
+        @endif
+
         @if($canSee('leads'))
-        <li class="nav-item mt-2">
+        <li class="nav-item">
             <a href="{{ route('admin.leads') }}"
                class="{{ Route::is('admin.leads') ? 'active' : '' }}">
                 <i class="fas fa-bolt"></i>
-                <span class="nav-text ms-2">Lead Dashboard</span>
+                <span class="nav-text ms-2">All Leads</span>
+            </a>
+        </li>
+        @endif
+
+        @if($isAdmin || $isCoo)
+        <li class="nav-item">
+            <a href="{{ route('admin.pricing.index') }}"
+               class="{{ Route::is('admin.pricing.*') ? 'active' : '' }}">
+                <i class="fas fa-dollar-sign"></i>
+                <span class="nav-text ms-2">Lead Pricing</span>
             </a>
         </li>
         @endif
@@ -58,18 +72,15 @@
             <a href="{{ route('admin.affiliate') }}"
                class="{{ Route::is('admin.affiliate') ? 'active' : '' }}">
                 <i class="fas fa-share-nodes"></i>
-                <span class="nav-text ms-2">Affiliate</span>
+                <span class="nav-text ms-2">Affiliate Program</span>
             </a>
         </li>
         @endif
 
-        @if($canSee('hierarchy'))
-        <li class="nav-item">
-            <a href="{{ route('admin.hierarchy') }}"
-               class="{{ Route::is('admin.hierarchy*') ? 'active' : '' }}">
-                <i class="fas fa-sitemap"></i>
-                <span class="nav-text ms-2">Hierarchy</span>
-            </a>
+        {{-- ── PLATFORM CONTENT ── --}}
+        @if($canSee('blogs') || $canSee('categories') || $canSee('locations') || $canSee('services'))
+        <li class="nav-item mt-3">
+            <span class="nav-text ms-1 text-uppercase fw-bold" style="font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.35)">Platform Content</span>
         </li>
         @endif
 
@@ -113,22 +124,37 @@
         </li>
         @endif
 
-        {{-- Managers section — admin and COO --}}
-        @if($isAdmin || $isCoo)
+        {{-- ── ADMIN TEAM ── --}}
+        @if($canSee('hierarchy') || ($isAdmin || $isCoo))
+        <li class="nav-item mt-3">
+            <span class="nav-text ms-1 text-uppercase fw-bold" style="font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.35)">Admin Team</span>
+        </li>
+        @endif
+
+        @if($canSee('hierarchy'))
         <li class="nav-item">
-            <a href="{{ route('admin.pricing.index') }}"
-               class="{{ Route::is('admin.pricing.*') ? 'active' : '' }}">
-                <i class="fas fa-tags"></i>
-                <span class="nav-text ms-2">Pricing Rules</span>
+            <a href="{{ route('admin.hierarchy') }}"
+               class="{{ Route::is('admin.hierarchy*') ? 'active' : '' }}">
+                <i class="fas fa-sitemap"></i>
+                <span class="nav-text ms-2">Manager Hierarchy</span>
             </a>
         </li>
+        @endif
 
+        @if($isAdmin || $isCoo)
         <li class="nav-item">
             <a href="{{ route('admin.managers.index') }}"
                class="{{ Route::is('admin.managers.*') ? 'active' : '' }}">
                 <i class="fas fa-user-shield"></i>
                 <span class="nav-text ms-2">Managers</span>
             </a>
+        </li>
+        @endif
+
+        {{-- ── SETTINGS ── --}}
+        @if($isAdmin || $isCoo)
+        <li class="nav-item mt-3">
+            <span class="nav-text ms-1 text-uppercase fw-bold" style="font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.35)">Settings</span>
         </li>
 
         <li class="nav-item">
@@ -143,12 +169,20 @@
             <a href="{{ route('admin.phone-pool.index') }}"
                class="{{ Route::is('admin.phone-pool.*') ? 'active' : '' }}">
                 <i class="fas fa-phone-volume"></i>
-                <span class="nav-text ms-2">Phone Pool</span>
+                <span class="nav-text ms-2">Tracking Numbers</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a href="{{ route('admin.settings.contact') }}"
+               class="{{ Route::is('admin.settings.*') ? 'active' : '' }}">
+                <i class="fas fa-headset"></i>
+                <span class="nav-text ms-2">Contact Settings</span>
             </a>
         </li>
 
         @if($isAdmin)
-        <li class="nav-item mt-4 border-top pt-3">
+        <li class="nav-item">
             <a href="{{ route('admin.clear.cache') }}"
                onclick="return confirm('Clear all cache?')">
                 <i class="fas fa-broom"></i>
@@ -159,13 +193,14 @@
             <a href="{{ route('admin.storage.link') }}"
                onclick="return confirm('Link storage? This restores access to uploaded images.')">
                 <i class="fas fa-link"></i>
-                <span class="nav-text ms-2">Link Storage</span>
+                <span class="nav-text ms-2">Fix Image Links</span>
             </a>
         </li>
         @endif
         @endif
 
-        <li class="nav-item {{ ($isAdmin || $isCoo) ? '' : 'mt-4 border-top pt-3' }}">
+        {{-- View Site --}}
+        <li class="nav-item mt-3 border-top pt-3">
             <a href="{{ route('frontend.home') }}" target="_blank">
                 <i class="fas fa-arrow-up-right-from-square"></i>
                 <span class="nav-text ms-2">View Site</span>
