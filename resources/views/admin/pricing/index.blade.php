@@ -369,7 +369,7 @@
 @section('scripts')
 <script>
 const statesData  = @json($states);
-const categoriesData = @json($categories->append([]).toArray());
+const categoriesData = @json($categories->toArray());
 
 // Load cities dynamically
 async function loadCities(stateId, selectId) {
