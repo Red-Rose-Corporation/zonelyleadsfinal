@@ -25,8 +25,8 @@ class ImageOptimizer
         try {
             $manager = new ImageManager(new Driver());
             $encoded = $manager->read($file->getPathname())
-                ->scaleDown(width: 1200, height: 900)
-                ->toWebp(quality: 85);
+                ->scaleDown(width: 800, height: 600)
+                ->toWebp(quality: 78);
 
             Storage::disk('r2')->put($filename, (string) $encoded, 'public');
 
