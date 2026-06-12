@@ -269,34 +269,66 @@ class PageController extends Controller
     }
     public function leads()
     {
+        // ── All-time payment stats ──────────────────────
         $s = Lead::selectRaw("
             COUNT(*) as total,
-            SUM(CASE WHEN status='new' THEN 1 ELSE 0 END) as new_count,
-            SUM(CASE WHEN status='won' THEN 1 ELSE 0 END) as won_count,
-            SUM(CASE WHEN status='lost' THEN 1 ELSE 0 END) as lost_count,
             SUM(CASE WHEN paid_at IS NOT NULL THEN 1 ELSE 0 END) as paid_count,
             SUM(CASE WHEN paid_at IS NULL THEN 1 ELSE 0 END) as unpaid_count,
             SUM(CASE WHEN paid_at IS NOT NULL THEN fee ELSE 0 END) as revenue,
             SUM(CASE WHEN paid_at IS NULL THEN fee ELSE 0 END) as pending_revenue
         ")->first();
+
+        // ── Time-based lead counts ──────────────────────
         $stats = [
-            'total'           => (int) ($s->total ?? 0),
-            'new'             => (int) ($s->new_count ?? 0),
-            'won'             => (int) ($s->won_count ?? 0),
-            'lost'            => (int) ($s->lost_count ?? 0),
-            'paid'            => (int) ($s->paid_count ?? 0),
-            'unpaid'          => (int) ($s->unpaid_count ?? 0),
+            'total'           => (int)   ($s->total ?? 0),
+            'paid'            => (int)   ($s->paid_count ?? 0),
+            'unpaid'          => (int)   ($s->unpaid_count ?? 0),
             'revenue'         => (float) ($s->revenue ?? 0),
             'pending_revenue' => (float) ($s->pending_revenue ?? 0),
+            'today'           => Lead::whereDate('created_at', today())->count(),
+            'week'            => Lead::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'month'           => Lead::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+            'year'            => Lead::whereYear('created_at', now()->year)->count(),
+            'overdue_sellers' => User::where('type', 'seller')->where('status', true)->get()->filter(fn($u) => $u->isOverdue())->count(),
         ];
+
+        // ── Period revenue (responds to tab filter) ─────
+        $period = request('period', 'month');
+        $periodQuery = match($period) {
+            'today' => Lead::whereDate('created_at', today()),
+            'week'  => Lead::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+            'year'  => Lead::whereYear('created_at', now()->year),
+            default => Lead::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
+        };
+        $periodStats = [
+            'count'           => (clone $periodQuery)->count(),
+            'revenue'         => (clone $periodQuery)->whereNotNull('paid_at')->sum('fee'),
+            'pending_revenue' => (clone $periodQuery)->whereNull('paid_at')->sum('fee'),
+        ];
+
+        // ── Leads table ─────────────────────────────────
         $status = request('status');
         $source = request('source');
-        $leads = Lead::with('seller:id,name,profile_photo,slug')
+        $search = request('search');
+        $leads  = Lead::with('seller:id,name,slug,category_id,state,city')
             ->when($status, fn($q) => $q->where('status', $status))
             ->when($source, fn($q) => $q->where('source', $source))
+            ->when($search, fn($q) => $q->where(fn($q) =>
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('email', 'like', "%$search%")
+                  ->orWhere('phone', 'like', "%$search%")
+            ))
             ->latest()
-            ->paginate(25);
-        return view('admin.leads.index', compact('stats', 'leads'));
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('admin.leads.index', compact('stats', 'periodStats', 'period', 'leads'));
+    }
+
+    public function leadDetail($id)
+    {
+        $lead = Lead::with('seller')->findOrFail($id);
+        return view('frontend.seller.lead_detail', compact('lead'));
     }
 
     public function leadUpdateStatus(Request $request, $id)

@@ -270,6 +270,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Leads module
         Route::middleware('manager.module:leads')->group(function () {
             Route::get('leads', [PageController::class, 'leads'])->name('leads');
+            Route::get('leads/{id}', [PageController::class, 'leadDetail'])->name('leads.detail');
             Route::post('leads/{id}/status', [PageController::class, 'leadUpdateStatus'])->name('leads.status');
             Route::post('leads/{id}/pay', [PageController::class, 'leadMarkPaid'])->name('leads.pay');
             Route::delete('leads/{id}', [PageController::class, 'leadDestroy'])->name('leads.destroy');

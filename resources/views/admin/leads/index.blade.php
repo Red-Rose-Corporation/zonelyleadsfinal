@@ -1,4 +1,4 @@
-﻿@extends('layouts.admin2')
+@extends('layouts.admin2')
 @section('title', 'Lead Dashboard')
 
 @section('content')
@@ -11,59 +11,118 @@
         </div>
     </div>
 
-    {{-- Stats --}}
-    <div class="kpi-grid mb-4">
+    {{-- ── ROW 1: Payment Status KPIs (all-time) ── --}}
+    <div class="row g-3 mb-3">
         @foreach([
-            ['val'=>$stats['total'],           'label'=>'Total Leads',        'icon'=>'fa-bolt',          'color'=>'#0ea5e9'],
-            ['val'=>$stats['new'],             'label'=>'New',                'icon'=>'fa-star',          'color'=>'#8b5cf6'],
-            ['val'=>$stats['won'],             'label'=>'Won',                'icon'=>'fa-trophy',        'color'=>'#10b981'],
-            ['val'=>$stats['lost'],            'label'=>'Lost',               'icon'=>'fa-times-circle',  'color'=>'#ef4444'],
-            ['val'=>'$'.number_format($stats['revenue'],2),  'label'=>'Revenue Collected','icon'=>'fa-dollar-sign','color'=>'#10b981'],
-            ['val'=>'$'.number_format($stats['pending_revenue'],2),'label'=>'Pending Payment','icon'=>'fa-clock','color'=>'#f59e0b'],
-            ['val'=>$stats['paid'],            'label'=>'Paid Leads',         'icon'=>'fa-check-circle',  'color'=>'#10b981'],
-            ['val'=>$stats['unpaid'],          'label'=>'Unpaid Leads',       'icon'=>'fa-hourglass-half','color'=>'#94a3b8'],
+            ['val' => $stats['total'],                              'label' => 'Total Leads',      'icon' => 'fa-bolt',          'color' => '#0ea5e9'],
+            ['val' => $stats['paid'],                               'label' => 'Paid Leads',        'icon' => 'fa-circle-check',  'color' => '#10b981'],
+            ['val' => $stats['unpaid'],                             'label' => 'Due Leads',         'icon' => 'fa-hourglass-half','color' => '#f59e0b'],
+            ['val' => '$'.number_format($stats['revenue'], 2),      'label' => 'Revenue Collected', 'icon' => 'fa-dollar-sign',   'color' => '#10b981'],
+            ['val' => '$'.number_format($stats['pending_revenue'],2),'label' => 'Pending Revenue',  'icon' => 'fa-clock',         'color' => '#ef4444'],
+            ['val' => $stats['overdue_sellers'],                    'label' => 'Overdue Sellers',   'icon' => 'fa-triangle-exclamation', 'color' => '#dc2626'],
         ] as $s)
-        <div class="kpi-card" style="border-left-color:{{ $s['color'] }}">
-            <h3>{{ $s['val'] }}</h3>
-            <p><i class="fas {{ $s['icon'] }}"></i> {{ $s['label'] }}</p>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid {{ $s['color'] }} !important;">
+                <div class="card-body py-3 px-3">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="fas {{ $s['icon'] }} small" style="color:{{ $s['color'] }}"></i>
+                        <span class="text-muted" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">{{ $s['label'] }}</span>
+                    </div>
+                    <h4 class="mb-0 fw-black">{{ $s['val'] }}</h4>
+                </div>
+            </div>
         </div>
         @endforeach
     </div>
 
-    {{-- Leads Table --}}
+    {{-- ── ROW 2: Time Based KPIs (static counts) ── --}}
+    <div class="row g-3 mb-4">
+        @foreach([
+            ['val' => $stats['today'], 'label' => "Today's Leads",  'icon' => 'fa-sun',        'color' => '#f59e0b'],
+            ['val' => $stats['week'],  'label' => 'This Week',       'icon' => 'fa-calendar-week','color' => '#8b5cf6'],
+            ['val' => $stats['month'], 'label' => 'This Month',      'icon' => 'fa-calendar',   'color' => '#0ea5e9'],
+            ['val' => $stats['year'],  'label' => 'This Year',       'icon' => 'fa-calendar-days','color' => '#10b981'],
+        ] as $s)
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid {{ $s['color'] }} !important;">
+                <div class="card-body py-3 px-3">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="fas {{ $s['icon'] }} small" style="color:{{ $s['color'] }}"></i>
+                        <span class="text-muted" style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">{{ $s['label'] }}</span>
+                    </div>
+                    <h4 class="mb-0 fw-black">{{ $s['val'] }}</h4>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
+    {{-- ── Revenue by Period ── --}}
+    <div class="section-card mb-4">
+        <div class="card-header bg-dark text-white p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Revenue by Period</h6>
+            <div class="btn-group btn-group-sm">
+                @foreach(['today'=>'Today','week'=>'This Week','month'=>'This Month','year'=>'This Year'] as $val=>$label)
+                <a href="{{ request()->fullUrlWithQuery(['period'=>$val,'page'=>1]) }}"
+                   class="btn {{ $period===$val ? 'btn-light' : 'btn-outline-light' }}">{{ $label }}</a>
+                @endforeach
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="row g-0 divide-x">
+                @foreach([
+                    ['val'=>$periodStats['count'],                              'label'=>'Leads in Period',  'icon'=>'fa-inbox',       'color'=>'#0ea5e9'],
+                    ['val'=>'$'.number_format($periodStats['revenue'],2),       'label'=>'Revenue Collected','icon'=>'fa-check-circle','color'=>'#10b981'],
+                    ['val'=>'$'.number_format($periodStats['pending_revenue'],2),'label'=>'Pending Revenue', 'icon'=>'fa-clock',       'color'=>'#f59e0b'],
+                ] as $p)
+                <div class="col-12 col-md-4 p-4 text-center border-end">
+                    <i class="fas {{ $p['icon'] }} fa-2x mb-2" style="color:{{ $p['color'] }}"></i>
+                    <h3 class="fw-black mb-0">{{ $p['val'] }}</h3>
+                    <p class="text-muted small mb-0">{{ $p['label'] }}</p>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Leads Table ── --}}
     <div class="section-card">
         <div class="card-header bg-dark text-white p-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Leads</h5>
             <div class="d-flex gap-2 align-items-center flex-wrap">
+                {{-- Status filter --}}
                 <div class="btn-group btn-group-sm">
                     @foreach([''=>'All','new'=>'New','pending'=>'Pending','won'=>'Won','lost'=>'Lost'] as $val=>$label)
                     <a href="{{ request()->fullUrlWithQuery(['status'=>$val?:null,'page'=>1]) }}"
-                       class="btn {{ request('status',$val===''?'':null)===$val ? 'btn-light' : 'btn-outline-light' }}">
-                        {{ $label }}
-                    </a>
+                       class="btn {{ request('status','') === $val ? 'btn-light' : 'btn-outline-light' }}">{{ $label }}</a>
                     @endforeach
                 </div>
+                {{-- Source filter --}}
                 <div class="btn-group btn-group-sm">
-                    @foreach([''=>'All Channels','form'=>'📋 Form','phone'=>'📞 Phone','whatsapp'=>'💬 WhatsApp','email'=>'📧 Email','booking'=>'📅 Booking'] as $val=>$label)
+                    @foreach([''=>'All','form'=>'📋 Form','phone'=>'📞 Phone','whatsapp'=>'💬 WhatsApp','email'=>'📧 Email','booking'=>'📅 Booking'] as $val=>$label)
                     <a href="{{ request()->fullUrlWithQuery(['source'=>$val?:null,'page'=>1]) }}"
-                       class="btn {{ request('source',$val===''?'':null)===$val ? 'btn-info text-white' : 'btn-outline-light' }}">
-                        {{ $label }}
-                    </a>
+                       class="btn {{ request('source','') === $val ? 'btn-info text-white' : 'btn-outline-light' }}">{{ $label }}</a>
                     @endforeach
                 </div>
-                <input type="text" id="leadSearch" class="form-control form-control-sm"
-                       placeholder="Search..." style="min-width:180px"
-                       oninput="filterLeads(this.value)">
+                {{-- Search --}}
+                <form method="GET" action="{{ route('admin.leads') }}" class="d-flex gap-1">
+                    @foreach(request()->except(['search','page']) as $k=>$v)
+                        <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                    @endforeach
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           class="form-control form-control-sm" placeholder="Search name, email, phone…" style="min-width:180px">
+                    <button class="btn btn-sm btn-outline-light"><i class="fas fa-search"></i></button>
+                </form>
             </div>
         </div>
 
         <div class="card-body p-0">
             @if($leads->count())
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" id="leadsTable">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>Lead ID</th>
+                            <th>Lead</th>
                             <th>Channel</th>
                             <th>Contact</th>
                             <th>Seller</th>
@@ -76,31 +135,34 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($leads as $i => $lead)
+                        @foreach($leads as $lead)
                         @php
-                            $statusColor = match($lead->status) {
-                                'won'     => 'bg-success',
-                                'lost'    => 'bg-danger',
-                                'pending' => 'bg-warning text-dark',
-                                default   => 'bg-primary',
+                            $srcBadge = match($lead->source ?? 'form') {
+                                'whatsapp' => ['💬 WhatsApp', 'badge bg-success'],
+                                'email'    => ['📧 Email',    'badge bg-primary'],
+                                'phone'    => ['📞 Phone',    'badge bg-warning text-dark'],
+                                'booking'  => ['📅 Booking',  'badge bg-info text-dark'],
+                                default    => ['📋 Form',     'badge bg-secondary'],
                             };
+                            $statusBadge = match($lead->status) {
+                                'won'     => ['Won',     'badge bg-success'],
+                                'lost'    => ['Lost',    'badge bg-danger'],
+                                'pending' => ['Pending', 'badge bg-warning text-dark'],
+                                default   => ['New',     'badge bg-primary'],
+                            };
+                            $sellerOverdue = $lead->seller?->isOverdue() ?? false;
                         @endphp
                         <tr>
-                            <td class="fw-bold small text-nowrap">#ZL-{{ $lead->id }}</td>
+                            {{-- Lead ID --}}
+                            <td class="fw-bold small text-nowrap">
+                                <a href="{{ route('admin.leads.detail', $lead->id) }}" target="_blank"
+                                   class="text-decoration-none text-primary fw-bold">
+                                    #ZL-{{ $lead->id }}
+                                </a>
+                            </td>
 
                             {{-- Channel --}}
-                            <td>
-                                @php
-                                    $srcBadge = match($lead->source ?? 'form') {
-                                        'whatsapp' => ['💬 WhatsApp','badge bg-success'],
-                                        'email'    => ['📧 Email','badge bg-primary'],
-                                        'phone'    => ['📞 Phone','badge bg-warning text-dark'],
-                                        'booking'  => ['📅 Booking','badge bg-info text-dark'],
-                                        default    => ['📋 Form','badge bg-secondary'],
-                                    };
-                                @endphp
-                                <span class="{{ $srcBadge[1] }}">{{ $srcBadge[0] }}</span>
-                            </td>
+                            <td><span class="{{ $srcBadge[1] }}">{{ $srcBadge[0] }}</span></td>
 
                             {{-- Contact --}}
                             <td>
@@ -113,11 +175,9 @@
                                 @endif
                                 @if($lead->email)
                                 <div style="font-size:11px" class="text-muted">
-                                    <i class="fas fa-envelope fa-xs me-1"></i>{{ $lead->email }}
+                                    <i class="fas fa-envelope fa-xs me-1"></i>
+                                    <a href="mailto:{{ $lead->email }}" class="text-decoration-none text-muted">{{ $lead->email }}</a>
                                 </div>
-                                @endif
-                                @if($lead->message)
-                                <div style="font-size:11px" class="text-muted mt-1 fst-italic">"{{ Str::limit($lead->message,60) }}"</div>
                                 @endif
                             </td>
 
@@ -129,10 +189,15 @@
                                          style="width:30px;height:30px;font-size:11px;flex-shrink:0">
                                         {{ strtoupper(substr($lead->seller->name,0,1)) }}
                                     </div>
-                                    <a href="{{ route('admin.profiles.edit',$lead->seller_id) }}"
-                                       class="small fw-semibold text-decoration-none text-dark">
-                                        {{ $lead->seller->name }}
-                                    </a>
+                                    <div>
+                                        <a href="{{ route('admin.profiles.edit',$lead->seller_id) }}" target="_blank"
+                                           class="small fw-semibold text-decoration-none text-dark d-block">
+                                            {{ $lead->seller->name }}
+                                        </a>
+                                        @if($sellerOverdue)
+                                        <span class="badge bg-danger" style="font-size:9px">🔴 Overdue</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 @else
                                 <span class="text-muted small">—</span>
@@ -160,22 +225,13 @@
                                 </form>
                             </td>
 
-                            {{-- Status --}}
+                            {{-- Status — read only badge --}}
                             <td class="text-center">
-                                <form method="POST" action="{{ route('admin.leads.status',$lead->id) }}" class="d-inline">
-                                    @csrf
-                                    <select name="status" class="form-select form-select-sm border-0 p-0 fw-bold"
-                                            style="font-size:12px;width:auto;cursor:pointer"
-                                            onchange="this.form.submit()">
-                                        @foreach(['new'=>'New','pending'=>'Pending','won'=>'Won','lost'=>'Lost'] as $val=>$label)
-                                        <option value="{{ $val }}" {{ $lead->status===$val?'selected':'' }}>{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                </form>
+                                <span class="{{ $statusBadge[1] }}">{{ $statusBadge[0] }}</span>
                             </td>
 
                             {{-- Date --}}
-                            <td class="small text-muted">{{ $lead->created_at?->format('M d, Y') }}</td>
+                            <td class="small text-muted text-nowrap">{{ $lead->created_at?->format('M d, Y') }}</td>
 
                             {{-- Actions --}}
                             <td class="text-center">
@@ -184,20 +240,39 @@
                                         <i class="fas fa-ellipsis-v"></i>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                        {{-- View lead detail --}}
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('admin.leads.detail', $lead->id) }}" target="_blank">
+                                                <i class="fas fa-eye me-2 text-primary"></i> View Lead Details
+                                            </a>
+                                        </li>
+                                        {{-- View seller profile --}}
+                                        @if($lead->seller)
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('admin.profiles.edit',$lead->seller_id) }}" target="_blank">
+                                                <i class="fas fa-user me-2 text-info"></i> View Seller Profile
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ route('seller.billing') }}" target="_blank">
+                                                <i class="fas fa-file-invoice-dollar me-2 text-warning"></i> View Seller Billing
+                                            </a>
+                                        </li>
+                                        @endif
                                         {{-- View message --}}
                                         @if($lead->message)
+                                        <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <button class="dropdown-item" type="button"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#msgModal{{ $lead->id }}">
-                                                <i class="fas fa-comment me-2 text-info"></i> View Message
+                                                    data-bs-toggle="modal" data-bs-target="#msgModal{{ $lead->id }}">
+                                                <i class="fas fa-comment me-2 text-secondary"></i> View Message
                                             </button>
                                         </li>
-                                        <li><hr class="dropdown-divider"></li>
                                         @endif
+                                        <li><hr class="dropdown-divider"></li>
                                         <li>
                                             <form method="POST" action="{{ route('admin.leads.destroy',$lead->id) }}"
-                                                  onsubmit="return confirm('Delete lead from ' + @json($lead->name) + '?')">
+                                                  onsubmit="return confirm('Delete lead from {{ addslashes($lead->name) }}?')">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="dropdown-item text-danger">
                                                     <i class="fas fa-trash me-2"></i> Delete
@@ -219,6 +294,7 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
+                                        <p class="mb-1"><strong>Lead:</strong> #ZL-{{ $lead->id }}</p>
                                         <p class="mb-1"><strong>Service:</strong> {{ $lead->service ?? '—' }}</p>
                                         <p class="mb-1"><strong>Location:</strong> {{ $lead->location ?? $lead->zip_code ?? '—' }}</p>
                                         <hr>
@@ -253,24 +329,12 @@
             @else
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-bolt fa-3x mb-3 opacity-25"></i>
-                <p class="mb-0">No leads yet.</p>
-                <small>Leads appear when buyers contact sellers through the platform.</small>
+                <p class="mb-0 fw-bold">No leads found.</p>
+                <small>Try adjusting your filters.</small>
             </div>
             @endif
         </div>
     </div>
 
 </div>
-@endsection
-
-@section('scripts')
-<script>
-function filterLeads(q) {
-    q = q.toLowerCase();
-    document.querySelectorAll('#leadsTable tbody tr:not([id^="msgModal"])').forEach(row => {
-        if (row.closest('.modal')) return;
-        row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
-    });
-}
-</script>
 @endsection
