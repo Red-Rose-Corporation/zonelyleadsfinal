@@ -200,6 +200,12 @@
                     </p>
                     @endif
                     <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center md:justify-start flex-wrap">
+                        @if($isOverdue ?? false)
+                        <div class="flex items-center gap-3 bg-white/10 border border-white/30 px-6 py-4 rounded-2xl text-white text-sm font-semibold">
+                            <i class="fas fa-clock text-amber-300"></i>
+                            This professional is temporarily unavailable. Please check back soon.
+                        </div>
+                        @else
                         @if($callNumber)
                         <a href="tel:{{ $callNumber }}"
                            class="flex items-center justify-center gap-3 bg-white text-teal-800 hover:bg-yellow-300 px-8 py-4 rounded-full font-bold text-base shadow-xl transition">
@@ -217,6 +223,7 @@
                            class="flex items-center justify-center gap-3 bg-amber-400 hover:bg-amber-300 text-slate-900 px-8 py-4 rounded-full font-bold text-base transition shadow-xl">
                             <i class="fas fa-calendar-check"></i> Book Now
                         </a>
+                        @endif
                     </div>
                     @if($reviewCount && $avgRating)
                     <a href="#testimonials"
@@ -687,6 +694,21 @@
 
     {{-- ── CONTACT / BOOKING ────────────────────────────────────────── --}}
     <div id="contact" class="bg-gradient-to-br from-teal-800 via-teal-800 to-indigo-700 text-white py-12 md:py-16">
+        @if($isOverdue ?? false)
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 text-center py-8">
+            <div class="inline-flex flex-col items-center gap-4 bg-white/10 border border-white/20 rounded-3xl px-8 py-10 max-w-lg mx-auto">
+                <div class="w-16 h-16 bg-amber-400/20 rounded-2xl flex items-center justify-center">
+                    <i class="fas fa-clock text-amber-300 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Temporarily Unavailable</h3>
+                <p class="text-teal-200 text-sm leading-relaxed">This professional is temporarily unavailable for new inquiries. Please check back soon or explore other professionals.</p>
+                <a href="{{ route('frontend.service.all') }}"
+                   class="mt-2 bg-white text-teal-800 hover:bg-yellow-300 font-bold px-6 py-3 rounded-2xl text-sm transition">
+                    Browse Other Professionals
+                </a>
+            </div>
+        </div>
+        @else
         <div class="max-w-6xl mx-auto px-4 sm:px-6">
 
             {{-- 2-col header: text left, button right --}}
@@ -765,6 +787,7 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 
 </div>

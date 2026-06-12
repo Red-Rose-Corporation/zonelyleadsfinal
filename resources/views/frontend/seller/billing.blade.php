@@ -64,15 +64,24 @@
         <p class="text-2xl font-black text-emerald-600">${{ number_format($balance['total_paid'], 2) }}</p>
         <p class="text-[11px] text-slate-400 mt-0.5">all time</p>
     </div>
+    {{-- Unpaid Leads card --}}
     <div class="bg-white rounded-2xl border {{ $overdue ? 'border-red-200 bg-red-50' : 'border-slate-100' }} shadow-sm p-4 text-center">
-        <p class="text-[10px] font-bold {{ $overdue ? 'text-red-400' : 'text-slate-400' }} uppercase tracking-widest mb-1">Outstanding</p>
-        <p class="text-2xl font-black {{ $overdue ? 'text-red-600' : 'text-slate-900' }}">${{ number_format($balance['unpaid'], 2) }}</p>
-        <p class="text-[11px] {{ $overdue ? 'text-red-400' : 'text-slate-400' }} mt-0.5">{{ $unpaidCount }} leads due</p>
+        <p class="text-[10px] font-bold {{ $overdue ? 'text-red-400' : 'text-slate-400' }} uppercase tracking-widest mb-1">Unpaid Leads</p>
+        <p class="text-2xl font-black {{ $overdue ? 'text-red-600' : 'text-slate-900' }}">{{ $unpaidCount }} <span class="text-base font-semibold text-slate-400">/ {{ $threshold }}</span></p>
+        @php $pct = $threshold > 0 ? min(100, round($unpaidCount / $threshold * 100)) : 0; @endphp
+        <div class="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+            <div class="h-1.5 rounded-full transition-all {{ $pct >= 100 ? 'bg-red-500' : ($pct >= 66 ? 'bg-amber-400' : 'bg-teal-500') }}"
+                 style="width:{{ $pct }}%"></div>
+        </div>
+        <p class="text-[11px] {{ $overdue ? 'text-red-500 font-semibold' : 'text-slate-400' }} mt-1">
+            {{ $overdue ? 'Payment due' : ($pct >= 66 ? 'Almost due' : 'Good standing') }}
+        </p>
     </div>
-    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 text-center">
-        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Threshold</p>
-        <p class="text-2xl font-black text-slate-900">{{ $threshold }} leads</p>
-        <p class="text-[11px] text-slate-400 mt-0.5">set by Zonely</p>
+    {{-- Amount Due card --}}
+    <div class="bg-white rounded-2xl border {{ $overdue ? 'border-red-200 bg-red-50' : 'border-slate-100' }} shadow-sm p-4 text-center">
+        <p class="text-[10px] font-bold {{ $overdue ? 'text-red-400' : 'text-slate-400' }} uppercase tracking-widest mb-1">Amount Due</p>
+        <p class="text-2xl font-black {{ $overdue ? 'text-red-600' : 'text-slate-900' }}">${{ number_format($balance['unpaid'], 2) }}</p>
+        <p class="text-[11px] text-slate-400 mt-0.5">{{ $unpaidCount }} lead{{ $unpaidCount !== 1 ? 's' : '' }} unpaid</p>
     </div>
 </div>
 
@@ -93,16 +102,16 @@
         </div>
         <div class="px-5 py-4">
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Payment threshold</p>
-            <p class="text-sm font-bold text-slate-800">Pay after {{ $threshold }} unpaid leads</p>
-            @php $pct = $threshold > 0 ? min(100, round($unpaidCount / $threshold * 100)) : 0; @endphp
+            <p class="text-sm font-bold text-slate-800">Pay after every {{ $threshold }} unpaid leads</p>
+            @php $pct2 = $threshold > 0 ? min(100, round($unpaidCount / $threshold * 100)) : 0; @endphp
             <div class="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                <div class="h-1.5 rounded-full transition-all {{ $pct >= 100 ? 'bg-red-500' : ($pct >= 75 ? 'bg-amber-400' : 'bg-teal-500') }}"
-                     style="width:{{ $pct }}%"></div>
+                <div class="h-1.5 rounded-full transition-all {{ $pct2 >= 100 ? 'bg-red-500' : ($pct2 >= 66 ? 'bg-amber-400' : 'bg-teal-500') }}"
+                     style="width:{{ $pct2 }}%"></div>
             </div>
             <p class="text-[11px] text-slate-400 mt-1">
                 {{ $unpaidCount }} of {{ $threshold }} leads unpaid
-                @if($pct >= 100) · <span class="text-red-500 font-semibold">payment due</span>
-                @elseif($pct >= 75) · almost due
+                @if($pct2 >= 100) · <span class="text-red-500 font-semibold">payment due</span>
+                @elseif($pct2 >= 66) · almost due
                 @endif
             </p>
         </div>

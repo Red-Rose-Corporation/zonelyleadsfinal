@@ -182,6 +182,36 @@
 
             {{-- Main content --}}
             <main class="flex-1 min-w-0">
+                @php
+                    $__seller = auth()->user();
+                    $__overdue = $__seller && $__seller->type === 'seller' && $__seller->isOverdue();
+                    if ($__overdue) {
+                        $__unpaid    = $__seller->unpaidLeadsCount();
+                        $__threshold = $__seller->leadThreshold();
+                        $__amount    = $__seller->leads()->whereNull('paid_at')->sum('fee');
+                    }
+                @endphp
+                @if($__overdue)
+                <div class="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-triangle-exclamation text-red-600 text-sm"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-red-700">Your profile is currently private</p>
+                            <p class="text-xs text-red-500 mt-0.5">
+                                You have <strong>{{ $__unpaid }} unpaid lead{{ $__unpaid > 1 ? 's' : '' }}</strong>
+                                — <strong>${{ number_format($__amount, 2) }} due</strong>.
+                                Pay now to go live and receive new leads again.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{{ route('seller.billing') }}"
+                       class="shrink-0 bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition text-center whitespace-nowrap">
+                        Pay Now →
+                    </a>
+                </div>
+                @endif
                 @yield('content')
             </main>
 

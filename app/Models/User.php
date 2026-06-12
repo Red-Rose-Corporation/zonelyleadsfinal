@@ -88,6 +88,23 @@ class User extends Authenticatable
         return $this->hasMany(Lead::class, 'seller_id');
     }
 
+    public function unpaidLeadsCount(): int
+    {
+        return $this->leads()->whereNull('paid_at')->count();
+    }
+
+    public function leadThreshold(): int
+    {
+        $stateId  = \App\Models\State::where('title', $this->state)->value('id');
+        $cityId   = \App\Models\City::where('title', $this->city)->value('id');
+        return (int) \App\Models\PlatformCharge::resolve('lead_threshold', $this->category_id, $stateId, $cityId);
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->unpaidLeadsCount() >= $this->leadThreshold();
+    }
+
     public function reviews()
     {
         return $this->hasMany(Review::class, 'seller_id');

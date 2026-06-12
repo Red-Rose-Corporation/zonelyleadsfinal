@@ -210,7 +210,9 @@ class HomeController extends Controller
             $user->setRelation('gallery', collect());
         }
 
-        return view('frontend.service_details_professional', compact('user'));
+        $isOverdue = $user->isOverdue();
+
+        return view('frontend.service_details_professional', compact('user', 'isOverdue'));
     }
 
     function shareCard($slug)
