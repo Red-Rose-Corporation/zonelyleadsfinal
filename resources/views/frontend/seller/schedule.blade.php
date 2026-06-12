@@ -2,9 +2,9 @@
 @section('title', 'Booking Schedule')
 @section('content')
 <div class="pb-10">
-    <div class="max-w-2xl mx-auto py-6">
+    <div class="max-w-2xl mx-auto py-6 px-4 lg:px-0">
         <div class="mb-6">
-            <h1 class="text-2xl font-bold text-slate-900">Booking Schedule</h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-slate-900">Booking Schedule</h1>
             <p class="text-sm text-slate-500 mt-0.5">Set when you're available so clients can book time slots</p>
         </div>
 

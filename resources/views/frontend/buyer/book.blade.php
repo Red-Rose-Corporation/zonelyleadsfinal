@@ -1,7 +1,7 @@
 @extends('frontend.layouts._app')
 @section('title', 'Book ' . ($seller->name ?? 'Service'))
 @section('content')
-<div class="min-h-screen bg-slate-50 pt-20 pb-16 px-4">
+<div class="min-h-screen bg-slate-50 pt-20 pb-24 px-4">
     <div class="max-w-2xl mx-auto py-6">
 
         {{-- Back --}}
@@ -44,7 +44,7 @@
             <input type="hidden" name="selected_slot" id="selectedSlot">
 
             {{-- Step 1: Pick Date --}}
-            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-4">
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 sm:p-6 mb-4">
                 <h2 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <span class="w-6 h-6 bg-teal-700 text-white rounded-lg flex items-center justify-center text-xs font-black">1</span>
                     Pick a Date
@@ -78,7 +78,7 @@
             </div>
 
             {{-- Step 2: Pick Time Slot --}}
-            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-4" id="slotSection">
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 sm:p-6 mb-4" id="slotSection">
                 <h2 class="font-bold text-slate-900 mb-2 flex items-center gap-2">
                     <span class="w-6 h-6 bg-teal-700 text-white rounded-lg flex items-center justify-center text-xs font-black">2</span>
                     Pick a Time Slot
@@ -91,7 +91,7 @@
             </div>
 
             {{-- Step 3: Your Details --}}
-            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-4">
+            <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 sm:p-6 mb-4">
                 <h2 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <span class="w-6 h-6 bg-teal-700 text-white rounded-lg flex items-center justify-center text-xs font-black">3</span>
                     Your Details
