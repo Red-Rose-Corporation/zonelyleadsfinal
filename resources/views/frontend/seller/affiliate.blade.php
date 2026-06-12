@@ -23,7 +23,7 @@
     $paidOut = $stats['paid_out'] ?? 0;
 @endphp
 
-<div class="pb-12">
+<div class="pb-24">
 <div class="max-w-3xl mx-auto px-4 py-6 lg:px-6 lg:py-8">
 
     {{-- ── HERO BANNER ── --}}
@@ -58,7 +58,7 @@
             {{-- Referral Link --}}
             <div class="flex gap-2 mb-3">
                 <input type="text" id="refLink" value="{{ $refUrl }}" readonly
-                    class="flex-1 text-xs bg-white/10 border border-white/20 text-white rounded-xl px-4 py-3 focus:outline-none font-mono placeholder-teal-300 truncate">
+                    class="flex-1 min-w-0 text-xs bg-white/10 border border-white/20 text-white rounded-xl px-4 py-3 focus:outline-none font-mono placeholder-teal-300 truncate">
                 <button id="copyRefBtn" onclick="copyRef(this)"
                     class="bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-5 py-3 rounded-xl text-sm transition shrink-0 flex items-center gap-2">
                     <i class="fa-solid fa-copy text-xs"></i> Copy Link
@@ -268,24 +268,21 @@
 
         <div class="space-y-2">
             @foreach([
-                ['event'=>'Referred seller joins platform',       'cash'=>'$'.number_format($commRate,0), 'pts'=>'+35', 'color'=>'text-emerald-600'],
-                ['event'=>'They complete their first job',        'cash'=>'$'.number_format($commRate,0), 'pts'=>'+25', 'color'=>'text-emerald-600'],
-                ['event'=>'They reach Rising tier',               'cash'=>'—',                            'pts'=>'+50', 'color'=>'text-blue-600'],
-                ['event'=>'They reach Trusted tier',              'cash'=>'—',                            'pts'=>'+100','color'=>'text-purple-600'],
-                ['event'=>'They reach Elite tier',                'cash'=>'—',                            'pts'=>'+200','color'=>'text-teal-600'],
-                ['event'=>'They pay 3 months platform fees',      'cash'=>'—',                            'pts'=>'+75', 'color'=>'text-teal-600'],
-                ['event'=>'They refer another seller (2nd level)','cash'=>'—',                            'pts'=>'+20', 'color'=>'text-amber-600'],
+                ['event'=>'Referred seller signs up with your link', 'cash'=>'$'.number_format($commRate,0), 'pts'=>'+35', 'dot'=>'bg-emerald-400', 'cashColor'=>'text-emerald-600'],
+                ['event'=>'They reach Rising tier (3 referrals)',    'cash'=>'—',                            'pts'=>'+50', 'dot'=>'bg-blue-400',    'cashColor'=>null],
+                ['event'=>'They reach Trusted tier (5 referrals)',   'cash'=>'—',                            'pts'=>'+100','dot'=>'bg-purple-400',  'cashColor'=>null],
+                ['event'=>'They reach Elite tier (10 referrals)',    'cash'=>'—',                            'pts'=>'+200','dot'=>'bg-teal-400',    'cashColor'=>null],
             ] as $r)
-            <div class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition">
-                <div class="flex items-center gap-3">
-                    <div class="w-1.5 h-1.5 rounded-full {{ str_contains($r['color'], 'emerald') ? 'bg-emerald-400' : (str_contains($r['color'], 'purple') ? 'bg-purple-400' : (str_contains($r['color'], 'blue') ? 'bg-blue-400' : (str_contains($r['color'], 'amber') ? 'bg-amber-400' : 'bg-teal-400'))) }} shrink-0"></div>
+            <div class="flex items-start justify-between gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition">
+                <div class="flex items-start gap-3 min-w-0">
+                    <div class="w-1.5 h-1.5 rounded-full {{ $r['dot'] }} shrink-0 mt-1.5"></div>
                     <p class="text-sm text-slate-700">{{ $r['event'] }}</p>
                 </div>
-                <div class="flex items-center gap-3 shrink-0">
+                <div class="flex items-center gap-2 shrink-0">
                     @if($r['cash'] !== '—')
-                    <span class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">{{ $r['cash'] }}</span>
+                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg whitespace-nowrap">{{ $r['cash'] }}</span>
                     @endif
-                    <span class="text-sm font-bold {{ $r['color'] }} bg-slate-100 px-2.5 py-1 rounded-lg">{{ $r['pts'] }} pts</span>
+                    <span class="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg whitespace-nowrap">{{ $r['pts'] }} pts</span>
                 </div>
             </div>
             @endforeach
@@ -294,9 +291,9 @@
         <div class="mt-5 bg-teal-50 border border-teal-100 rounded-2xl p-4">
             <p class="text-sm font-bold text-teal-800 flex items-center gap-2">
                 <i class="fa-solid fa-lightbulb text-teal-600"></i>
-                One referral who reaches Elite = $45 cash + 430 points for you
+                One referral who reaches Elite = ${{ number_format($commRate, 0) }} cash + 385 points for you
             </p>
-            <p class="text-xs text-teal-600 mt-1">Points boost your own tier, unlock AI assistant access, and push your profile higher in search results.</p>
+            <p class="text-xs text-teal-600 mt-1">Points boost your tier, push your profile higher in search results, and unlock future rewards.</p>
         </div>
     </div>
 
@@ -374,8 +371,8 @@
 const _refUrl = "{{ $refUrl }}";
 
 function copyRef(btn) {
-    navigator.clipboard.writeText(_refUrl).then(() => {
-        const copyBtn = document.getElementById('copyRefBtn');
+    const copyBtn = document.getElementById('copyRefBtn');
+    const done = () => {
         if (!copyBtn) return;
         const orig = copyBtn.innerHTML;
         copyBtn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Copied!';
@@ -386,7 +383,18 @@ function copyRef(btn) {
             copyBtn.classList.remove('bg-green-600');
             copyBtn.classList.add('bg-emerald-500');
         }, 2000);
-    });
+    };
+    const fallback = () => {
+        const el = document.createElement('textarea');
+        el.value = _refUrl;
+        el.style.position = 'fixed'; el.style.opacity = '0';
+        document.body.appendChild(el); el.select();
+        try { document.execCommand('copy'); done(); } catch(e) {}
+        document.body.removeChild(el);
+    };
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(_refUrl).then(done).catch(fallback);
+    } else { fallback(); }
 }
 
 function shareNative() {

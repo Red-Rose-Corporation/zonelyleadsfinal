@@ -67,7 +67,8 @@ class SellerController extends Controller
                            ->where('referral_type', 'seller')
                            ->latest()->get();
 
-        $totalRefs = $user->referrals()->count();
+        // Count only seller referrals — consistent with the commissions query above
+        $totalRefs = $user->referrals()->where('type', 'seller')->count();
 
         // Tier progress
         $nextMilestone = $totalRefs < 3  ? 3  : ($totalRefs < 5  ? 5  : ($totalRefs < 10 ? 10 : ($totalRefs < 25 ? 25 : 50)));
