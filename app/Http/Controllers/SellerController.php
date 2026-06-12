@@ -52,7 +52,11 @@ class SellerController extends Controller
             $weekCounts[] = $allLeads->filter(fn($l) => $l->created_at->isSameDay($d))->count();
         }
 
-        return view('frontend.seller.dashboard', compact('user', 'leads', 'allLeads', 'stats', 'period', 'weekDays', 'weekCounts'));
+        $unpaidLeads   = $user->leads()->whereNull('paid_at')->get();
+        $unpaidCount   = $unpaidLeads->count();
+        $unpaidBalance = $unpaidLeads->sum('fee');
+
+        return view('frontend.seller.dashboard', compact('user', 'leads', 'allLeads', 'stats', 'period', 'weekDays', 'weekCounts', 'unpaidCount', 'unpaidBalance'));
     }
 
     public function affiliate()

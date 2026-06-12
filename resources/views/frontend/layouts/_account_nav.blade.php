@@ -5,8 +5,9 @@
     <div class="flex items-stretch justify-around px-2 pt-2 pb-1">
 
         @if($type === 'seller')
+            @php $sellerUnpaid = auth()->user()->leads()->whereNull('paid_at')->count(); @endphp
             {{-- ── SELLER NAV ── --}}
-            <a href="{{ route('seller.dashboard') ?? '#' }}"
+            <a href="{{ route('seller.dashboard') }}"
                class="bnav-item flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 hover:text-teal-700 {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}">
                 <div class="bnav-icon w-8 h-8 rounded-xl flex items-center justify-center">
                     <i class="fa-solid fa-gauge-high text-sm"></i>
@@ -16,25 +17,29 @@
 
             <a href="{{ route('seller.dashboard') }}"
                class="bnav-item flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 hover:text-teal-700 {{ request()->routeIs('seller.lead.*') ? 'active' : '' }}">
-                <div class="bnav-icon w-8 h-8 rounded-xl flex items-center justify-center relative">
-                    <i class="fa-solid fa-users text-sm"></i>
+                <div class="bnav-icon w-8 h-8 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-inbox text-sm"></i>
                 </div>
                 <span class="text-[10px] font-bold">Leads</span>
             </a>
 
-            <a href="{{ route('seller.reviews') ?? '#' }}"
-               class="bnav-item flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 hover:text-teal-700 {{ request()->routeIs('seller.reviews') ? 'active' : '' }}">
-                <div class="bnav-icon w-8 h-8 rounded-xl flex items-center justify-center">
-                    <i class="fa-solid fa-star text-sm"></i>
+            <a href="{{ route('seller.billing') }}"
+               class="bnav-item flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 hover:text-teal-700 {{ request()->routeIs('seller.billing*') ? 'active' : '' }}">
+                <div class="bnav-icon w-8 h-8 rounded-xl flex items-center justify-center relative">
+                    <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
+                    @if($sellerUnpaid > 0)
+                    <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
+                        {{ min($sellerUnpaid, 9) }}
+                    </span>
+                    @endif
                 </div>
-                <span class="text-[10px] font-bold">Reviews</span>
+                <span class="text-[10px] font-bold">Billing</span>
             </a>
 
-            <a href="{{ route('seller.notifications') ?? '#' }}"
+            <a href="{{ route('seller.notifications') }}"
                class="bnav-item flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 hover:text-teal-700 {{ request()->routeIs('seller.notifications') ? 'active' : '' }}">
                 <div class="bnav-icon w-8 h-8 rounded-xl flex items-center justify-center relative">
                     <i class="fa-solid fa-bell text-sm"></i>
-                    {{-- unread badge --}}
                     @if(($unreadNotifCount ?? 0) > 0)
                     <span class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
                         {{ min($unreadNotifCount, 9) }}
@@ -44,7 +49,7 @@
                 <span class="text-[10px] font-bold">Alerts</span>
             </a>
 
-            <a href="{{ route('seller.settings') ?? '#' }}"
+            <a href="{{ route('seller.settings') }}"
                class="bnav-item flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 hover:text-teal-700 {{ request()->routeIs('seller.settings') ? 'active' : '' }}">
                 <div class="bnav-icon w-8 h-8 rounded-xl flex items-center justify-center">
                     <i class="fa-solid fa-gear text-sm"></i>
