@@ -58,7 +58,7 @@
     </div>
 
     {{-- ── Revenue by Period ── --}}
-    <div class="section-card mb-4">
+    <div class="card mb-4">
         <div class="card-header bg-dark text-white p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>Revenue by Period</h6>
             <div class="btn-group btn-group-sm">
@@ -86,7 +86,7 @@
     </div>
 
     {{-- ── Leads Table ── --}}
-    <div class="section-card">
+    <div class="card">
         <div class="card-header bg-dark text-white p-4 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <h5 class="mb-0"><i class="fas fa-list me-2"></i>All Leads</h5>
             <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -253,11 +253,6 @@
                                                 <i class="fas fa-user me-2 text-info"></i> View Seller Profile
                                             </a>
                                         </li>
-                                        <li>
-                                            <a class="dropdown-item" href="{{ route('seller.billing') }}" target="_blank">
-                                                <i class="fas fa-file-invoice-dollar me-2 text-warning"></i> View Seller Billing
-                                            </a>
-                                        </li>
                                         @endif
                                         {{-- View message --}}
                                         @if($lead->message)
@@ -283,39 +278,41 @@
                                 </div>
                             </td>
                         </tr>
-
-                        {{-- Message modal --}}
-                        @if($lead->message)
-                        <div class="modal fade" id="msgModal{{ $lead->id }}" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h6 class="modal-title">Message from {{ $lead->name }}</h6>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p class="mb-1"><strong>Lead:</strong> #ZL-{{ $lead->id }}</p>
-                                        <p class="mb-1"><strong>Service:</strong> {{ $lead->service ?? '—' }}</p>
-                                        <p class="mb-1"><strong>Location:</strong> {{ $lead->location ?? $lead->zip_code ?? '—' }}</p>
-                                        <hr>
-                                        <p class="mb-0">{{ $lead->message }}</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        @if($lead->phone)
-                                        <a href="tel:{{ $lead->phone }}" class="btn btn-sm btn-primary">
-                                            <i class="fas fa-phone me-1"></i> Call
-                                        </a>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
                         @endforeach
                     </tbody>
                 </table>
             </div>
+
+            {{-- Message modals (must be outside <table>) --}}
+            @foreach($leads as $lead)
+            @if($lead->message)
+            <div class="modal fade" id="msgModal{{ $lead->id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title">Message from {{ $lead->name }}</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-1"><strong>Lead:</strong> #ZL-{{ $lead->id }}</p>
+                            <p class="mb-1"><strong>Service:</strong> {{ $lead->service ?? '—' }}</p>
+                            <p class="mb-1"><strong>Location:</strong> {{ $lead->location ?? $lead->zip_code ?? '—' }}</p>
+                            <hr>
+                            <p class="mb-0">{{ $lead->message }}</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                            @if($lead->phone)
+                            <a href="tel:{{ $lead->phone }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-phone me-1"></i> Call
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+            @endforeach
 
             @if($leads->hasPages())
             <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">

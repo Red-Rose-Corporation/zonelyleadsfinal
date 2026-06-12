@@ -922,6 +922,7 @@
 </div>
 
 {{-- ── MOBILE STICKY CTA ────────────────────────────────────────── --}}
+@if(!($isOverdue ?? false))
 <div class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 shadow-2xl px-4 py-3 flex gap-3">
     @if($waNumber)
     <button onclick="trackWa('{{ route('service.wa.click', $user->slug) }}')"
@@ -938,6 +939,7 @@
         <i class="fas fa-calendar-check"></i> Book
     </a>
 </div>
+@endif
 
 </div>
 @endsection
