@@ -42,6 +42,7 @@ class SellerController extends Controller
             'phone'     => $leads->where('source', 'phone')->count(),
             'whatsapp'  => $leads->where('source', 'whatsapp')->count(),
             'email'     => $leads->where('source', 'email')->count(),
+            'booking'   => $leads->where('source', 'booking')->count(),
         ];
 
         // Weekly chart — last 7 days

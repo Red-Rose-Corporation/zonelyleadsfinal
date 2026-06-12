@@ -44,7 +44,7 @@
                     @endforeach
                 </div>
                 <div class="btn-group btn-group-sm">
-                    @foreach([''=>'All Channels','form'=>'📋 Form','phone'=>'📞 Phone','whatsapp'=>'💬 WhatsApp','email'=>'📧 Email'] as $val=>$label)
+                    @foreach([''=>'All Channels','form'=>'📋 Form','phone'=>'📞 Phone','whatsapp'=>'💬 WhatsApp','email'=>'📧 Email','booking'=>'📅 Booking'] as $val=>$label)
                     <a href="{{ request()->fullUrlWithQuery(['source'=>$val?:null,'page'=>1]) }}"
                        class="btn {{ request('source',$val===''?'':null)===$val ? 'btn-info text-white' : 'btn-outline-light' }}">
                         {{ $label }}
@@ -95,6 +95,7 @@
                                         'whatsapp' => ['💬 WhatsApp','badge bg-success'],
                                         'email'    => ['📧 Email','badge bg-primary'],
                                         'phone'    => ['📞 Phone','badge bg-warning text-dark'],
+                                        'booking'  => ['📅 Booking','badge bg-info text-dark'],
                                         default    => ['📋 Form','badge bg-secondary'],
                                     };
                                 @endphp

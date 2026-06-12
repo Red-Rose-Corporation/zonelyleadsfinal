@@ -186,12 +186,13 @@
                 @php
                     $isPaid  = !is_null($lead->paid_at);
                     $source  = $lead->source ?? 'form';
-                    $chIcon  = match($source) { 'phone'=>'📞', 'whatsapp'=>'💬', 'email'=>'📧', default=>'📋' };
-                    $chLabel = match($source) { 'phone'=>'Phone', 'whatsapp'=>'WhatsApp', 'email'=>'Email', default=>'Form' };
+                    $chIcon  = match($source) { 'phone'=>'📞', 'whatsapp'=>'💬', 'email'=>'📧', 'booking'=>'📅', default=>'📋' };
+                    $chLabel = match($source) { 'phone'=>'Phone', 'whatsapp'=>'WhatsApp', 'email'=>'Email', 'booking'=>'Booking', default=>'Form' };
                     $chColor = match($source) {
                         'phone'    => 'bg-amber-50 text-amber-700 border-amber-200',
                         'whatsapp' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                         'email'    => 'bg-blue-50 text-blue-700 border-blue-200',
+                        'booking'  => 'bg-sky-50 text-sky-700 border-sky-200',
                         default    => 'bg-slate-50 text-slate-600 border-slate-200',
                     };
                 @endphp

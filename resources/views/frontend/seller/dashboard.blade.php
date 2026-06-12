@@ -80,6 +80,9 @@
     @if($stats['email'] > 0)
     <button onclick="filterChannel(this,'email')" class="channel-btn px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">📧 Email ({{ $stats['email'] }})</button>
     @endif
+    @if(($stats['booking'] ?? 0) > 0)
+    <button onclick="filterChannel(this,'booking')" class="channel-btn px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition">📅 Booking ({{ $stats['booking'] }})</button>
+    @endif
 </div>
 
 {{-- Lead Cards --}}
@@ -88,12 +91,13 @@
     @forelse($leads as $lead)
     @php
         $source = $lead->source ?? 'form';
-        $channelIcon  = match($source) { 'phone'=>'📞', 'whatsapp'=>'💬', 'email'=>'📧', default=>'📋' };
-        $channelLabel = match($source) { 'phone'=>'Phone Call', 'whatsapp'=>'WhatsApp', 'email'=>'Email', default=>'Form' };
+        $channelIcon  = match($source) { 'phone'=>'📞', 'whatsapp'=>'💬', 'email'=>'📧', 'booking'=>'📅', default=>'📋' };
+        $channelLabel = match($source) { 'phone'=>'Phone Call', 'whatsapp'=>'WhatsApp', 'email'=>'Email', 'booking'=>'Booking', default=>'Form' };
         $channelColor = match($source) {
             'phone'    => 'bg-amber-50 text-amber-700 border-amber-200',
             'whatsapp' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
             'email'    => 'bg-blue-50 text-blue-700 border-blue-200',
+            'booking'  => 'bg-sky-50 text-sky-700 border-sky-200',
             default    => 'bg-slate-50 text-slate-600 border-slate-200',
         };
     @endphp
@@ -241,6 +245,7 @@
                 ['📞','Phone',    $allLeads->where('source','phone')->count(),   'bg-amber-500'],
                 ['💬','WhatsApp', $allLeads->where('source','whatsapp')->count(),'bg-emerald-500'],
                 ['📧','Email',    $allLeads->where('source','email')->count(),   'bg-blue-500'],
+                ['📅','Booking',  $allLeads->where('source','booking')->count(), 'bg-sky-500'],
             ] as [$icon, $label, $count, $color])
             @php $pct = $allLeads->count() ? round($count / $allLeads->count() * 100) : 0; @endphp
             <div class="flex items-center gap-3">

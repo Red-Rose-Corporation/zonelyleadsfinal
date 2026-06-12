@@ -146,6 +146,8 @@
 const workingDays = @json($schedule['working_days'] ?? ['mon','tue','wed','thu','fri']);
 const periods = @json($schedule['periods'] ?? [['label'=>'Morning','from'=>'09:00','to'=>'12:00','duration'=>60],['label'=>'Afternoon','from'=>'13:00','to'=>'17:00','duration'=>60]]);
 const bookedSlots = @json($bookedSlots ?? []);
+const advanceDays = {{ (int)($schedule['advance_days'] ?? 30) }};
+const minNoticeHours = {{ (int)($schedule['min_notice_hours'] ?? 2) }};
 const dayNames = ['sun','mon','tue','wed','thu','fri','sat'];
 const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -172,10 +174,15 @@ function renderCalendar() {
     for (let i = 0; i < firstDay; i++) {
         grid.insertAdjacentHTML('beforeend', '<div></div>');
     }
+    const minDate = new Date(today.getTime() + minNoticeHours * 3600 * 1000);
+    minDate.setHours(0,0,0,0);
+    const maxDate = new Date(today.getTime() + advanceDays * 86400 * 1000);
+    maxDate.setHours(23,59,59,999);
+
     for (let d = 1; d <= daysInMonth; d++) {
         const date = new Date(curYear, curMonth, d);
         const dayName = dayNames[date.getDay()];
-        const isPast = date < today;
+        const isPast = date < minDate || date > maxDate;
         const isWorking = workingDays.includes(dayName);
         const dateStr = curYear + '-' + String(curMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
         const isSelected = dateStr === selectedDate;

@@ -83,14 +83,34 @@ class BuyerController extends Controller
     {
         abort_unless($seller->type === 'seller' && $seller->status, 404);
 
-        $schedule    = $seller->schedule ?? [
-            'working_days' => ['mon', 'tue', 'wed', 'thu', 'fri'],
-            'periods'      => [
+        $schedule = $seller->schedule ?? [
+            'working_days'    => ['mon', 'tue', 'wed', 'thu', 'fri'],
+            'periods'         => [
                 ['label' => 'Morning',   'from' => '09:00', 'to' => '12:00', 'duration' => 60],
                 ['label' => 'Afternoon', 'from' => '13:00', 'to' => '17:00', 'duration' => 60],
             ],
+            'advance_days'    => 30,
+            'min_notice_hours'=> 2,
+            'max_per_day'     => 4,
         ];
-        $bookedSlots = [];
+
+        // Build booked-slot keys: "YYYY-MM-DD_HH:MM" for all active bookings
+        $bookedSlots = Lead::where('seller_id', $seller->id)
+            ->whereNotNull('service')
+            ->where('service', 'like', 'Booking: %')
+            ->whereNotIn('status', ['lost', 'closed'])
+            ->get()
+            ->map(function ($lead) {
+                // service format: "Booking: 2026-06-15 @ 09:00"
+                if (preg_match('/Booking: (\d{4}-\d{2}-\d{2}) @ (\d{2}:\d{2})/', $lead->service, $m)) {
+                    return $m[1] . '_' . $m[2];
+                }
+                return null;
+            })
+            ->filter()
+            ->values()
+            ->toArray();
+
         return view('frontend.buyer.book', compact('seller', 'schedule', 'bookedSlots'));
     }
 
@@ -106,7 +126,35 @@ class BuyerController extends Controller
             'message'       => 'nullable|string|max:1000',
         ]);
 
-        $seller = User::findOrFail($data['seller_id']);
+        $seller   = User::findOrFail($data['seller_id']);
+        $schedule = $seller->schedule ?? [];
+
+        // Enforce max bookings per day
+        $maxPerDay = (int) ($schedule['max_per_day'] ?? 4);
+        $dayCount  = Lead::where('seller_id', $seller->id)
+            ->where('service', 'like', 'Booking: ' . $data['selected_date'] . ' %')
+            ->whereNotIn('status', ['lost', 'closed'])
+            ->count();
+
+        if ($dayCount >= $maxPerDay) {
+            return back()->withErrors(['selected_date' => 'No more slots available on this date.'])->withInput();
+        }
+
+        // Enforce min notice hours
+        $minNotice = (int) ($schedule['min_notice_hours'] ?? 2);
+        $slotDt    = \Carbon\Carbon::parse($data['selected_date'] . ' ' . $data['selected_slot']);
+        if ($slotDt->lt(now()->addHours($minNotice))) {
+            return back()->withErrors(['selected_slot' => 'This slot requires at least ' . $minNotice . ' hour(s) advance notice.'])->withInput();
+        }
+
+        // Enforce advance booking window
+        $advanceDays = (int) ($schedule['advance_days'] ?? 30);
+        if ($slotDt->gt(now()->addDays($advanceDays))) {
+            return back()->withErrors(['selected_date' => 'Bookings can only be made up to ' . $advanceDays . ' days in advance.'])->withInput();
+        }
+
+        // booking_type: manual → pending, instant → new
+        $status = ($schedule['booking_type'] ?? 'instant') === 'manual' ? 'pending' : 'new';
 
         $lead = Lead::create([
             'seller_id' => $data['seller_id'],
@@ -115,12 +163,16 @@ class BuyerController extends Controller
             'email'     => $data['email'] ?? (Auth::user()?->email),
             'service'   => 'Booking: ' . $data['selected_date'] . ' @ ' . $data['selected_slot'],
             'message'   => $data['message'],
-            'status'    => 'new',
+            'source'    => 'booking',
+            'status'    => $status,
             'fee'       => 0,
         ]);
 
-        return redirect()->route('buyer.booking.confirmation', $lead->id)
-            ->with('success', 'Booking confirmed!');
+        $msg = $status === 'pending'
+            ? 'Booking request sent! The seller will confirm shortly.'
+            : 'Booking confirmed!';
+
+        return redirect()->route('buyer.booking.confirmation', $lead->id)->with('success', $msg);
     }
 
     public function review($sellerId)
