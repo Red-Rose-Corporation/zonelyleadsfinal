@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Review;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -46,6 +47,8 @@ class ReviewController extends Controller
             'token_used_at'  => now(),
             'review_token'   => null, // invalidate token after use
         ]);
+
+        NotificationService::newReview($review->seller, $review);
 
         return redirect()->route('frontend.service.show', $review->seller->slug ?? $review->seller_id)
             ->with('success', 'Thank you! Your review has been submitted.');

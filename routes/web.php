@@ -203,6 +203,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('reviews/request', [SellerController::class, 'reviewRequestDirect'])->name('reviews.request');
         Route::get('notifications', [SellerController::class, 'notifications'])->name('notifications');
         Route::post('notifications/read-all', [SellerController::class, 'notificationsReadAll'])->name('notifications.read-all');
+        Route::post('notifications/{id}/read', [SellerController::class, 'notificationRead'])->name('notifications.read');
         Route::get('leads/{id}', [SellerController::class, 'leadDetail'])->name('lead.detail');
         Route::post('leads/{id}/status', [SellerController::class, 'leadStatus'])->name('lead.status');
         Route::post('leads/{id}/notes', [SellerController::class, 'leadNotes'])->name('lead.notes');

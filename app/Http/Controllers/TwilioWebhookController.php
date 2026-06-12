@@ -10,6 +10,7 @@ use App\Models\Setting;
 use App\Models\State;
 use App\Models\TwilioNumber;
 use App\Services\Sms\SmsService;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Twilio\Security\RequestValidator;
 
@@ -63,6 +64,7 @@ class TwilioWebhookController extends Controller
             ]);
 
             $log->update(['lead_id' => $lead->id]);
+            NotificationService::newLead($lead);
 
             if ($seller->twilio_enabled && $seller->phone) {
                 (new SmsService())->send(

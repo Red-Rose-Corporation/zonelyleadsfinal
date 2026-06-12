@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\AffiliateCommission;
 use App\Services\Sms\SmsService;
 use App\Services\PointsService;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
@@ -256,6 +257,7 @@ class HomeController extends Controller
             'status'    => 'new',
             'fee'       => $leadFee,
         ]);
+        NotificationService::newLead($lead);
 
         // Auto-create affiliate commission on seller's FIRST lead
         // Use firstOrCreate keyed on referrer+referred — safe against double submissions
@@ -336,6 +338,7 @@ class HomeController extends Controller
             'status'    => 'new',
             'fee'       => $waLeadFee,
         ]);
+        NotificationService::newLead($lead);
 
         if ($seller->twilio_enabled && $seller->phone) {
             $msg = "💬 New WhatsApp Lead!\nClient clicked your WhatsApp button on Zonely.\nView: " . route('seller.dashboard');
@@ -372,6 +375,7 @@ class HomeController extends Controller
             'status'    => 'new',
             'fee'       => $leadFee,
         ]);
+        NotificationService::newLead($lead);
 
         // Send email to seller
         \Mail::raw(

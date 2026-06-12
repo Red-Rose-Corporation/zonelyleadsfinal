@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Services\NotificationService;
 
 class SellerController extends Controller
 {
@@ -255,6 +256,7 @@ class SellerController extends Controller
         }
 
         $lead->update(['paid_at' => now(), 'paypal_order_id' => $orderId]);
+        NotificationService::paymentReceived(Auth::user(), (float) $lead->fee, 1);
 
         return response()->json(['ok' => true]);
     }
@@ -284,6 +286,7 @@ class SellerController extends Controller
         }
 
         $leads->each(fn($l) => $l->update(['paid_at' => now(), 'paypal_order_id' => $orderId]));
+        NotificationService::paymentReceived(Auth::user(), $leads->sum('fee'), $leads->count());
 
         return response()->json(['ok' => true, 'paid' => $leads->count()]);
     }
@@ -402,14 +405,20 @@ class SellerController extends Controller
     public function notifications()
     {
         $user          = Auth::user();
-        $notifications = $user->notifications()->latest()->paginate(20);
-        $user->unreadNotifications()->update(['read_at' => now()]);
-        return view('frontend.seller.notifications', compact('notifications'));
+        $notifications = $user->notifications()->latest()->paginate(30);
+        $unreadCount   = $user->unreadNotifications()->count();
+        return view('frontend.seller.notifications', compact('notifications', 'unreadCount'));
     }
 
     public function notificationsReadAll()
     {
         Auth::user()->unreadNotifications()->update(['read_at' => now()]);
+        return response()->json(['success' => true]);
+    }
+
+    public function notificationRead($id)
+    {
+        Auth::user()->notifications()->where('id', $id)->update(['read_at' => now()]);
         return response()->json(['success' => true]);
     }
 

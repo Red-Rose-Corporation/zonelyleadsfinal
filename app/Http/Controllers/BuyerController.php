@@ -7,6 +7,7 @@ use App\Models\PlatformCharge;
 use App\Models\Review;
 use App\Models\User;
 use App\Services\ImageOptimizer;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -167,6 +168,8 @@ class BuyerController extends Controller
             'status'    => $status,
             'fee'       => 0,
         ]);
+
+        NotificationService::newLead($lead);
 
         $msg = $status === 'pending'
             ? 'Booking request sent! The seller will confirm shortly.'
