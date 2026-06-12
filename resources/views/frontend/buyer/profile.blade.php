@@ -156,6 +156,15 @@
             </button>
         </form>
 
+        {{-- Log Out --}}
+        <form action="{{ route('logout') }}" method="POST" class="mb-4">
+            @csrf
+            <button type="submit"
+                class="w-full flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-2xl text-sm transition">
+                <i class="fa-solid fa-arrow-right-from-bracket text-slate-500"></i> Log Out
+            </button>
+        </form>
+
         {{-- Danger Zone --}}
         <div class="bg-white rounded-3xl border border-red-100 shadow-sm p-6">
             <h2 class="font-bold text-red-600 mb-1">Danger Zone</h2>
