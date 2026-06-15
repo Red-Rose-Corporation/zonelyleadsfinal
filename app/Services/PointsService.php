@@ -104,6 +104,10 @@ class PointsService
      */
     public static function checkTierMilestones(User $referrer): void
     {
+        $gate = "tier_milestone_checked_{$referrer->id}";
+        if (\Illuminate\Support\Facades\Cache::has($gate)) return;
+        \Illuminate\Support\Facades\Cache::put($gate, 1, 3600);
+
         $totalRefs = $referrer->referrals()->count();
 
         $milestones = [

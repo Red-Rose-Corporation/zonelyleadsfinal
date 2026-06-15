@@ -5,7 +5,7 @@
     <div class="flex items-stretch justify-around px-2 pt-2 pb-1">
 
         @if($type === 'seller')
-            @php $sellerUnpaid = auth()->user()->leads()->whereNull('paid_at')->count(); @endphp
+            @php $sellerUnpaid = \Illuminate\Support\Facades\Cache::remember('seller_unpaid_' . $user->id, 60, fn() => $user->leads()->whereNull('paid_at')->count()); @endphp
             {{-- ── SELLER NAV ── --}}
             <a href="{{ route('seller.dashboard') }}"
                class="bnav-item flex-1 flex flex-col items-center gap-1 py-1 text-slate-400 hover:text-teal-700 {{ request()->routeIs('seller.dashboard') ? 'active' : '' }}">

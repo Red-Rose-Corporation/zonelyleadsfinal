@@ -49,6 +49,14 @@ class PlatformCharge extends Model
      */
     public static function resolve(string $type, ?int $categoryId = null, ?int $stateId = null, ?int $cityId = null): float
     {
+        $cacheKey = "platform_charge:{$type}:{$categoryId}:{$stateId}:{$cityId}";
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($type, $categoryId, $stateId, $cityId) {
+            return static::resolveRaw($type, $categoryId, $stateId, $cityId);
+        });
+    }
+
+    private static function resolveRaw(string $type, ?int $categoryId, ?int $stateId, ?int $cityId): float
+    {
         $defaultKey = match($type) {
             'lead_fee'                  => 'default_lead_fee',
             'lead_threshold'            => 'default_lead_threshold',

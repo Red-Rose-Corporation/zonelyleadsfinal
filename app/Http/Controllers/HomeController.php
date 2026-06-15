@@ -127,11 +127,11 @@ class HomeController extends Controller
     {
         ['meta_title' => $meta_title, 'meta_description' => $meta_description, 'meta_keywords' => $meta_keywords] = $this->defaultMeta();
         $users = User::activeSellers()->with('reviews')->latest()->take(8)->get();
-        $stats = [
-            'pros'   => User::activeSellers()->count(),
-            'cities' => User::activeSellers()->whereNotNull('city')->distinct('city')->count('city'),
-            'reviews'=> \App\Models\Review::count(),
-        ];
+        $stats = \Illuminate\Support\Facades\Cache::remember('home_stats', 600, fn() => [
+            'pros'    => User::activeSellers()->count(),
+            'cities'  => User::activeSellers()->whereNotNull('city')->distinct('city')->count('city'),
+            'reviews' => \App\Models\Review::count(),
+        ]);
         $categories = Category::where('is_active', true)->whereNull('parent_id')->withCount('children')->take(8)->get();
         $featuredReviews = \App\Models\Review::with('reviewer:id,name,profile_photo', 'seller:id,name,slug,title,designation')
             ->where('rating', '>=', 4)
@@ -192,25 +192,8 @@ class HomeController extends Controller
     function service_show($slug)
     {
         $user = User::activeSellers()->where('slug', $slug)
-            ->with(['contacts','languages','educations','memberships','services.category','reviews.reviewer','category','twilioNumber','faqs'])
+            ->with(['contacts','languages','educations','memberships','services.category','reviews.reviewer','category','twilioNumber','faqs','experiences','certifications','gallery'])
             ->firstOrFail();
-
-        // Load new relationships only if their tables exist (guards first deploy)
-        if (\Illuminate\Support\Facades\Schema::hasTable('experiences')) {
-            $user->load('experiences');
-        } else {
-            $user->setRelation('experiences', collect());
-        }
-        if (\Illuminate\Support\Facades\Schema::hasTable('certifications')) {
-            $user->load('certifications');
-        } else {
-            $user->setRelation('certifications', collect());
-        }
-        if (\Illuminate\Support\Facades\Schema::hasTable('seller_galleries')) {
-            $user->load('gallery');
-        } else {
-            $user->setRelation('gallery', collect());
-        }
 
         $isOverdue = $user->isOverdue();
 

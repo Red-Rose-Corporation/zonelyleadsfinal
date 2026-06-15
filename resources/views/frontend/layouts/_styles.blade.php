@@ -2,7 +2,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-<link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
 
 {{-- ── Fonts — display=swap prevents invisible text during load ── --}}
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -11,35 +10,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
 
-{{-- ── Tailwind (CDN — replace with compiled build for production) ── --}}
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-    theme: {
-        extend: {
-            fontFamily: {
-                sans:  ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
-                serif: ['"DM Serif Display"', 'Georgia', 'serif'],
-            },
-            colors: {
-                teal: {
-                    50:  '#eafaf9',
-                    100: '#d5f3f1',
-                    200: '#b0e7e4',
-                    300: '#86d9d5',
-                    400: '#5dcbc6',
-                    500: '#3cbab4',
-                    600: '#32a29d',
-                    700: '#2a8c87',
-                    800: '#1e6e6a',
-                    900: '#135150',
-                    950: '#0d3836',
-                },
-            },
-        }
-    }
-}
-</script>
+{{-- ── Tailwind (compiled build — no CDN runtime overhead) ── --}}
+@vite(['resources/css/app.css', 'resources/js/app.js'])
 
 <style>
     /* ── Base ────────────────────────────────── */
