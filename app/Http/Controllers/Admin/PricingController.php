@@ -74,6 +74,7 @@ class PricingController extends Controller
         $data['priority']  ??= 0;
 
         PlatformCharge::create($data);
+        PlatformCharge::bustCache();
 
         return back()->with('success', 'Pricing rule created.');
     }
@@ -95,6 +96,7 @@ class PricingController extends Controller
         ]);
 
         $charge->update($data);
+        PlatformCharge::bustCache();
 
         return back()->with('success', 'Pricing rule updated.');
     }
@@ -103,12 +105,14 @@ class PricingController extends Controller
     {
         $charge = PlatformCharge::findOrFail($id);
         $charge->update(['is_active' => !$charge->is_active]);
+        PlatformCharge::bustCache();
         return back()->with('success', 'Rule ' . ($charge->is_active ? 'activated' : 'deactivated') . '.');
     }
 
     public function destroy($id)
     {
         PlatformCharge::findOrFail($id)->delete();
+        PlatformCharge::bustCache();
         return back()->with('success', 'Rule archived (soft deleted).');
     }
 
@@ -123,6 +127,7 @@ class PricingController extends Controller
         foreach (['default_lead_fee', 'default_affiliate_commission', 'default_buyer_referral_commission'] as $key) {
             Setting::updateOrCreate(['key' => $key], ['value' => $request->$key]);
         }
+        PlatformCharge::bustCache();
 
         return back()->with('success', 'Global defaults saved.');
     }

@@ -49,10 +49,16 @@ class PlatformCharge extends Model
      */
     public static function resolve(string $type, ?int $categoryId = null, ?int $stateId = null, ?int $cityId = null): float
     {
-        $cacheKey = "platform_charge:{$type}:{$categoryId}:{$stateId}:{$cityId}";
+        $gen      = \Illuminate\Support\Facades\Cache::get('platform_charges_gen', 0);
+        $cacheKey = "platform_charge:{$gen}:{$type}:{$categoryId}:{$stateId}:{$cityId}";
         return \Illuminate\Support\Facades\Cache::remember($cacheKey, 300, function () use ($type, $categoryId, $stateId, $cityId) {
             return static::resolveRaw($type, $categoryId, $stateId, $cityId);
         });
+    }
+
+    public static function bustCache(): void
+    {
+        \Illuminate\Support\Facades\Cache::increment('platform_charges_gen');
     }
 
     private static function resolveRaw(string $type, ?int $categoryId, ?int $stateId, ?int $cityId): float
