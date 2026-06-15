@@ -121,10 +121,14 @@
 
         {{-- Card body --}}
         <div class="px-4 pb-4">
-            @if($source === 'phone' || $source === 'whatsapp')
-                {{-- Phone/WhatsApp — minimal data --}}
+            @if($source === 'phone')
+                {{-- Phone call — caller ID only --}}
                 <p class="font-bold text-slate-800 text-sm">{{ $lead->phone }}</p>
                 <p class="text-xs text-slate-400 mt-0.5">Caller ID only — no name available</p>
+            @elseif($source === 'whatsapp')
+                {{-- WhatsApp click — buyer went to WhatsApp directly --}}
+                <p class="text-xs font-semibold text-emerald-700 mt-0.5">💬 Buyer clicked your WhatsApp button</p>
+                <p class="text-xs text-slate-400 mt-0.5">Continue the conversation on WhatsApp</p>
             @else
                 {{-- Form/Email — full data --}}
                 @if($lead->name && $lead->name !== 'Phone Lead')
