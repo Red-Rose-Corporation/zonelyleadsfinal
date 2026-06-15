@@ -176,7 +176,8 @@ class ProfileController extends Controller
         $user->update($request->only($allowed));
 
         $_next = $request->_next;
-        return redirect()->route('user.dashboard', compact('_next'));
+        $url = route('user.dashboard') . ($_next ? '?_next=' . urlencode($_next) : '');
+        return redirect($url);
     }
 
     public function destroy(Request $request): RedirectResponse

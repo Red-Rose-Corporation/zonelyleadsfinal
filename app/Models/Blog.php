@@ -45,7 +45,7 @@ class Blog extends Model
             if ($blog->image_path != null) {
                 delete_file($blog->image_path);
             }
-            $image = upload_file($request->image_path);
+            $image = upload_file($request->file('image_path'));
         }
         $slug = $request->slug != null ? make_slug($request->slug) : make_slug($request->name) . '-' . get_random_number(10);
         if ($slug != $blog->slug) {

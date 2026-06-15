@@ -284,6 +284,10 @@ class HuntBotController extends Controller
     public function deleteLead(HuntLead $lead)
     {
         $campaign = $lead->campaign;
+        $actor = auth()->user();
+        if (!in_array($actor->type, ['admin', 'coo']) && $campaign->created_by !== $actor->id) {
+            abort(403, 'You do not have permission to delete this lead.');
+        }
         $lead->delete();
         if ($campaign->total_found > 0) {
             $campaign->decrement('total_found');

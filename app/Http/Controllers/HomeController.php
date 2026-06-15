@@ -184,7 +184,8 @@ class HomeController extends Controller
         $meta_title = $category->title . ' — Zonely';
         $meta_description = 'Find trusted local ' . $category->title . ' experts near you with Zonely.';
         $meta_keywords = $category->title . ' near me;';
-        return view('frontend.service_all', compact('users', 'category', 'meta_title', 'meta_description', 'meta_keywords'));
+        $isSearch = false;
+        return view('frontend.service_all', compact('users', 'category', 'isSearch', 'meta_title', 'meta_description', 'meta_keywords'));
     }
 
     function service_show($slug)

@@ -24,39 +24,47 @@ class SellerController extends Controller
     public function dashboard()
     {
         $user   = Auth::user();
-        $allLeads = $user->leads()->latest()->get();
-
-        // Period filter
         $period = request('period', 'month');
-        $leads  = match($period) {
-            'today' => $allLeads->filter(fn($l) => $l->created_at->isToday()),
-            'week'  => $allLeads->filter(fn($l) => $l->created_at->isCurrentWeek()),
-            'year'  => $allLeads->filter(fn($l) => $l->created_at->isCurrentYear()),
-            default => $allLeads->filter(fn($l) => $l->created_at->isCurrentMonth()),
+
+        // Period query at DB level — no more loading all leads into memory
+        $periodQuery = match($period) {
+            'today' => $user->leads()->whereDate('created_at', today()),
+            'week'  => $user->leads()->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+            'year'  => $user->leads()->whereYear('created_at', now()->year),
+            default => $user->leads()->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
         };
 
-        // Stats based on filtered period
+        $leads = $periodQuery->latest()->get();
+
+        // Stats
         $stats = [
-            'total'     => $leads->count(),
-            'today'     => $allLeads->filter(fn($l) => $l->created_at->isToday())->count(),
-            'form'      => $leads->where('source', 'form')->count(),
-            'phone'     => $leads->where('source', 'phone')->count(),
-            'whatsapp'  => $leads->where('source', 'whatsapp')->count(),
-            'email'     => $leads->where('source', 'email')->count(),
-            'booking'   => $leads->where('source', 'booking')->count(),
+            'total'    => $leads->count(),
+            'today'    => $user->leads()->whereDate('created_at', today())->count(),
+            'form'     => $leads->where('source', 'form')->count(),
+            'phone'    => $leads->where('source', 'phone')->count(),
+            'whatsapp' => $leads->where('source', 'whatsapp')->count(),
+            'email'    => $leads->where('source', 'email')->count(),
+            'booking'  => $leads->where('source', 'booking')->count(),
         ];
 
-        // Weekly chart — last 7 days
-        $weekDays   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+        // Weekly chart — last 7 days via single GROUP BY query
+        $rawWeek = $user->leads()
+            ->whereBetween('created_at', [now()->subDays(6)->startOfDay(), now()->endOfDay()])
+            ->selectRaw("DATE(created_at) as day, COUNT(*) as cnt")
+            ->groupByRaw("DATE(created_at)")
+            ->pluck('cnt', 'day');
+
+        $weekDays   = [];
         $weekCounts = [];
         for ($i = 6; $i >= 0; $i--) {
             $d = now()->subDays($i);
-            $weekCounts[] = $allLeads->filter(fn($l) => $l->created_at->isSameDay($d))->count();
+            $weekDays[]   = $d->format('D');
+            $weekCounts[] = (int) ($rawWeek[$d->toDateString()] ?? 0);
         }
 
-        $unpaidLeads   = $user->leads()->whereNull('paid_at')->get();
-        $unpaidCount   = $unpaidLeads->count();
-        $unpaidBalance = $unpaidLeads->sum('fee');
+        $unpaidCount   = $user->leads()->whereNull('paid_at')->count();
+        $unpaidBalance = $user->leads()->whereNull('paid_at')->sum('fee');
+        $allLeads      = $leads; // keep for view compatibility
 
         return view('frontend.seller.dashboard', compact('user', 'leads', 'allLeads', 'stats', 'period', 'weekDays', 'weekCounts', 'unpaidCount', 'unpaidBalance'));
     }

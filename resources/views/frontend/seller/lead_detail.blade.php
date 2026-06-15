@@ -102,9 +102,9 @@
             </div>
             @endif
 
-            @if($source === 'booking' && $lead->message)
+            @if($source === 'booking' && $lead->service)
             @php
-                preg_match('/Booking:\s*(\d{4}-\d{2}-\d{2})\s*@\s*(\d{2}:\d{2})/', $lead->message, $bm);
+                preg_match('/Booking:\s*(\d{4}-\d{2}-\d{2})\s*@\s*(\d{2}:\d{2})/', $lead->service ?? '', $bm);
                 $bookingDate = isset($bm[1]) ? \Carbon\Carbon::parse($bm[1])->format('l, M j, Y') : null;
                 $bookingTime = $bm[2] ?? null;
             @endphp
