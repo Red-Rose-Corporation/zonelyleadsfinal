@@ -333,24 +333,35 @@
             $hasCertifications= $user->certifications->count();
             $hasBio         = $user->about || $user->bio;
         @endphp
-        @if($hasBio || $hasPricing)
-        <section id="pricing" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        @php
+            $hasGallery      = $user->gallery->count() > 0;
+            $bioText         = $user->about ?? $user->bio ?? '';
+            $bioLong         = strlen($bioText) > 400;
+            $galleryLabel    = $isHome || $isBeauty ? 'Our Work' : ($isHealthcare ? 'Our Clinic' : 'Photo Gallery');
+            $galleryPhotosJs = $user->gallery->map(fn($p) => ['src' => $p->image_url, 'caption' => $p->caption ?? ''])->toJson();
+        @endphp
 
-            {{-- LEFT: Bio --}}
+        @if($hasBio || $hasPricing)
+
+        {{-- ════════════════════════════════════════════
+             WITH GALLERY
+             About → full width top
+             Pricing + Gallery → side by side, Gallery follows Pricing height
+             ════════════════════════════════════════════ --}}
+        @if($hasGallery)
+
+            {{-- About — full width, no height competition --}}
             @if($hasBio)
-            <div class="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden">
+            <div class="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden mb-6">
                 <div class="border-l-4 border-teal-600 p-6">
                     <div class="flex items-center gap-2 mb-3">
                         <i class="fas fa-quote-left text-teal-300 text-lg"></i>
                         <span class="text-xs font-bold text-teal-600 uppercase tracking-wider">About</span>
                     </div>
-                    @php $bioText = $user->about ?? $user->bio; $bioLong = strlen($bioText) > 400; @endphp
                     <p class="text-base text-slate-700 leading-relaxed text-justify" id="bioText">
                         @if($user->title)<strong class="font-bold text-slate-900">{{ $user->title }}</strong><br>@endif
                         <span id="bioShort">{{ $bioLong ? Str::limit($bioText, 400) : $bioText }}</span>
-                        @if($bioLong)
-                        <span id="bioFull" class="hidden">{{ $bioText }}</span>
-                        @endif
+                        @if($bioLong)<span id="bioFull" class="hidden">{{ $bioText }}</span>@endif
                     </p>
                     @if($bioLong)
                     <button onclick="document.getElementById('bioShort').classList.toggle('hidden');document.getElementById('bioFull').classList.toggle('hidden');this.textContent=this.textContent.trim()==='Read more'?'Read less':'Read more';"
@@ -360,7 +371,226 @@
             </div>
             @endif
 
-            {{-- RIGHT: Pricing --}}
+            {{-- Pricing (untouched inside) + Gallery slider — side by side, items-stretch so Gallery follows Pricing height --}}
+            <section id="pricing" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+
+                {{-- LEFT: Pricing — zero changes inside --}}
+                @if($activeServices->count())
+                <div>
+                    <div class="mb-6">
+                        <h3 class="font-bold text-2xl sm:text-3xl sh">Services &amp; Pricing</h3>
+                        @if($activeServices->where('price', '>', 0)->count())
+                        <p class="text-slate-500 mt-4 text-sm font-medium">No hidden fees · Click to see details</p>
+                        @endif
+                    </div>
+                    @php $svcIcons = ['fa-briefcase','fa-file-alt','fa-handshake','fa-chart-line','fa-calculator','fa-gavel','fa-wrench','fa-star','fa-shield-alt','fa-lightbulb']; $svcIdx = 0; @endphp
+                    <div class="space-y-4">
+                        @foreach($activeServices as $svc)
+                        @php
+                            $ptLabel  = $ptMap[$svc->pricing_type ?? 'starting_at'] ?? 'Starting at';
+                            $features = array_filter(array_map('trim', explode("\n", $svc->features ?? '')));
+                            $hasPrice = $svc->price && !in_array($svc->pricing_type, ['free','contact']);
+                            $svcIcon  = $svcIcons[$svcIdx % count($svcIcons)]; $svcIdx++;
+                        @endphp
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md hover:border-teal-100 transition-all duration-200">
+                            <div class="h-1 bg-gradient-to-r from-teal-600 to-indigo-500"></div>
+                            <button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-teal-50/30 transition-colors">
+                                <div class="flex items-center gap-3 sm:gap-6 min-w-0">
+                                    <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">
+                                        <i class="fas {{ $svcIcon }} text-teal-700 text-base"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="font-bold text-base text-slate-900 leading-snug truncate">{{ $svc->title }}</p>
+                                        @if($features)
+                                        <p class="text-xs text-slate-400 mt-0.5">{{ count($features) }} {{ Str::plural('item', count($features)) }} included</p>
+                                        @elseif($svc->description)
+                                        <p class="text-xs text-slate-400 mt-0.5 truncate">{{ Str::limit($svc->description, 55) }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 flex-shrink-0 ml-3">
+                                    <div class="text-right">
+                                        @if($hasPrice)
+                                            <div class="text-2xl font-black text-teal-800 leading-none">${{ number_format($svc->price, 0) }}</div>
+                                            <div class="text-xs text-teal-400 font-semibold mt-0.5">{{ $ptLabel }}</div>
+                                        @elseif($svc->pricing_type === 'free')
+                                            <div class="text-xl font-black text-emerald-600">Free</div>
+                                        @else
+                                            <div class="text-sm font-bold text-slate-400">Negotiable</div>
+                                        @endif
+                                    </div>
+                                    <div class="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-teal-100 flex items-center justify-center transition-colors flex-shrink-0">
+                                        <i class="fas fa-chevron-down text-slate-400 text-xs accordion-icon transition-transform duration-300"></i>
+                                    </div>
+                                </div>
+                            </button>
+                            <div class="accordion-content border-t border-slate-100">
+                                @if($features)
+                                <div class="px-5 pt-4 pb-3 space-y-2">
+                                    @foreach($features as $feature)
+                                    <div class="flex items-start gap-2.5">
+                                        <span class="mt-0.5 w-4 h-4 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas fa-check text-emerald-600" style="font-size:9px"></i>
+                                        </span>
+                                        <span class="text-sm text-slate-700">{{ $feature }}</span>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                @endif
+                                @if($svc->description)
+                                <p class="px-5 pt-2 pb-3 text-sm text-slate-500 leading-relaxed">{{ $svc->description }}</p>
+                                @endif
+                                <div class="px-5 pb-4 pt-3 flex items-center gap-3 border-t border-slate-100 bg-slate-50/50">
+                                    <a href="#contact" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
+                                        <i class="fas fa-paper-plane text-xs"></i> Get a Quote
+                                    </a>
+                                    @if($callNumber)
+                                    <a href="tel:{{ $callNumber }}" class="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 font-semibold text-sm transition">
+                                        <i class="fas fa-phone text-xs"></i> Call Now
+                                    </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @elseif(count($tags))
+                <div>
+                    <div class="mb-6"><h3 class="font-bold text-2xl sm:text-3xl sh">Services Offered</h3></div>
+                    <div class="flex flex-wrap gap-3">
+                        @foreach($tags as $tag)
+                        <span class="flex items-center gap-2 bg-teal-50 border border-teal-100 text-teal-800 font-semibold px-5 py-3 rounded-2xl text-sm">
+                            <i class="fas fa-circle-check text-teal-400 text-xs"></i> {{ ucfirst($tag) }}
+                        </span>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                {{-- RIGHT: Gallery slider — follows Pricing height via items-stretch --}}
+                <div class="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                    <div class="border-b border-slate-100 px-5 py-4 flex items-center justify-between flex-shrink-0">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-images text-teal-500 text-sm"></i>
+                            <span class="text-xs font-bold text-teal-600 uppercase tracking-wider">{{ $galleryLabel }}</span>
+                        </div>
+                        <span class="text-xs text-slate-400 font-medium" id="galCounter">1 / {{ $user->gallery->count() }}</span>
+                    </div>
+                    <div class="relative flex-1" style="min-height:180px">
+                        <img id="galImg"
+                             src="{{ $user->gallery->first()->image_url }}"
+                             alt="{{ $user->gallery->first()->caption ?: $galleryLabel }}"
+                             loading="lazy"
+                             class="w-full h-full object-cover cursor-pointer"
+                             onclick="openLightbox(galCurrentIdx)">
+                        @if($user->gallery->count() > 1)
+                        <button onclick="galPrev()" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 hover:bg-white rounded-full shadow flex items-center justify-center transition" aria-label="Previous photo">
+                            <i class="fas fa-chevron-left text-slate-600 text-xs"></i>
+                        </button>
+                        <button onclick="galNext()" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 hover:bg-white rounded-full shadow flex items-center justify-center transition" aria-label="Next photo">
+                            <i class="fas fa-chevron-right text-slate-600 text-xs"></i>
+                        </button>
+                        @endif
+                    </div>
+                    <div class="px-4 py-2 border-t border-slate-50 flex-shrink-0 min-h-[32px]">
+                        <p id="galCaption" class="text-xs text-slate-400 truncate">{{ $user->gallery->first()->caption ?? '' }}</p>
+                    </div>
+                </div>
+
+            </section>
+
+            {{-- Lightbox for gallery --}}
+            <div id="galleryLightbox" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center p-4" onclick="if(event.target===this)closeLightbox()">
+                <button onclick="closeLightbox()" class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+                <button onclick="prevPhoto()" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button onclick="nextPhoto()" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center transition">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <div class="max-w-4xl max-h-[85vh] w-full flex flex-col items-center gap-3">
+                    <img id="lightboxImg" src="" alt="" class="max-h-[75vh] max-w-full rounded-2xl object-contain shadow-2xl">
+                    <p id="lightboxCaption" class="text-white/70 text-sm font-medium text-center"></p>
+                    <p id="lightboxCounter" class="text-white/40 text-xs"></p>
+                </div>
+            </div>
+
+            <script>
+            const galPhotos = {!! $galleryPhotosJs !!};
+            let galCurrentIdx = 0;
+            function galShow(i) {
+                galCurrentIdx = i;
+                const p = galPhotos[i];
+                document.getElementById('galImg').src = p.src;
+                document.getElementById('galImg').alt = p.caption || '{{ $galleryLabel }}';
+                document.getElementById('galCounter').textContent = (i + 1) + ' / ' + galPhotos.length;
+                const cap = document.getElementById('galCaption');
+                if (cap) cap.textContent = p.caption || '';
+                document.getElementById('lightboxImg').src = p.src;
+                document.getElementById('lightboxCaption').textContent = p.caption || '';
+                document.getElementById('lightboxCounter').textContent = (i + 1) + ' / ' + galPhotos.length;
+            }
+            function galPrev() { galShow((galCurrentIdx - 1 + galPhotos.length) % galPhotos.length); }
+            function galNext() { galShow((galCurrentIdx + 1) % galPhotos.length); }
+            function openLightbox(i) {
+                galShow(i);
+                document.getElementById('galleryLightbox').classList.remove('hidden');
+                document.getElementById('galleryLightbox').classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            }
+            function closeLightbox() {
+                document.getElementById('galleryLightbox').classList.add('hidden');
+                document.getElementById('galleryLightbox').classList.remove('flex');
+                document.body.style.overflow = '';
+            }
+            function prevPhoto() { galPrev(); }
+            function nextPhoto() { galNext(); }
+            document.addEventListener('keydown', e => {
+                if (!document.getElementById('galleryLightbox').classList.contains('hidden')) {
+                    if (e.key === 'ArrowLeft') galPrev();
+                    if (e.key === 'ArrowRight') galNext();
+                    if (e.key === 'Escape') closeLightbox();
+                }
+            });
+            </script>
+
+        {{-- ════════════════════════════════════════════
+             WITHOUT GALLERY
+             About + Pricing side by side
+             About follows Pricing height (items-stretch)
+             Read more only if bio is long, pinned to bottom
+             ════════════════════════════════════════════ --}}
+        @else
+
+        <section id="pricing" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+
+            {{-- LEFT: About — stretches to Pricing height, Read more pinned to bottom --}}
+            @if($hasBio)
+            <div class="bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                <div class="border-l-4 border-teal-600 p-6 flex flex-col flex-1">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fas fa-quote-left text-teal-300 text-lg"></i>
+                        <span class="text-xs font-bold text-teal-600 uppercase tracking-wider">About</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-base text-slate-700 leading-relaxed text-justify" id="bioText">
+                            @if($user->title)<strong class="font-bold text-slate-900">{{ $user->title }}</strong><br>@endif
+                            <span id="bioShort">{{ $bioLong ? Str::limit($bioText, 400) : $bioText }}</span>
+                            @if($bioLong)<span id="bioFull" class="hidden">{{ $bioText }}</span>@endif
+                        </p>
+                    </div>
+                    @if($bioLong)
+                    <button onclick="document.getElementById('bioShort').classList.toggle('hidden');document.getElementById('bioFull').classList.toggle('hidden');this.textContent=this.textContent.trim()==='Read more'?'Read less':'Read more';"
+                        class="mt-4 text-xs font-bold text-teal-700 hover:underline self-start">Read more</button>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            {{-- RIGHT: Pricing — zero changes inside --}}
             @if($activeServices->count())
             <div>
                 <div class="mb-6">
@@ -369,22 +599,18 @@
                     <p class="text-slate-500 mt-4 text-sm font-medium">No hidden fees · Click to see details</p>
                     @endif
                 </div>
-                @php
-                $svcIcons = ['fa-briefcase','fa-file-alt','fa-handshake','fa-chart-line','fa-calculator','fa-gavel','fa-wrench','fa-star','fa-shield-alt','fa-lightbulb'];
-                $svcIdx = 0;
-                @endphp
+                @php $svcIcons2 = ['fa-briefcase','fa-file-alt','fa-handshake','fa-chart-line','fa-calculator','fa-gavel','fa-wrench','fa-star','fa-shield-alt','fa-lightbulb']; $svcIdx2 = 0; @endphp
                 <div class="space-y-4">
                     @foreach($activeServices as $svc)
                     @php
                         $ptLabel  = $ptMap[$svc->pricing_type ?? 'starting_at'] ?? 'Starting at';
                         $features = array_filter(array_map('trim', explode("\n", $svc->features ?? '')));
                         $hasPrice = $svc->price && !in_array($svc->pricing_type, ['free','contact']);
-                        $svcIcon  = $svcIcons[$svcIdx % count($svcIcons)]; $svcIdx++;
+                        $svcIcon  = $svcIcons2[$svcIdx2 % count($svcIcons2)]; $svcIdx2++;
                     @endphp
                     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md hover:border-teal-100 transition-all duration-200">
                         <div class="h-1 bg-gradient-to-r from-teal-600 to-indigo-500"></div>
-                        <button onclick="toggleAccordion(this)"
-                            class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-teal-50/30 transition-colors">
+                        <button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-teal-50/30 transition-colors">
                             <div class="flex items-center gap-3 sm:gap-6 min-w-0">
                                 <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">
                                     <i class="fas {{ $svcIcon }} text-teal-700 text-base"></i>
@@ -431,13 +657,11 @@
                             <p class="px-5 pt-2 pb-3 text-sm text-slate-500 leading-relaxed">{{ $svc->description }}</p>
                             @endif
                             <div class="px-5 pb-4 pt-3 flex items-center gap-3 border-t border-slate-100 bg-slate-50/50">
-                                <a href="#contact"
-                                   class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
+                                <a href="#contact" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
                                     <i class="fas fa-paper-plane text-xs"></i> Get a Quote
                                 </a>
                                 @if($callNumber)
-                                <a href="tel:{{ $callNumber }}"
-                                   class="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 font-semibold text-sm transition">
+                                <a href="tel:{{ $callNumber }}" class="inline-flex items-center gap-2 text-teal-700 hover:text-teal-800 font-semibold text-sm transition">
                                     <i class="fas fa-phone text-xs"></i> Call Now
                                 </a>
                                 @endif
@@ -449,9 +673,7 @@
             </div>
             @elseif(count($tags))
             <div>
-                <div class="mb-6">
-                    <h3 class="font-bold text-2xl sm:text-3xl sh">Services Offered</h3>
-                </div>
+                <div class="mb-6"><h3 class="font-bold text-2xl sm:text-3xl sh">Services Offered</h3></div>
                 <div class="flex flex-wrap gap-3">
                     @foreach($tags as $tag)
                     <span class="flex items-center gap-2 bg-teal-50 border border-teal-100 text-teal-800 font-semibold px-5 py-3 rounded-2xl text-sm">
@@ -462,97 +684,10 @@
             </div>
             @endif
 
-        </section>
-        @endif
+        </section>{{-- end without-gallery grid --}}
+        @endif{{-- end @else (no gallery) --}}
 
-        {{-- ── WORK GALLERY (Home Services & Beauty only) ─────────────── --}}
-        @if(($isHome || $isBeauty) && $user->gallery->count())
-        <section id="gallery">
-            <div class="mb-6">
-                <h3 class="font-bold text-2xl sm:text-3xl sh">Our Work</h3>
-                <p class="text-slate-500 mt-2 text-sm font-medium">{{ $user->gallery->count() }} photo{{ $user->gallery->count() > 1 ? 's' : '' }}</p>
-            </div>
-
-            {{-- Masonry-style responsive grid --}}
-            <div class="columns-2 sm:columns-3 gap-3 space-y-3">
-                @foreach($user->gallery as $i => $photo)
-                <div class="break-inside-avoid rounded-2xl overflow-hidden shadow-sm border border-slate-100 cursor-pointer group"
-                     onclick="openLightbox({{ $i }})">
-                    <div class="relative">
-                        <img src="{{ $photo->image_url }}"
-                             alt="{{ $photo->caption ?: 'Work photo by ' . $user->name }}"
-                             loading="lazy"
-                             class="w-full object-cover transition duration-300 group-hover:scale-105 group-hover:brightness-90">
-                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition duration-300 flex items-center justify-center">
-                            <i class="fa-solid fa-magnifying-glass-plus text-white text-xl opacity-0 group-hover:opacity-100 transition duration-300"></i>
-                        </div>
-                    </div>
-                    @if($photo->caption)
-                    <div class="px-3 py-2 bg-white">
-                        <p class="text-xs text-slate-500 font-medium truncate">{{ $photo->caption }}</p>
-                    </div>
-                    @endif
-                </div>
-                @endforeach
-            </div>
-        </section>
-
-        {{-- Lightbox --}}
-        <div id="galleryLightbox"
-             class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center p-4"
-             onclick="if(event.target===this)closeLightbox()">
-            <button onclick="closeLightbox()"
-                    class="absolute top-4 right-4 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center transition">
-                <i class="fa-solid fa-xmark text-lg"></i>
-            </button>
-            <button onclick="prevPhoto()"
-                    class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center transition">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            <button onclick="nextPhoto()"
-                    class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full text-white flex items-center justify-center transition">
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
-            <div class="max-w-4xl max-h-[85vh] w-full flex flex-col items-center gap-3">
-                <img id="lightboxImg" src="" alt="" class="max-h-[75vh] max-w-full rounded-2xl object-contain shadow-2xl">
-                <p id="lightboxCaption" class="text-white/70 text-sm font-medium text-center"></p>
-                <p id="lightboxCounter" class="text-white/40 text-xs"></p>
-            </div>
-        </div>
-
-        @php $galleryJson = $user->gallery->map(fn($p) => ['src' => $p->image_url, 'caption' => $p->caption ?? ''])->toJson(); @endphp
-        <script>
-        const galleryPhotos = {!! $galleryJson !!};
-        let currentPhoto = 0;
-        function openLightbox(i) {
-            currentPhoto = i;
-            showPhoto();
-            document.getElementById('galleryLightbox').classList.remove('hidden');
-            document.getElementById('galleryLightbox').classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
-        function closeLightbox() {
-            document.getElementById('galleryLightbox').classList.add('hidden');
-            document.getElementById('galleryLightbox').classList.remove('flex');
-            document.body.style.overflow = '';
-        }
-        function showPhoto() {
-            const p = galleryPhotos[currentPhoto];
-            document.getElementById('lightboxImg').src = p.src;
-            document.getElementById('lightboxCaption').textContent = p.caption;
-            document.getElementById('lightboxCounter').textContent = (currentPhoto + 1) + ' / ' + galleryPhotos.length;
-        }
-        function prevPhoto() { currentPhoto = (currentPhoto - 1 + galleryPhotos.length) % galleryPhotos.length; showPhoto(); }
-        function nextPhoto() { currentPhoto = (currentPhoto + 1) % galleryPhotos.length; showPhoto(); }
-        document.addEventListener('keydown', e => {
-            if (!document.getElementById('galleryLightbox').classList.contains('hidden')) {
-                if (e.key === 'ArrowLeft') prevPhoto();
-                if (e.key === 'ArrowRight') nextPhoto();
-                if (e.key === 'Escape') closeLightbox();
-            }
-        });
-        </script>
-        @endif
+        @endif{{-- end @if($hasBio || $hasPricing) --}}
 
         {{-- ── REVIEWS / TESTIMONIALS ───────────────────────────────── --}}
         @if($user->reviews->count())
