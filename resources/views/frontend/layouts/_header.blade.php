@@ -33,6 +33,51 @@
                 </div>
                 @endforeach
 
+                {{-- Contact dropdown --}}
+                <div class="relative group">
+                    <a href="#" class="hover:text-teal-700 transition flex items-center gap-1.5 py-2 whitespace-nowrap" style="min-height:unset;">
+                        Contact
+                        <svg class="w-3 h-3 mt-[2px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </a>
+                    <div class="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
+                        {{-- Header strip --}}
+                        <div class="bg-gradient-to-r from-teal-700 to-teal-600 px-5 py-4">
+                            <p class="text-white font-bold text-sm">Get in Touch</p>
+                            <p class="text-teal-200 text-xs mt-0.5">We're here to help — reach us anytime</p>
+                        </div>
+                        {{-- Email --}}
+                        <a href="mailto:contact@zonelyleads.com"
+                           class="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition group/item border-b border-slate-50" style="min-height:unset;">
+                            <div class="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 group-hover/item:bg-teal-100 transition">
+                                <i class="fas fa-envelope text-teal-600 text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Email Us</p>
+                                <p class="text-sm font-semibold text-slate-800 truncate">contact@zonelyleads.com</p>
+                            </div>
+                            <i class="fas fa-arrow-right text-slate-300 text-xs group-hover/item:text-teal-500 group-hover/item:translate-x-0.5 transition-all ml-auto shrink-0"></i>
+                        </a>
+                        {{-- WhatsApp --}}
+                        <a href="https://wa.me/8801898884425" target="_blank" rel="noopener"
+                           class="flex items-center gap-4 px-5 py-4 hover:bg-slate-50 transition group/item" style="min-height:unset;">
+                            <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0 group-hover/item:bg-emerald-100 transition">
+                                <i class="fab fa-whatsapp text-emerald-600 text-base"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">WhatsApp</p>
+                                <p class="text-sm font-semibold text-slate-800">+880 189-888-4425</p>
+                            </div>
+                            <span class="ml-auto shrink-0 text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Live</span>
+                        </a>
+                        {{-- Footer note --}}
+                        <div class="px-5 py-3 bg-slate-50 border-t border-slate-100">
+                            <p class="text-[11px] text-slate-400 text-center">Usually responds within a few hours</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             {{-- DESKTOP AUTH --}}
@@ -123,6 +168,32 @@
             </div>
             @endforeach
 
+            {{-- Mobile Contact card --}}
+            <div class="mx-1 mt-2 rounded-2xl border border-slate-100 overflow-hidden">
+                <div class="bg-gradient-to-r from-teal-700 to-teal-600 px-4 py-3">
+                    <p class="text-white font-bold text-sm">Get in Touch</p>
+                    <p class="text-teal-200 text-xs">We're here to help — reach us anytime</p>
+                </div>
+                <a href="mailto:contact@zonelyleads.com" class="flex items-center gap-3 px-4 py-3 bg-white hover:bg-slate-50 transition border-b border-slate-50" style="min-height:unset;">
+                    <div class="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
+                        <i class="fas fa-envelope text-teal-600 text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email</p>
+                        <p class="text-sm font-semibold text-slate-800">contact@zonelyleads.com</p>
+                    </div>
+                </a>
+                <a href="https://wa.me/8801898884425" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 bg-white hover:bg-slate-50 transition" style="min-height:unset;">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                        <i class="fab fa-whatsapp text-emerald-600 text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">WhatsApp</p>
+                        <p class="text-sm font-semibold text-slate-800">+880 189-888-4425</p>
+                    </div>
+                    <span class="ml-auto text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">Live</span>
+                </a>
+            </div>
 
             {{-- Auth buttons --}}
             <div class="pt-3 border-t border-slate-100 flex gap-3">
