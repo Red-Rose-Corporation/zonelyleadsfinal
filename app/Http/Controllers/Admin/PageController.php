@@ -218,7 +218,7 @@ class PageController extends Controller
         $user->update($validated);
 
         if ($user->type === 'seller' && $oldStatus !== $newStatus) {
-            $supportEmail    = Setting::get('support_email', 'support@zonely.com');
+            $supportEmail    = Setting::get('support_email', 'contact@zonelyleads.com');
             $supportWhatsapp = Setting::get('support_whatsapp', '');
             $waLink          = $supportWhatsapp ? 'https://wa.me/' . preg_replace('/[^0-9]/', '', $supportWhatsapp) : null;
 

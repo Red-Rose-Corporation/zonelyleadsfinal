@@ -49,7 +49,7 @@
                                 <input type="email" name="support_email"
                                        class="form-control @error('support_email') is-invalid @enderror"
                                        value="{{ old('support_email', $settings['support_email']) }}"
-                                       placeholder="support@zonely.com" required>
+                                       placeholder="contact@zonelyleads.com" required>
                             </div>
                             @error('support_email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                         </div>
