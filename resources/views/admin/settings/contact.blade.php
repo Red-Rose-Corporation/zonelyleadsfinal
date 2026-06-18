@@ -147,7 +147,7 @@
                                class="form-control @error('copyright_text') is-invalid @enderror"
                                value="{{ old('copyright_text', $settings['copyright_text']) }}"
                                placeholder="© {{ date('Y') }} Zonely. Empowering Local Experts.">
-                        <div class="form-text">Shown in the footer bottom bar. Use <code>{{ '{{year}}' }}</code> to auto-insert the current year.</div>
+                        <div class="form-text">Shown in the footer bottom bar. Use <code>&#123;&#123;year&#125;&#125;</code> to auto-insert the current year.</div>
                         @error('copyright_text')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
