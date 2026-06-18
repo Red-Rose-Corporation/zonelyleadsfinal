@@ -73,11 +73,11 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
-                            <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
+                            <input type="email" name="email" class="form-control" value="{{ old('email') }}" required autocomplete="off">
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Password <span class="text-danger">*</span></label>
-                            <input type="password" name="password" class="form-control" required minlength="6">
+                            <input type="password" name="password" class="form-control" required minlength="6" autocomplete="new-password">
                             <div class="form-text">Min 6 characters.</div>
                         </div>
                         <div class="row g-2 mb-3">
