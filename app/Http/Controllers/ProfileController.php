@@ -139,7 +139,12 @@ class ProfileController extends Controller
             $user->about      = $request->about;
             $user->title      = $request->title;
             $user->experience = $request->experience;
-            $user->save();
+
+            try {
+                $user->save();
+            } catch (\Throwable $e) {
+                return back()->withInput()->withErrors(['save_error' => 'Could not save profile: ' . $e->getMessage()]);
+            }
 
             return redirect()->route('type.profile', [$type, 'profile'])->with('success', 'Profile saved successfully.');
 
