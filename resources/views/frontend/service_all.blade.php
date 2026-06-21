@@ -82,7 +82,7 @@
                 @if($user->profile_photo)
                 <img src="{{ asset($user->profile_photo) }}"
                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                     class="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition duration-500"
+                     class="w-full h-full object-cover object-center grayscale group-hover:grayscale-0 transition duration-500"
                      alt="{{ $user->name }}" loading="lazy">
                 <div class="hidden w-full h-full bg-teal-700 items-center justify-center text-white font-black text-3xl">
                     {{ $initials }}
