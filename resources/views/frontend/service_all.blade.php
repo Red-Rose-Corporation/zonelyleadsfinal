@@ -215,6 +215,22 @@
         </div>
         @endif
 
+        {{-- Categories with pros available now (only set for empty top-level categories) --}}
+        @if(isset($alternativeCategories) && $alternativeCategories->count())
+        <div class="bg-white border border-slate-100 rounded-3xl p-6 mb-6">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Explore categories with pros available now</p>
+            <div class="flex flex-wrap gap-2">
+                @foreach($alternativeCategories as $altCategory)
+                <a href="{{ route('frontend.category', $altCategory->slug) }}"
+                   class="px-3 py-1.5 bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 text-slate-700 hover:text-teal-700 text-xs font-semibold rounded-xl transition"
+                   style="min-height:unset;">
+                    {{ $altCategory->title }}
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Browse all fallback --}}
         <div class="text-center">
             <a href="{{ route('frontend.service.all') }}"

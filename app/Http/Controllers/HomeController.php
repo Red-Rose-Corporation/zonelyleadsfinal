@@ -184,7 +184,27 @@ class HomeController extends Controller
         $meta_description = 'Find trusted local ' . $category->title . ' experts near you with Zonely.';
         $meta_keywords = $category->title . ' near me;';
         $isSearch = false;
-        return view('frontend.service_all', compact('users', 'category', 'isSearch', 'meta_title', 'meta_description', 'meta_keywords'));
+
+        // Categories with no active listings yet render a near-empty page that
+        // Google flags as a "Soft 404". Only for that empty case (zero extra
+        // queries on the normal, populated path), surface a few categories
+        // that DO have active sellers so the page has real, useful content
+        // and internal links instead of just an empty-state message.
+        $alternativeCategories = collect();
+        if ($users->isEmpty()) {
+            $categoryIdsWithSellers = User::activeSellers()
+                ->whereNotNull('category_id')
+                ->distinct()
+                ->pluck('category_id');
+            $alternativeCategories = Category::where('is_active', true)
+                ->whereNull('parent_id')
+                ->where('id', '!=', $category->id)
+                ->whereIn('id', $categoryIdsWithSellers)
+                ->take(6)
+                ->get();
+        }
+
+        return view('frontend.service_all', compact('users', 'category', 'isSearch', 'meta_title', 'meta_description', 'meta_keywords', 'alternativeCategories'));
     }
 
     function service_show($slug)
