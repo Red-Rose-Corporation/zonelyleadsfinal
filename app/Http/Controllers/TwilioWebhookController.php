@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CallLog;
 use App\Models\City;
+use App\Models\HuntLead;
 use App\Models\Lead;
 use App\Models\PlatformCharge;
 use App\Models\Setting;
@@ -16,6 +17,39 @@ use Twilio\Security\RequestValidator;
 
 class TwilioWebhookController extends Controller
 {
+    // ── Incoming SMS (STOP / opt-out compliance for HuntBot) ────────────────────
+    // Point your Twilio number's "A MESSAGE COMES IN" webhook at this URL
+    // (route('twilio.webhook.sms')) so opt-out replies are honored automatically
+    // and the number is never contacted by HuntBot again.
+    public function sms(Request $request)
+    {
+        if (!$this->validSignature($request)) {
+            return response('Unauthorized', 403);
+        }
+
+        $from = $request->input('From');
+        $body = trim(strtoupper($request->input('Body', '')));
+
+        $optOutKeywords = ['STOP', 'UNSUBSCRIBE', 'CANCEL', 'END', 'QUIT', 'STOPALL'];
+
+        if ($from && in_array($body, $optOutKeywords, true)) {
+            try {
+                HuntLead::where('phone', $from)->update(['opted_out' => true]);
+            } catch (\Throwable $e) {
+                \Log::error('TwilioWebhook sms opt-out update failed: ' . $e->getMessage(), ['from' => $from]);
+            }
+
+            return response(
+                '<?xml version="1.0" encoding="UTF-8"?><Response><Message>You have been unsubscribed and will not receive further messages from Zonely.</Message></Response>',
+                200
+            )->header('Content-Type', 'text/xml');
+        }
+
+        // Any other inbound message: no auto-reply, just acknowledge receipt.
+        return response('<?xml version="1.0" encoding="UTF-8"?><Response></Response>', 200)
+            ->header('Content-Type', 'text/xml');
+    }
+
     public function voice(Request $request)
     {
         if (!$this->validSignature($request)) {

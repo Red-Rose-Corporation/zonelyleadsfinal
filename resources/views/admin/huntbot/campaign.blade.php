@@ -107,6 +107,12 @@
                                 class="form-control rounded-3">
                         </div>
                         <div class="mb-3">
+                            <label class="form-label fw-semibold small">Email</label>
+                            <input type="email" name="email"
+                                placeholder="owner@business.com (used when no phone number)"
+                                class="form-control rounded-3">
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label fw-semibold small">Address</label>
                             <input type="text" name="address"
                                 placeholder="123 Main St, Brooklyn NY"
@@ -130,8 +136,8 @@
                 <div class="card-body p-4">
                     <p class="text-muted small mb-3">
                         Paste one business per line. Format:<br>
-                        <code>Business Name, Phone, Address</code><br>
-                        Phone and Address are optional.
+                        <code>Business Name, Phone, Address, Email</code><br>
+                        Phone, Address and Email are all optional.
                     </p>
                     <form action="{{ route('admin.huntbot.lead.bulk', $campaign->id) }}" method="POST">
                         @csrf
@@ -139,7 +145,7 @@
                             <textarea name="bulk_data" rows="8" required
                                 class="form-control rounded-3 font-monospace"
                                 style="font-size:12px"
-                                placeholder="Ali's Plumbing, +17185550100, Brooklyn NY&#10;Sunrise Hair Salon, +17185550200&#10;Green Lawn Care"></textarea>
+                                placeholder="Ali's Plumbing, +17185550100, Brooklyn NY, ali@aliplumbing.com&#10;Sunrise Hair Salon, +17185550200&#10;Green Lawn Care"></textarea>
                         </div>
                         <button type="submit" class="btn btn-success w-100 rounded-3 fw-bold">
                             <i class="fas fa-file-import me-2"></i>Import Leads

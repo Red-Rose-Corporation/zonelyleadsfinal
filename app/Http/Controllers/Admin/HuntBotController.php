@@ -105,7 +105,21 @@ class HuntBotController extends Controller
             'source'     => 'auto',
         ]);
 
+        // Skip businesses already known from a previous campaign (by phone or
+        // Google place_id) so the same number never gets duplicated across runs.
+        $existingPhones = HuntLead::whereNotNull('phone')->pluck('phone')->flip();
+        $existingPlaceIds = HuntLead::whereNotNull('place_id')->pluck('place_id')->flip();
+
+        $created = 0;
+        $skippedDuplicates = 0;
         foreach ($leads as $l) {
+            $isDupe = (!empty($l['phone']) && $existingPhones->has($l['phone']))
+                || (!empty($l['place_id']) && $existingPlaceIds->has($l['place_id']));
+            if ($isDupe) {
+                $skippedDuplicates++;
+                continue;
+            }
+
             HuntLead::create([
                 'campaign_id'   => $campaign->id,
                 'business_name' => $l['business_name'],
@@ -118,12 +132,17 @@ class HuntBotController extends Controller
                 'review_count'  => $l['review_count'],
                 'status'        => 'found',
             ]);
+            $created++;
         }
 
-        $campaign->update(['total_found' => count($leads)]);
+        $campaign->update(['total_found' => $created]);
 
-        return redirect()->route('admin.huntbot.campaign', $campaign->id)
-            ->with('success', count($leads) . ' businesses found in ' . $location . '.');
+        $msg = $created . ' new businesses found in ' . $location . '.';
+        if ($skippedDuplicates) {
+            $msg .= ' (' . $skippedDuplicates . ' already known from a previous hunt, skipped.)';
+        }
+
+        return redirect()->route('admin.huntbot.campaign', $campaign->id)->with('success', $msg);
     }
 
     // ── Manual Campaign ────────────────────────────────────────────────────────
@@ -164,6 +183,7 @@ class HuntBotController extends Controller
         $request->validate([
             'business_name' => 'required|string|max:200',
             'phone'         => 'nullable|string|max:30',
+            'email'         => 'nullable|email|max:200',
             'address'       => 'nullable|string|max:300',
             'website_url'   => 'nullable|url|max:500',
         ]);
@@ -174,6 +194,7 @@ class HuntBotController extends Controller
             'campaign_id'   => $campaign->id,
             'business_name' => $request->business_name,
             'phone'         => $request->phone,
+            'email'         => $request->email,
             'address'       => $request->address,
             'has_website'   => $hasWebsite,
             'website_url'   => $request->website_url,
@@ -196,15 +217,22 @@ class HuntBotController extends Controller
 
         foreach ($lines as $line) {
             if (empty($line)) continue;
-            $parts = array_map('trim', explode(',', $line, 3));
+            // Format: Business Name, Phone, Address, Email
+            $parts = array_map('trim', explode(',', $line, 4));
             $name  = $parts[0] ?? null;
             if (empty($name)) continue;
+
+            $email = $parts[3] ?? null;
+            if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $email = null;
+            }
 
             HuntLead::create([
                 'campaign_id'   => $campaign->id,
                 'business_name' => $name,
                 'phone'         => $parts[1] ?? null,
                 'address'       => $parts[2] ?? null,
+                'email'         => $email,
                 'has_website'   => false,
                 'status'        => 'found',
             ]);
@@ -240,10 +268,27 @@ class HuntBotController extends Controller
         $sent   = 0;
         $errors = 0;
 
-        $leads = HuntLead::whereIn('id', $request->lead_ids)
+        $selectedLeads = HuntLead::whereIn('id', $request->lead_ids)
             ->where('campaign_id', $campaign->id)
-            ->whereNotNull('phone')
             ->get();
+
+        $noPhone  = $selectedLeads->whereNull('phone')->count();
+        $optedOut = $selectedLeads->where('opted_out', true)->count();
+
+        // Never re-contact a phone number that already opted out, or that
+        // already received an SMS from ANY previous HuntBot campaign.
+        $alreadyContactedPhones = HuntLead::whereNotNull('sms_sent_at')
+            ->whereNotIn('id', $selectedLeads->pluck('id'))
+            ->pluck('phone')
+            ->filter()
+            ->unique();
+
+        $leads = $selectedLeads
+            ->whereNotNull('phone')
+            ->where('opted_out', false)
+            ->reject(fn($lead) => $alreadyContactedPhones->contains($lead->phone));
+
+        $skippedRepeat = $selectedLeads->whereNotNull('phone')->where('opted_out', false)->count() - $leads->count();
 
         foreach ($leads as $lead) {
             try {
@@ -256,13 +301,23 @@ class HuntBotController extends Controller
             } catch (\Exception $e) {
                 $errors++;
             }
+
+            // Small pacing gap between sends — reduces carrier spam-filtering
+            // risk from bursty sending. Safe for typical batch sizes (a
+            // few dozen leads) within the request's timeout window.
+            usleep(300000);
         }
 
         $campaign->increment('total_contacted', $sent);
         $campaign->update(['status' => 'running', 'sms_template_key' => $request->template_key]);
 
         $msg = "SMS sent to {$sent} businesses.";
-        if ($errors) $msg .= " {$errors} failed (Twilio error).";
+        $notes = [];
+        if ($errors) $notes[] = "{$errors} failed (Twilio error)";
+        if ($noPhone) $notes[] = "{$noPhone} had no phone number (add an email and use email outreach for these)";
+        if ($optedOut) $notes[] = "{$optedOut} previously opted out, skipped";
+        if ($skippedRepeat) $notes[] = "{$skippedRepeat} already contacted in an earlier campaign, skipped";
+        if ($notes) $msg .= ' — ' . implode('; ', $notes) . '.';
 
         return back()->with($errors && !$sent ? 'error' : 'success', $msg);
     }
@@ -347,10 +402,18 @@ class HuntBotController extends Controller
     private function buildMessage(string $template, HuntLead $lead, HuntCampaign $campaign): string
     {
         $link = config('app.url') . '/register?ref=huntbot&city=' . urlencode($campaign->city);
-        return str_replace(
+        $body = str_replace(
             ['{business_name}', '{city}', '{signup_link}'],
             [$lead->business_name, $campaign->city, $link],
             $template
         );
+
+        // Always appended, regardless of how the template was customized in
+        // Settings — required for US TCPA compliance on unsolicited SMS.
+        if (stripos($body, 'reply stop') === false) {
+            $body .= "\n\nReply STOP to opt out.";
+        }
+
+        return $body;
     }
 }

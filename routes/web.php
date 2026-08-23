@@ -107,6 +107,7 @@ Route::post('/r/{token}', [ReviewController::class, 'store'])->name('review.stor
 // Twilio webhooks — no auth, verified by Twilio signature
 Route::post('/webhook/twilio/voice',  [TwilioWebhookController::class, 'voice'])->name('twilio.webhook.voice');
 Route::post('/webhook/twilio/status', [TwilioWebhookController::class, 'status'])->name('twilio.webhook.status');
+Route::post('/webhook/twilio/sms',    [TwilioWebhookController::class, 'sms'])->name('twilio.webhook.sms');
 Route::get('/blog/{slug}', [HomeController::class, 'blog_show'])->name('blog.show');
 Route::get('/sitemap.xml', [HomeController::class, 'sitemap']);
 Route::get('/sitemap', [HomeController::class, 'sitemap'])->name('sitemap');

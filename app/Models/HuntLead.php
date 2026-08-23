@@ -7,14 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class HuntLead extends Model
 {
     protected $fillable = [
-        'campaign_id', 'business_name', 'address', 'phone',
+        'campaign_id', 'business_name', 'address', 'phone', 'email',
         'has_website', 'website_url', 'place_id', 'rating', 'review_count',
-        'status', 'sms_sent_at', 'registered_user_id',
+        'status', 'opted_out', 'sms_sent_at', 'email_sent_at', 'registered_user_id',
     ];
 
     protected $casts = [
-        'has_website'  => 'boolean',
-        'sms_sent_at'  => 'datetime',
+        'has_website'   => 'boolean',
+        'opted_out'     => 'boolean',
+        'sms_sent_at'   => 'datetime',
+        'email_sent_at' => 'datetime',
     ];
 
     public function campaign()
