@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-7889299981957538">
     <title>@yield('title') — Admin Panel | Zonely</title>
     <link rel="icon" href="/frontend/img/favicon.svg" type="image/svg+xml">
     <link rel="icon" href="/frontend/img/zonely_logo.png" type="image/png" sizes="192x192">
