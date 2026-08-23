@@ -231,6 +231,9 @@
             }
         }
     </style>
+    <!-- Google AdSense Code -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7839299991857538"
+         crossorigin="anonymous"></script>
 </head>
 
 <body>
