@@ -57,6 +57,11 @@
 
     <meta name="google-site-verification" content="dwwJ-8RPBJ7ZKJVORVBjX84ehyNkdpSXMj3JsAqlZZQ">
 
+    {{-- Google AdSense ──────────────────────────────── --}}
+    <meta name="google-adsense-account" content="ca-pub-7889299981957538">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7889299981957538"
+         crossorigin="anonymous"></script>
+
     {{-- JSON-LD slot (pages inject schema here) ──────── --}}
     @yield('schema')
 
