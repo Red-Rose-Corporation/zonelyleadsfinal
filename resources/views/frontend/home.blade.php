@@ -209,7 +209,7 @@
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             @foreach($categories->take(8) as $cat)
-            <a href="{{ route('frontend.service.search') }}?q={{ urlencode($cat->title) }}"
+            <a href="{{ route('frontend.category', $cat->slug) }}"
                class="cat-card bg-white border border-slate-200 rounded-2xl p-5 flex flex-col items-center gap-3 text-center">
                 <div class="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center">
                     <i class="fa-solid fa-briefcase text-teal-700 text-lg"></i>
