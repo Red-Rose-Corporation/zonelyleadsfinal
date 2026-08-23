@@ -13,7 +13,7 @@ Zonely is a US marketplace connecting clients with verified local professionals 
 - Professional Profiles: https://www.zonelyleads.com/service/{slug}
 - Categories: https://www.zonelyleads.com/category/{slug}
 - Blog: https://www.zonelyleads.com/blog
-- Sitemap: https://www.zonelyleads.com/sitemap.xml
+- Sitemap: https://www.zonelyleads.com/sitemap
 
 ## Coverage
 - United States only

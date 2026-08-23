@@ -3,9 +3,11 @@
     $meta_description = $meta_description ?? '';
     $meta_keywords    = $meta_keywords ?? '';
 
+    // Note: the "Zonely — " brand prefix is already added once by the layout's
+    // <title> tag (frontend/layouts/_app.blade.php), so it must NOT be repeated here.
     $listingTitle = isset($category)
-        ? $category->title . (isset($city) ? ' in ' . $city : '') . ' | Zonely'
-        : (isset($city) ? 'Top Professionals in ' . $city . ' | Zonely' : 'Top Professionals | Zonely');
+        ? $category->title . (isset($city) ? ' in ' . $city : '')
+        : (isset($city) ? 'Top Professionals in ' . $city : 'Top Professionals');
 @endphp
 @extends('frontend.layouts._app')
 @section('title', $listingTitle)

@@ -21,6 +21,19 @@
   }
 }
 </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Zonely",
+  "url": "{{ url('/') }}",
+  "logo": "{{ asset('frontend/img/zonely_logo.png') }}",
+  "sameAs": [
+    "{{ \App\Models\Setting::get('social_facebook', 'https://www.facebook.com/profile.php?id=61581047693543') }}",
+    "{{ \App\Models\Setting::get('social_linkedin', 'https://www.linkedin.com/company/102732925/admin/dashboard') }}"
+  ]
+}
+</script>
 @endsection
 
 @section('css')
