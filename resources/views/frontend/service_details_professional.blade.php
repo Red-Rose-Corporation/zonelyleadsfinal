@@ -219,9 +219,6 @@
                             @if($user->business_name)
                             <p class="text-white/80 text-sm font-semibold mt-0.5">{{ $user->business_name }}</p>
                             @endif
-                            <p class="text-teal-200 text-base mt-0.5">
-                                {{ $user->title ?? $user->designation ?? $user->category?->title }}
-                            </p>
                             @if($cityName)
                             <p class="text-teal-300 text-sm mt-0.5">
                                 <i class="fas fa-map-marker-alt text-xs mr-1"></i>{{ $cityName }}{{ $stateName ? ', '.$stateName : '' }}
