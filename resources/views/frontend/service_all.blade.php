@@ -82,6 +82,11 @@
 
 {{-- ── Grid ─────────────────────────────────────────── --}}
 <main class="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+    @php
+        // /all-service only (not /category/{slug}, not /search) — the only
+        // page reached when neither $category nor a search is in play.
+        $isAllServicePage = !($isSearch ?? false) && !isset($category);
+    @endphp
 
     @if($users->count())
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -121,9 +126,11 @@
             <div class="p-4 flex flex-col flex-1 justify-between">
                 <div>
                     <h3 class="font-serif text-base sm:text-lg text-slate-900 leading-snug truncate">
-                        {{ $user->name }}
+                        {{ $isAllServicePage ? $specialty : $user->name }}
                     </h3>
+                    @unless($isAllServicePage)
                     <p class="text-xs text-slate-500 mt-0.5 truncate">{{ $specialty }}</p>
+                    @endunless
                     @if($user->city)
                     <p class="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
                         <i class="fa-solid fa-location-dot text-[10px] text-teal-400"></i>
