@@ -4,7 +4,12 @@
     $stateName   = $user->state   ? (is_numeric($user->state)   ? (\App\Models\State::find($user->state)?->title   ?? $user->state)   : $user->state)   : null;
     $countryName = $user->country ? (is_numeric($user->country) ? (\App\Models\Country::find($user->country)?->title ?? $user->country) : $user->country) : null;
 
-    $meta_title       = 'Trusted ' . ($user->category?->title ?? 'Professional') . ' in ' . ($cityName ?? 'Your City') . ($stateName ? ', '.$stateName : '') . ' | ' . $user->name;
+    // Prefer the seller's own written "Professional Title" (unique per seller,
+    // avoids the old "Trusted {category} in {city}" text repeating across
+    // every profile page). Falls back to the old category+city pattern only
+    // for the rare/legacy case where title is empty.
+    $sellerHeadline   = $user->title ?: (($user->category?->title ?? 'Professional') . ($cityName ? ' in ' . $cityName : ''));
+    $meta_title       = Str::limit($sellerHeadline, 45, '') . ' | ' . $user->name;
     $meta_description = $user->name . ' — verified ' . ($user->category?->title ?? 'professional') . ($cityName ? ' in '.$cityName : '') . '. ' . Str::limit(strip_tags($user->bio ?? $user->about ?? ''), 120);
     // Mother category detection for section labels
     $motherTitle = strtolower($user->category?->parent?->title ?? $user->category?->title ?? '');
@@ -259,8 +264,7 @@
                 {{-- Text + CTAs — RIGHT --}}
                 <div class="flex-1 text-center md:text-left">
                     <h1 class="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
-                        Trusted {{ $user->category?->title ?? 'Professional' }}
-                        @if($cityName) in {{ $cityName }}{{ $stateName ? ', '.$stateName : '' }}@endif
+                        {{ $sellerHeadline }}
                     </h1>
                     @if($user->bio || $user->about)
                     <p class="mt-6 text-teal-100 text-base md:text-lg leading-relaxed">
