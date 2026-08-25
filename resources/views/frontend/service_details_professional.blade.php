@@ -149,6 +149,32 @@
   @endif
 }
 </script>
+@if($user->faqs->count())
+@php
+    // JSON-string-safe: strip tags, collapse newlines (raw newlines inside a
+    // JSON string are invalid), then addslashes for quotes/backslashes —
+    // matches this file's existing schema-escaping convention above.
+    $faqJsonSafe = fn($text) => addslashes(str_replace(["\r\n", "\n", "\r"], ' ', strip_tags($text ?? '')));
+@endphp
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    @foreach($user->faqs as $faq)
+    {
+      "@type": "Question",
+      "name": "{{ $faqJsonSafe($faq->question) }}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ $faqJsonSafe($faq->answer) }}"
+      }
+    }@if(!$loop->last),@endif
+    @endforeach
+  ]
+}
+</script>
+@endif
 @endsection
 
 @section('hideLayoutFooter', true)
