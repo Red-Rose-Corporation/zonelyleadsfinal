@@ -4,7 +4,36 @@
     $meta_title       = 'Free NYC Car Insurance Calculator | Zonely Tools';
     $meta_description = 'Instantly estimate your monthly and yearly auto insurance costs in New York City. Free, fast & no signup required.';
     $meta_keywords    = 'NYC car insurance calculator, auto insurance estimate, New York car insurance';
+    $playBadge = config('tools.play_badge');
 @endphp
+
+@section('schema')
+@if ($app ?? null)
+<script type="application/ld+json">
+{!! json_encode([
+    '@context'            => 'https://schema.org',
+    '@type'               => 'SoftwareApplication',
+    'name'                => $app['name'],
+    'operatingSystem'     => 'ANDROID',
+    'applicationCategory' => $app['category_schema'],
+    'description'         => $app['summary'],
+    'image'               => $app['icon'],
+    'url'                 => url()->current(),
+    'installUrl'          => $app['play_url'],
+    'downloadUrl'         => $app['play_url'],
+    'offers'              => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD'],
+    'publisher'           => ['@type' => 'Organization', 'name' => 'Zonely'],
+], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
+</script>
+@endif
+@endsection
+
+@if ($app ?? null)
+@section('css')
+@include('frontend.apps._styles')
+@endsection
+@endif
+
 @section('content')
 
     {{-- HERO SECTION (MATCHES HOME PAGE) --}}
@@ -119,6 +148,25 @@
 
         </div>
     </main>
+
+    @if ($app ?? null)
+        <section class="zl" style="padding:0 1rem 4rem;">
+            <div class="zl-promo">
+                <img class="ico" src="{{ $app['icon'] }}" alt="{{ $app['name'] }} icon" loading="lazy" width="72" height="72">
+                <div class="txt">
+                    <h2>Prefer it on your phone?</h2>
+                    <p>{{ $app['name'] }} is a free Android app &mdash; the same estimate plus a TLC &amp; DMV points tracker and a PIRP discount estimator, and it works fully offline.</p>
+                </div>
+                <div class="act">
+                    <a href="{{ $app['play_url'] }}&utm_source=zonelyleads&utm_medium=tools_page&utm_campaign=free_apps"
+                       target="_blank" rel="noopener" aria-label="Get {{ $app['name'] }} on Google Play">
+                        <img class="zl-badge zl-badge-lg" src="{{ $playBadge }}" alt="Get it on Google Play">
+                    </a>
+                    <a class="alllink" href="{{ route('frontend.apps.index') }}">See all free apps by Zonely &rarr;</a>
+                </div>
+            </div>
+        </section>
+    @endif
 @endsection
 
 @section('scripts')

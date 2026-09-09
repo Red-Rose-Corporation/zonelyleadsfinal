@@ -66,6 +66,8 @@ Route::name('frontend.')->group(function () {
     Route::get('/about-us', [HomeController::class, 'about_us'])->name('about-us');
     Route::get('/about-site-author', [HomeController::class, 'about_site_author'])->name('about-site-author');
     Route::get('/tools', [HomeController::class, 'tools'])->name('tools');
+    Route::get('/apps', [HomeController::class, 'appsIndex'])->name('apps.index');
+    Route::get('/apps/{slug}', [HomeController::class, 'appShow'])->name('apps.show')->where('slug', '[a-z0-9-]+');
     Route::get('/blog', [HomeController::class, 'blog'])->name('blog');
 });
 

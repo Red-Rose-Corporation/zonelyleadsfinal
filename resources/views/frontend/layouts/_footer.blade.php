@@ -45,7 +45,7 @@
             <p class="text-[11px] font-black uppercase tracking-widest text-slate-500 mb-5">Explore</p>
             <ul class="space-y-3.5">
                 <li><a href="{{ route('frontend.service.all') }}"  class="text-sm text-slate-400 hover:text-white transition" style="min-height:unset;">Browse Professionals</a></li>
-                <li><a href="{{ route('frontend.tools') }}"        class="text-sm text-slate-400 hover:text-white transition" style="min-height:unset;">Free Tools</a></li>
+                <li><a href="{{ route('frontend.apps.index') }}"   class="text-sm text-slate-400 hover:text-white transition" style="min-height:unset;">Free Tools</a></li>
                 <li><a href="{{ route('frontend.blog') }}"         class="text-sm text-slate-400 hover:text-white transition" style="min-height:unset;">Blog</a></li>
                 <li><a href="{{ route('frontend.help') }}"         class="text-sm text-slate-400 hover:text-white transition" style="min-height:unset;">Help Center</a></li>
                 <li><a href="{{ route('frontend.about-us') }}"     class="text-sm text-slate-400 hover:text-white transition" style="min-height:unset;">About Us</a></li>

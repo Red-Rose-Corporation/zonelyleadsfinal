@@ -469,7 +469,40 @@ class HomeController extends Controller
         $meta_title = 'Free Car Insurance Calculator for NYC, USA';
         $meta_description = 'Use our Free Car Insurance Calculator for NYC, USA to instantly estimate your monthly and yearly auto insurance costs. Compare rates, save money, and get accurate results fast.';
         $meta_keywords = 'NYC Car Insurance Calculator; Free Auto Insurance Quote NYC; Compare Car Insurance Rates NYC; NYC Vehicle Insurance Estimator; Cheap Car Insurance NYC;';
-        return view('frontend.tools', compact('meta_title', 'meta_description', 'meta_keywords'));
+        $app = config('tools.apps.car-insurance-calculator-nyc');
+        return view('frontend.tools', compact('meta_title', 'meta_description', 'meta_keywords', 'app'));
+    }
+
+    function appsIndex()
+    {
+        $cfg  = config('tools');
+        $apps = collect($cfg['apps']);
+        $meta_title       = $cfg['hub']['title'];
+        $meta_description = $cfg['hub']['description'];
+        $meta_keywords    = $cfg['hub']['keywords'];
+        return view('frontend.apps.index', compact('apps', 'meta_title', 'meta_description', 'meta_keywords'));
+    }
+
+    function appShow($slug)
+    {
+        $apps = config('tools.apps', []);
+        abort_unless(isset($apps[$slug]), 404);
+
+        $app = $apps[$slug];
+
+        // Apps whose public page is an existing route (e.g. the NYC calculator lives
+        // at /tools) redirect there so there is only one indexable URL.
+        if (!empty($app['internal_page'])) {
+            return redirect()->route('frontend.' . $app['internal_page'], [], 301);
+        }
+
+        $related = collect($apps)->except($slug)->take(3)->values();
+
+        $meta_title       = $app['name'] . ' — Free ' . $app['category'] . ' App for Android | Zonely';
+        $meta_description = $app['tagline'];
+        $meta_keywords    = $app['keywords'] ?? '';
+
+        return view('frontend.apps.show', compact('app', 'related', 'meta_title', 'meta_description', 'meta_keywords'));
     }
     function blog()
     {
@@ -512,11 +545,25 @@ class HomeController extends Controller
             // Blog: local SEO content
             ['loc' => route('frontend.blog'),                'priority' => '0.6', 'changefreq' => 'weekly',  'lastmod' => $now],
             ['loc' => route('frontend.tools'),               'priority' => '0.5', 'changefreq' => 'monthly', 'lastmod' => $now],
+            ['loc' => route('frontend.apps.index'),          'priority' => '0.6', 'changefreq' => 'weekly',  'lastmod' => $now],
             ['loc' => route('frontend.about-us'),            'priority' => '0.4', 'changefreq' => 'monthly', 'lastmod' => $now],
             ['loc' => route('frontend.help'),                'priority' => '0.3', 'changefreq' => 'monthly', 'lastmod' => $now],
             ['loc' => route('frontend.privacy-policy'),      'priority' => '0.2', 'changefreq' => 'yearly',  'lastmod' => $now],
             ['loc' => route('frontend.terms-and-condition'), 'priority' => '0.2', 'changefreq' => 'yearly',  'lastmod' => $now],
         ]);
+
+        // Free app detail pages — one indexable URL each (apps that live on an
+        // existing route, e.g. the NYC calculator at /tools, are skipped here).
+        $appPages = collect(config('tools.apps', []))
+            ->reject(fn($a) => !empty($a['internal_page']))
+            ->map(fn($a) => [
+                'loc'        => route('frontend.apps.show', $a['slug']),
+                'priority'   => '0.6',
+                'changefreq' => 'monthly',
+                'lastmod'    => $now,
+            ])
+            ->values();
+        $static = $static->merge($appPages);
 
         // Category pages — top local SEO pages ("plumbers near me", "lawyers in [city]")
         $categories = Category::where('is_active', 1)
