@@ -98,15 +98,4 @@
     .zl-band h2{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(1.4rem,3vw,1.9rem);color:#fff;margin:0 0 .6rem;}
     .zl-band p{color:rgba(255,255,255,.82);font-size:.9rem;margin:0 0 1.4rem;}
     .zl-back{display:block;text-align:center;font-size:13px;font-weight:600;color:var(--zl-teal);margin-top:2rem;}
-
-    /* ---- /tools app-promo strip ---- */
-    .zl-promo{background:#fff;border:1px solid var(--zl-line);border-radius:24px;padding:2rem;margin:0 auto;max-width:1120px;display:flex;flex-direction:column;gap:1.5rem;}
-    @media(min-width:720px){.zl-promo{flex-direction:row;align-items:center;gap:2rem;}}
-    .zl-promo img.ico{width:72px;height:72px;border-radius:18px;flex:none;box-shadow:0 6px 20px -8px rgba(15,23,42,.25);}
-    .zl-promo .txt{flex:1;}
-    .zl-promo h2{font-family:'DM Serif Display',Georgia,serif;font-size:1.4rem;margin:0 0 .35rem;}
-    .zl-promo p{color:var(--zl-slate);font-size:.9rem;line-height:1.65;margin:0;}
-    .zl-promo .act{display:flex;flex-direction:column;gap:.5rem;align-items:flex-start;flex:none;}
-    @media(min-width:720px){.zl-promo .act{align-items:flex-end;}}
-    .zl-promo .alllink{font-size:13px;font-weight:600;color:var(--zl-teal);}
 </style>
