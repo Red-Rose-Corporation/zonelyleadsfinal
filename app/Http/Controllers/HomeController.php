@@ -498,8 +498,8 @@ class HomeController extends Controller
 
         $related = collect($apps)->except($slug)->take(3)->values();
 
-        $meta_title       = $app['name'] . ' — Free ' . $app['category'] . ' App for Android | Zonely';
-        $meta_description = $app['tagline'];
+        $meta_title       = $app['seo_title'] ?? ($app['name'] . ' — Free ' . $app['category'] . ' App for Android | Zonely');
+        $meta_description = $app['seo_description'] ?? $app['tagline'];
         $meta_keywords    = $app['keywords'] ?? '';
 
         return view('frontend.apps.show', compact('app', 'related', 'meta_title', 'meta_description', 'meta_keywords'));

@@ -1,6 +1,6 @@
 @extends('frontend.layouts._app')
 
-@section('title', $app['name'] . ' — Free ' . $app['category'] . ' App')
+@section('title', $app['seo_title'] ?? ($app['name'] . ' — Free ' . $app['category'] . ' App'))
 
 @php
     $playBadge = config('tools.play_badge');
@@ -9,8 +9,8 @@
     $hubUrl = route('frontend.apps.index');
 @endphp
 
-@section('og_title', $app['name'])
-@section('og_description', $app['tagline'])
+@section('og_title', $app['seo_title'] ?? $app['name'])
+@section('og_description', $app['seo_description'] ?? $app['tagline'])
 @section('og_image', $app['icon'])
 
 @section('schema')
@@ -26,7 +26,6 @@
     'url'                 => url()->current(),
     'installUrl'          => $app['play_url'],
     'downloadUrl'         => $app['play_url'],
-    'datePublished'       => $app['updated'],
     'offers'              => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD'],
     'publisher'           => ['@type' => 'Organization', 'name' => 'Zonely'],
 ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}
@@ -61,38 +60,47 @@
 
 @section('content')
 <div class="zl">
-    <div class="zl-wrap-sm">
-        <nav class="zl-crumb" aria-label="Breadcrumb">
-            <a href="{{ route('frontend.home') }}">Home</a><span>/</span>
-            <a href="{{ $hubUrl }}">Free Apps</a><span>/</span>
-            <span class="cur">{{ $app['name'] }}</span>
-        </nav>
 
-        <header class="zl-apphero">
-            <img class="zl-apphero-ico" src="{{ $app['icon'] }}" alt="{{ $app['name'] }} icon" width="88" height="88">
-            <div>
-                <h1>{{ $app['name'] }}</h1>
-                <p>{{ $app['tagline'] }}</p>
-                <div class="zl-chips">
-                    <span class="zl-chip">{{ $app['category'] }}</span>
-                    <span class="zl-chip">Android</span>
-                    <span class="zl-chip">{{ $app['iap'] ? 'Free · In-app purchases' : 'Free' }}</span>
-                    @if ($app['offline'])<span class="zl-chip">Works offline</span>@endif
-                    @if ($app['region'])<span class="zl-chip">{{ $app['region'] }}</span>@endif
+    <div class="zl-herowrap">
+        <div class="zl-wrap-sm">
+            <nav class="zl-crumb" aria-label="Breadcrumb">
+                <a href="{{ route('frontend.home') }}">Home</a><span>/</span>
+                <a href="{{ $hubUrl }}">Free Apps</a><span>/</span>
+                <span class="cur">{{ $app['name'] }}</span>
+            </nav>
+
+            <header class="zl-apphero">
+                <img class="zl-apphero-ico" src="{{ $app['icon'] }}" alt="{{ $app['name'] }} icon" width="96" height="96">
+                <div>
+                    <h1>{{ $app['seo_title'] ?? $app['name'] }}</h1>
+                    <p>{{ $app['seo_description'] ?? $app['tagline'] }}</p>
+                    <div class="zl-chips">
+                        <span class="zl-chip">{{ $app['category'] }}</span>
+                        <span class="zl-chip">Android</span>
+                        <span class="zl-chip">{{ $app['iap'] ? 'Free · In-app purchases' : 'Free' }}</span>
+                        @if ($app['region'])<span class="zl-chip">{{ $app['region'] }}</span>@endif
+                    </div>
+                    <a class="zl-cta-inline" href="{{ $store }}" target="_blank" rel="noopener"
+                       aria-label="Get {{ $app['name'] }} on Google Play">
+                        <img class="zl-badge zl-badge-lg" src="{{ $playBadge }}" alt="Get it on Google Play">
+                    </a>
+                    <div class="zl-trust">
+                        <span class="zl-trust-item"><i class="fas fa-lock"></i> No account needed</span>
+                        @if ($app['offline'])<span class="zl-trust-item"><i class="fas fa-wifi"></i> Works offline</span>@endif
+                        <span class="zl-trust-item"><i class="fas fa-shield-halved"></i> Privacy-first</span>
+                    </div>
                 </div>
-                <a class="zl-cta-inline" href="{{ $store }}" target="_blank" rel="noopener"
-                   aria-label="Get {{ $app['name'] }} on Google Play">
-                    <img class="zl-badge zl-badge-lg" src="{{ $playBadge }}" alt="Get it on Google Play">
-                </a>
-            </div>
-        </header>
+            </header>
+        </div>
     </div>
 
     @if (!empty($app['screenshots']))
-    <section class="zl-wrap" style="margin-top:3.5rem;">
+    <section class="zl-wrap">
         <div class="zl-shots">
             @foreach ($app['screenshots'] as $i => $shot)
-                <img src="{{ $shot }}" alt="{{ $app['name'] }} screenshot {{ $i + 1 }}" loading="lazy">
+                <div class="zl-phone">
+                    <img src="{{ $shot }}" alt="{{ $app['name'] }} screenshot {{ $i + 1 }}" loading="lazy">
+                </div>
             @endforeach
         </div>
     </section>
@@ -106,15 +114,15 @@
                     <p class="zl-p">{{ $app['summary'] }}</p>
 
                     <h3 class="zl-h3">Key features</h3>
-                    @foreach ($app['features'] as $i => $f)
-                        <div class="zl-feat">
-                            <div class="zl-feat-n">{{ $i + 1 }}</div>
-                            <div>
+                    <div class="zl-featgrid">
+                        @foreach ($app['features'] as $f)
+                            <div class="zl-featcard">
+                                <div class="ic"><i class="fas {{ $f['icon'] ?? 'fa-circle-check' }}"></i></div>
                                 <b>{{ $f['title'] }}</b>
                                 <span>{{ $f['text'] }}</span>
                             </div>
-                        </div>
-                    @endforeach
+                        @endforeach
+                    </div>
                 </section>
 
                 <section class="zl-sec">
@@ -126,25 +134,18 @@
                         </details>
                     @endforeach
                 </section>
-
-                @if (!empty($app['whats_new']))
-                <section class="zl-sec">
-                    <h2 class="zl-h2">What&rsquo;s new</h2>
-                    <p class="zl-p" style="font-size:.9rem;">{{ $app['whats_new'] }}</p>
-                </section>
-                @endif
             </div>
 
             <aside class="zl-aside">
                 <div class="zl-panel">
                     <h3>App details</h3>
                     <dl class="zl-dl">
-                        <div class="row"><dt>Category</dt><dd>{{ $app['category'] }}</dd></div>
-                        <div class="row"><dt>Platform</dt><dd>Android</dd></div>
-                        <div class="row"><dt>Updated</dt><dd>{{ $app['updated'] }}</dd></div>
-                        <div class="row"><dt>Price</dt><dd>{{ $app['iap'] ? 'Free · IAP' : 'Free' }}</dd></div>
-                        <div class="row"><dt>Offline</dt><dd>{{ $app['offline'] ? 'Yes' : 'No' }}</dd></div>
-                        <div class="row"><dt>Offered by</dt><dd>Zonely</dd></div>
+                        <div class="row"><dt><i class="fas fa-tag"></i>Category</dt><dd>{{ $app['category'] }}</dd></div>
+                        <div class="row"><dt><i class="fas fa-mobile-screen"></i>Platform</dt><dd>Android</dd></div>
+                        <div class="row"><dt><i class="fas fa-calendar"></i>Updated</dt><dd>{{ $app['updated'] }}</dd></div>
+                        <div class="row"><dt><i class="fas fa-dollar-sign"></i>Price</dt><dd>{{ $app['iap'] ? 'Free · IAP' : 'Free' }}</dd></div>
+                        <div class="row"><dt><i class="fas fa-wifi"></i>Offline</dt><dd>{{ $app['offline'] ? 'Yes' : 'No' }}</dd></div>
+                        <div class="row"><dt><i class="fas fa-building"></i>Offered by</dt><dd>Zonely</dd></div>
                     </dl>
                     <a class="zl-privacy" href="{{ $app['play_url'] }}" target="_blank" rel="noopener">Data safety &amp; privacy &rarr;</a>
                 </div>
@@ -181,5 +182,46 @@
         <a class="zl-back" href="{{ $hubUrl }}">&larr; Back to all apps</a>
     </div>
 
+    <div class="zl-footbridge" aria-hidden="true"></div>
+
+    <div class="zl-stickybar" id="zlStickyBar">
+        <img class="ico" src="{{ $app['icon'] }}" alt="">
+        <div>
+            <div class="nm">{{ $app['name'] }}</div>
+            <div class="sub">Free on Google Play</div>
+        </div>
+        <a class="go" href="{{ $store }}" target="_blank" rel="noopener">Install</a>
+    </div>
+
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    (function () {
+        var bar = document.getElementById('zlStickyBar');
+        var hero = document.querySelector('.zl-herowrap');
+        var footer = document.querySelector('footer');
+        if (!bar || !hero) return;
+
+        var pastHero = false;
+        var footerVisible = false;
+        function sync() {
+            bar.classList.toggle('show', pastHero && !footerVisible);
+        }
+
+        window.addEventListener('scroll', function () {
+            pastHero = window.scrollY > hero.offsetHeight;
+            sync();
+        }, { passive: true });
+
+        // Don't let the bar cover the footer once it scrolls into view.
+        if (footer && 'IntersectionObserver' in window) {
+            new IntersectionObserver(function (entries) {
+                footerVisible = entries[0].isIntersecting;
+                sync();
+            }).observe(footer);
+        }
+    })();
+</script>
 @endsection
