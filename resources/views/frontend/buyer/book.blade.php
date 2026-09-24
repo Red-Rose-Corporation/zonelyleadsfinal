@@ -20,6 +20,7 @@
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-6 flex items-center gap-4">
             @if($seller->profile_photo)
                 <img src="{{ asset($seller->profile_photo) }}"
+                     alt="{{ $seller->name }}"
                      onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($seller->name) }}&size=80&background=3b82f6&color=fff'"
                      class="w-14 h-14 rounded-2xl object-cover shrink-0">
             @else
@@ -142,9 +143,19 @@
     </div>
 </div>
 
+@php
+    // Blade's @json splits its argument on every comma, so the fallback arrays below
+    // were being truncated into invalid PHP. Building them here keeps @json's escaping
+    // while giving it a single, comma-free argument.
+    $bookingWorkingDays = $schedule['working_days'] ?? ['mon','tue','wed','thu','fri'];
+    $bookingPeriods = $schedule['periods'] ?? [
+        ['label'=>'Morning','from'=>'09:00','to'=>'12:00','duration'=>60],
+        ['label'=>'Afternoon','from'=>'13:00','to'=>'17:00','duration'=>60],
+    ];
+@endphp
 <script>
-const workingDays = @json($schedule['working_days'] ?? ['mon','tue','wed','thu','fri']);
-const periods = @json($schedule['periods'] ?? [['label'=>'Morning','from'=>'09:00','to'=>'12:00','duration'=>60],['label'=>'Afternoon','from'=>'13:00','to'=>'17:00','duration'=>60]]);
+const workingDays = @json($bookingWorkingDays);
+const periods = @json($bookingPeriods);
 const bookedSlots = @json($bookedSlots ?? []);
 const advanceDays = {{ (int)($schedule['advance_days'] ?? 30) }};
 const minNoticeHours = {{ (int)($schedule['min_notice_hours'] ?? 2) }};
