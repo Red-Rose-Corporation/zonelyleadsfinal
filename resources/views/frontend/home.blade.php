@@ -67,7 +67,7 @@
             <em class="text-teal-700" style="font-style:italic;">Local Experts</em> Near Me
         </h1>
         <p class="text-slate-500 text-base sm:text-lg mb-10 max-w-lg mx-auto leading-relaxed">
-            Access the top 1% of verified professionals in your area. Fast, secure, and expert-led.
+            Connect with local professionals in your area, each profile reviewed by our team before it goes live.
         </p>
 
         {{-- Single search pill --}}
@@ -126,12 +126,18 @@
 {{-- ═══ TRUST STRIP ═══ --}}
 <div class="bg-slate-900 py-3.5 px-4">
     <div class="max-w-3xl mx-auto flex items-center justify-center gap-3 sm:gap-8 flex-wrap">
-        @foreach([
-            ['icon'=>'fa-star','color'=>'text-amber-400','text'=>'4.9 avg rating'],
-            ['icon'=>'fa-circle-check','color'=>'text-emerald-400','text'=>'All pros verified'],
-            ['icon'=>'fa-lock','color'=>'text-teal-400','text'=>'Secure booking'],
-            ['icon'=>'fa-tag','color'=>'text-violet-400','text'=>'No subscription fees'],
-        ] as $t)
+        @php
+            // Rating claim comes from real reviews; if there are none yet, the item is dropped
+            // instead of showing a number nobody earned.
+            $trustItems = [];
+            if (!empty($stats['rating'])) {
+                $trustItems[] = ['icon'=>'fa-star','color'=>'text-amber-400','text'=>number_format($stats['rating'],1).' avg rating'];
+            }
+            $trustItems[] = ['icon'=>'fa-circle-check','color'=>'text-emerald-400','text'=>'Admin-reviewed profiles'];
+            $trustItems[] = ['icon'=>'fa-lock','color'=>'text-teal-400','text'=>'Secure booking'];
+            $trustItems[] = ['icon'=>'fa-tag','color'=>'text-violet-400','text'=>'No subscription fees'];
+        @endphp
+        @foreach($trustItems as $t)
         <span class="flex items-center gap-2 text-xs font-semibold text-slate-300">
             <i class="fa-solid {{ $t['icon'] }} {{ $t['color'] }} text-xs"></i> {{ $t['text'] }}
         </span>
@@ -154,7 +160,7 @@
             @if($stats['reviews'] > 0)
             <div class="stat-num text-2xl sm:text-4xl font-black text-teal-700" data-target="{{ $stats['reviews'] }}" data-suffix="+">{{ $stats['reviews'] }}+</div>
             @else
-            <div class="text-2xl sm:text-4xl font-black text-teal-700">5★</div>
+            <div class="text-2xl sm:text-4xl font-black text-teal-700">New</div>
             @endif
             <div class="text-[10px] sm:text-xs text-slate-500 font-semibold mt-1 uppercase tracking-wide">Client Reviews</div>
         </div>
@@ -249,6 +255,7 @@
                 <div class="relative w-28 sm:w-36 shrink-0 self-stretch">
                     @if($user->profile_photo)
                     <img src="{{ str_starts_with($user->profile_photo, 'http') ? $user->profile_photo : asset($user->profile_photo) }}"
+                         alt="{{ $user->name }}{{ $user->city ? ' — ' . $user->city : '' }}"
                          onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
                          class="w-full h-full object-cover object-center absolute inset-0" style="min-height:160px;">
                     <div class="w-full h-full bg-teal-700 items-center justify-center text-white font-black text-2xl absolute inset-0" style="display:none;min-height:160px;">
@@ -473,9 +480,10 @@
 
     function avatar(u) {
         const i = (u.name || 'ZZ').substring(0,2).toUpperCase();
+        const nm = (u.name || 'Professional').replace(/"/g, '&quot;');
         const src = u.photo ? (u.photo.startsWith('storage/') || u.photo.startsWith('/storage/') ? '/'+u.photo.replace(/^\//,'') : '/storage/'+u.photo) : null;
         return src
-            ? `<img src="${src}" onerror="this.style.display='none'" class="w-10 h-10 rounded-xl object-cover shrink-0">`
+            ? `<img src="${src}" alt="${nm}" onerror="this.style.display='none'" class="w-10 h-10 rounded-xl object-cover shrink-0">`
             : `<div class="w-10 h-10 bg-teal-700 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0">${i}</div>`;
     }
 

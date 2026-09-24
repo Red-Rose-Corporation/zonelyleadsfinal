@@ -1,5 +1,7 @@
 @extends('frontend.layouts._app')
 @section('title', ($type === 'seller' ? 'Join as a Local Expert' : 'Create Account') . ' — Zonely')
+{{-- Signup form has no search value; keep it out of the index, still follow its links. --}}
+@section('robots', 'noindex, follow')
 
 @section('content')
 <div class="min-h-screen bg-slate-50 flex items-center justify-center px-4 pt-24 pb-16">

@@ -1,5 +1,7 @@
 @extends('frontend.layouts._app')
 @section('title', 'Select Business Type — Zonely')
+{{-- Signup step, login-only page; keep it out of the index. --}}
+@section('robots', 'noindex, follow')
 
 @section('content')
 <div class="min-h-screen bg-slate-50 flex items-center justify-center py-12 px-4 pt-24 pb-16">

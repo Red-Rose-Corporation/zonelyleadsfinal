@@ -80,7 +80,7 @@
         <div class="flex items-center gap-4 mb-5">
             <div class="w-14 h-14 rounded-full bg-teal-700 flex items-center justify-center shrink-0 overflow-hidden shadow">
                 @if($user->profile_photo)
-                    <img src="{{ asset($user->profile_photo) }}" class="w-full h-full object-cover">
+                    <img src="{{ asset($user->profile_photo) }}" alt="Your profile photo" class="w-full h-full object-cover">
                 @else
                     <span class="text-white font-black text-xl">{{ strtoupper(substr($user->name, 0, 1)) }}</span>
                 @endif
@@ -497,7 +497,7 @@
         @if($galleryDone)
         <div class="flex gap-1.5 mt-2">
             @foreach($user->gallery()->limit(4)->get() as $gp)
-            <img src="{{ $gp->image_url }}" class="w-12 h-10 rounded-lg object-cover border border-slate-100">
+            <img src="{{ $gp->image_url }}" alt="{{ $gp->caption ?: 'Work photo' }}" class="w-12 h-10 rounded-lg object-cover border border-slate-100">
             @endforeach
             @if($galleryCount > 4)
             <div class="w-12 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-xs text-slate-500 font-bold">+{{ $galleryCount - 4 }}</div>

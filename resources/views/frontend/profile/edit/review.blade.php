@@ -20,7 +20,7 @@
     <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-4">
         <div class="flex items-center gap-4">
             @if($user->profile_photo)
-            <img src="{{ asset($user->profile_photo) }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200 shrink-0">
+            <img src="{{ asset($user->profile_photo) }}" alt="{{ $user->name }}" class="w-16 h-16 rounded-2xl object-cover border border-slate-200 shrink-0">
             @else
             <div class="w-16 h-16 rounded-2xl bg-teal-700 flex items-center justify-center text-white font-black text-xl shrink-0">
                 {{ strtoupper(substr($user->name, 0, 2)) }}

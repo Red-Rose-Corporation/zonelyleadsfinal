@@ -129,6 +129,8 @@ class HomeController extends Controller
             'pros'    => User::activeSellers()->count(),
             'cities'  => User::activeSellers()->whereNotNull('city')->distinct('city')->count('city'),
             'reviews' => \App\Models\Review::count(),
+            // Real platform-wide average; the trust strip hides the claim when it is null.
+            'rating'  => round((float) \App\Models\Review::avg('rating'), 1) ?: null,
         ]);
         $categories = Category::where('is_active', true)->whereNull('parent_id')->withCount('children')->take(8)->get();
         $featuredReviews = \App\Models\Review::with('reviewer:id,name,profile_photo', 'seller:id,name,slug,title,designation')
@@ -141,7 +143,7 @@ class HomeController extends Controller
     }
     function service_all()
     {
-        $users = User::activeSellers()->latest()->paginate(12);
+        $users = User::activeSellers()->withCount('reviews')->withAvg('reviews', 'rating')->latest()->paginate(12);
         $isSearch = false;
         ['meta_title' => $meta_title, 'meta_description' => $meta_description, 'meta_keywords' => $meta_keywords] = $this->defaultMeta();
         return view('frontend.service_all', compact('users', 'isSearch', 'meta_title', 'meta_description', 'meta_keywords'));
@@ -151,6 +153,7 @@ class HomeController extends Controller
         $query = $request->input('q');
         $city  = $request->input('city');
         $users = User::activeSellers()
+            ->withCount('reviews')->withAvg('reviews', 'rating')
             ->when($city, fn($q) => $q->where(function($q) use ($city) {
                 $q->where('city', 'like', '%' . $city . '%')
                   ->orWhere('state', 'like', '%' . $city . '%')
@@ -178,6 +181,7 @@ class HomeController extends Controller
         $categoryIds = $category->children->pluck('id')->prepend($category->id);
         $users = User::activeSellers()
             ->whereIn('category_id', $categoryIds)
+            ->withCount('reviews')->withAvg('reviews', 'rating')
             ->latest()
             ->paginate(12);
         $meta_title = $category->title . ' — Zonely';

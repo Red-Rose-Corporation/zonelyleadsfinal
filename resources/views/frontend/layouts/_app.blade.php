@@ -6,7 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Robots ─────────────────────────────────────── --}}
-    <meta name="robots" content="index, follow, max-image-preview:large">
+    {{-- Default is unchanged for every page; a view opts out with
+         @section('robots', 'noindex, follow') — used on search results and signup. --}}
+    <meta name="robots" content="@yield('robots', 'index, follow, max-image-preview:large')">
 
     {{-- SEO ────────────────────────────────────────── --}}
     @php

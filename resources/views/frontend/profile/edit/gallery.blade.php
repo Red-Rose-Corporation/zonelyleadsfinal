@@ -43,7 +43,7 @@
                     <span class="text-sm font-semibold">Click to upload or drag & drop</span>
                     <span class="text-xs">JPG, PNG, WebP · max 10MB · auto-resized to 1200×900</span>
                 </div>
-                <img id="previewImg" src="" class="hidden w-full h-full object-cover rounded-2xl">
+                <img id="previewImg" src="" alt="Selected photo preview" class="hidden w-full h-full object-cover rounded-2xl">
                 <input id="photoUpload" type="file" name="photo" accept="image/*" class="hidden" onchange="previewGallery(this)">
             </label>
 

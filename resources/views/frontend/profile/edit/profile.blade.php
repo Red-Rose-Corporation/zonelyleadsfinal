@@ -70,14 +70,14 @@
             <div class="flex items-center gap-5">
                 <div class="relative flex-shrink-0">
                     @if($user->profile_photo)
-                    <img id="photoPreview" src="{{ asset($user->profile_photo) }}"
+                    <img id="photoPreview" src="{{ asset($user->profile_photo) }}" alt="Your profile photo"
                          class="w-20 h-20 rounded-2xl object-cover border-2 border-slate-200">
                     @else
                     <div id="photoPreviewPlaceholder"
                          class="w-20 h-20 rounded-2xl bg-teal-50 border-2 border-dashed border-teal-200 flex items-center justify-center">
                         <i class="fa-solid fa-user text-teal-300 text-2xl"></i>
                     </div>
-                    <img id="photoPreview" src="" class="w-20 h-20 rounded-2xl object-cover border-2 border-slate-200 hidden">
+                    <img id="photoPreview" src="" alt="New profile photo preview" class="w-20 h-20 rounded-2xl object-cover border-2 border-slate-200 hidden">
                     @endif
                 </div>
                 <div class="flex-1">

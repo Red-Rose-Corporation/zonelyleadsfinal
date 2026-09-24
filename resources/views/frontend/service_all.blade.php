@@ -12,6 +12,10 @@
 @extends('frontend.layouts._app')
 @section('title', $listingTitle)
 
+{{-- Search results are thin, near-duplicate pages (one per query string), so they stay
+     out of the index. /all-service and /category pages keep the default index, follow. --}}
+@section('robots', ($isSearch ?? false) ? 'noindex, follow' : 'index, follow, max-image-preview:large')
+
 @section('css')
 @if(isset($users) && $users->hasPages())
   @if(!$users->onFirstPage())
@@ -137,9 +141,19 @@
                         {{ $user->city }}@if($user->state), {{ $user->state }}@endif
                     </p>
                     @endif
+                    @php
+                        // Real review data only (withCount/withAvg come from the controller query).
+                        // No reviews yet => say so, instead of showing an invented rating.
+                        $cardCount = $user->reviews_count ?? 0;
+                        $cardAvg   = $cardCount ? round($user->reviews_avg_rating, 1) : null;
+                    @endphp
                     <div class="flex items-center gap-1 mt-2">
-                        @for($i=0;$i<5;$i++)<i class="fa-solid fa-star text-amber-400 text-[9px]"></i>@endfor
-                        <span class="text-xs font-semibold text-slate-600 ml-1">4.9</span>
+                        @if($cardAvg)
+                        @for($i=1;$i<=5;$i++)<i class="fa-solid fa-star text-amber-400 text-[9px]{{ $i > $cardAvg ? ' opacity-30' : '' }}"></i>@endfor
+                        <span class="text-xs font-semibold text-slate-600 ml-1">{{ $cardAvg }} ({{ $cardCount }})</span>
+                        @else
+                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">No reviews yet</span>
+                        @endif
                     </div>
                 </div>
 

@@ -8,6 +8,7 @@
         <div class="text-center mb-8">
             @if($review->seller->profile_photo)
             <img src="{{ asset($review->seller->profile_photo) }}"
+                 alt="{{ $review->seller->name }}"
                  class="w-20 h-20 rounded-2xl object-cover mx-auto mb-4 shadow"
                  onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
             <div class="hidden w-20 h-20 rounded-2xl bg-teal-700 text-white mx-auto mb-4 items-center justify-center font-bold text-2xl shadow">

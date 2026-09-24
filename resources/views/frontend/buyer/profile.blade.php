@@ -30,6 +30,7 @@
             <div class="relative shrink-0">
                 @if(auth()->user()->profile_photo)
                 <img src="{{ asset(auth()->user()->profile_photo) }}"
+                     alt="Your profile photo"
                      onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&size=80&background=3b82f6&color=fff'"
                      class="w-20 h-20 rounded-full object-cover" id="profilePhotoImg">
                 @else
