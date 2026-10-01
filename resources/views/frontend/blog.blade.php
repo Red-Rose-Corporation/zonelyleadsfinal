@@ -121,6 +121,41 @@
     </div>
     @endif
 
+    {{-- All articles (paginated) --}}
+    @php $allBlogs = $allBlogs ?? null; @endphp
+    @if($allBlogs && $allBlogs->count())
+    <section class="mb-14">
+        <h4 class="text-xs font-black uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-3 mb-8">All Articles</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach($allBlogs as $blog)
+            <article class="group">
+                <a href="{{ route('frontend.blog') }}/{{ $blog->slug ?? '' }}" class="block" style="min-height:unset;">
+                    <div class="rounded-2xl overflow-hidden aspect-video mb-4 bg-gradient-to-br from-teal-700 to-teal-500 flex items-center justify-center">
+                        @if($blog->image_path)
+                        <img src="{{ get_file($blog->image_path, 'blog') }}"
+                             onerror="this.style.opacity='0'"
+                             class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                             alt="{{ $blog->name }}" loading="lazy">
+                        @else
+                        <i class="fa-regular fa-newspaper text-white/50 text-2xl"></i>
+                        @endif
+                    </div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        {{ $blog->created_at?->format('M d, Y') }}
+                    </div>
+                    <h3 class="font-serif text-lg leading-snug group-hover:text-teal-700 transition line-clamp-2">
+                        {{ $blog->name }}
+                    </h3>
+                </a>
+            </article>
+            @endforeach
+        </div>
+        <div class="mt-10">
+            {{ $allBlogs->links('pagination::tailwind') }}
+        </div>
+    </section>
+    @endif
+
     {{-- CTA --}}
     <section class="bg-teal-700 rounded-3xl p-8 sm:p-12 md:p-14 flex flex-col md:flex-row items-center justify-between gap-8">
         <div class="max-w-xl text-white text-center md:text-left">

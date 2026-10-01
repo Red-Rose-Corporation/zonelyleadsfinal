@@ -512,10 +512,14 @@ class HomeController extends Controller
     {
         $featuredBlog = Blog::latest()->first();
         $blogs        = $this->sideBlogs($featuredBlog?->id);
+        $allBlogs     = Blog::when($featuredBlog, fn($q) => $q->where('id', '!=', $featuredBlog->id))
+            ->latest()
+            ->paginate(12)
+            ->withQueryString();
         $meta_title = 'Zonely - Discover & Hire Local Experts Near Me';
         $meta_description = 'Find trusted local experts near you with Zonely. Compare lawyers, consultants, and more professionals. Read reviews and contact verified pros instantly';
         $meta_keywords = 'Lawyers near me; Insurance agents near me; Consultants near me; Real estate agents near me; Local health professionals near me;';
-        return view('frontend.blog', compact('featuredBlog', 'blogs', 'meta_title', 'meta_description', 'meta_keywords'));
+        return view('frontend.blog', compact('featuredBlog', 'blogs', 'allBlogs', 'meta_title', 'meta_description', 'meta_keywords'));
     }
 
     function blog_show($slug)
