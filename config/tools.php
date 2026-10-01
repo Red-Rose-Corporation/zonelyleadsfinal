@@ -118,6 +118,7 @@ return [
                 ['q' => 'How much does it cost to renew your TSA PreCheck?', 'a' => 'Online renewal costs around $70, though the exact fee depends on your enrollment provider — for example, about $58.75 through IDEMIA or around $70 through Telos or CLEAR.'],
                 ['q' => 'Does your TSA PreCheck number change when you renew?', 'a' => 'No. Your Known Traveler Number (KTN) stays the same through renewal, regardless of which provider you use.'],
                 ['q' => 'Do you have to renew your TSA PreCheck?', 'a' => "Yes — membership isn't automatic. TSA PreCheck lasts 5 years and simply expires if you don't renew, dropping you back into standard screening lines. That's the entire reason this app exists: to make sure you don't find out at the airport."],
+                ['q' => 'How to renew your TSA PreCheck online?', 'a' => "Go to the official Trusted Traveler Program (TTP) website, log in with your Known Traveler Number, and look for the renewal option once you're within your eligible window — up to 6 months before expiration. Confirm your details, pay the renewal fee, and submit. Most members are approved within a few business days with no in-person visit needed."],
             ],
             'whats_new'        => 'Added Dark Mode support. Your data now automatically backs up to your own Google account, so it survives a phone upgrade. New "Reminders not arriving?" help screen for phones with aggressive battery optimization (Xiaomi, Samsung, Huawei, and others). General reliability and polish improvements.',
         ],
