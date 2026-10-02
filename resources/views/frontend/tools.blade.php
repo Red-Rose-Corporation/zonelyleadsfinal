@@ -14,7 +14,7 @@
 
 @section('og_title', $meta_title)
 @section('og_description', $meta_description)
-@section('og_image', $app['icon'] ?? '')
+@section('og_image', $app['og_image'] ?? $app['icon'] ?? '')
 
 @section('schema')
 @if ($app ?? null)

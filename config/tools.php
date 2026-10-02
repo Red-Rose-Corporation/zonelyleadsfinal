@@ -47,11 +47,11 @@ return [
             'iap'              => false,
             'region'           => 'US',
             'screenshots'      => [
-                'https://play-lh.googleusercontent.com/GEp559W9iWxaZ-Wp5XRm_L67mt7le7XjeLy5exMNj2NMTgCC8u2pCi061SnOo7CxIob7w1rhx3dN81p7Msje=w1000',
-                'https://play-lh.googleusercontent.com/ZodxgF-ifp9fuxaLUAs0WSvX-2mwto1F_ARQu9YTszfofQAhhBOrsh21jyt4sifKwfL_5T3GJohFGOqeu70ARw=w1000',
-                'https://play-lh.googleusercontent.com/UFoQ1dA7JXPi3fTAqSbsnxr_TgUpPJoJNap1Q07LQpYJIH6SsZ1Q_Iz5BQ2etUgiV-aqu2sZkm-EggKYlFxkog=w1000',
-                'https://play-lh.googleusercontent.com/5_oI--ZxOaJ9LW4B2pMFuUO3izqs5-pU-5yHFD5vOYFHD9rkv79fWQUIe_AuA4TunZnwp2GF3zCS0T4HJdcrBg=w1000',
-                'https://play-lh.googleusercontent.com/qG75S9lQRnAPC8i7eZwXHY9kIMcXTdJfpMRr8r-oMha9petDJOi--2Sve5jOxGTTDx4HWnRuupnWWO9DWVQKUA=w1000',
+                'https://play-lh.googleusercontent.com/loNYzMQsp14PyLK-w2_YQbjUMVYwt7SZRk20tEKLBfABDFZD8A1LtoZhM2NMaaI8CkRHX_qSupNd0ljbcWTERg=w1000',
+                'https://play-lh.googleusercontent.com/6JImMNLvU-g4oekvihstBFh1_-SMhwTBux8n9UCeBW2nyVGb93SE2mVaONJ82k44tGqBXfv3Hi4LGzl5A50=w1000',
+                'https://play-lh.googleusercontent.com/Fp0UUv4xy7-lD_8EpHt2mHeNQysgLBuzubVwRl7pMZhV6UTtvTmj-uRJLPU2B8F2gcHcMcP0r5pSvXlumKq9=w1000',
+                'https://play-lh.googleusercontent.com/lwr7bAyhZFy6wmyvBCrywkTMfmPMEMZlfZuIM9jmPega6GdNhkPtTx9SCnQIkCpsJTFKAHZ_UP3OEKRwq_vC5Jg=w1000',
+                'https://play-lh.googleusercontent.com/07THPk-CT1MYSaAA6PKpR6ECg_e5hQ2Aif8PsONFFBDxA7glQtCnncHUp_5qfFnQgSV5EMXUie25MOoUeWk9zQ=w1000',
             ],
             'features'         => [
                 ['icon' => 'fa-calculator',        'title' => 'TLC insurance premium estimate',   'text' => 'Enter your TLC and DMV points, vehicle type and years licensed to get an instant monthly and yearly estimate. Save it as a PDF or share it.'],
