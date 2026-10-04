@@ -60,9 +60,9 @@
 
     /* ---- detail: screenshots (phone-frame) ---- */
     .zl-shots{display:flex;gap:1.5rem;overflow-x:auto;padding:2.5rem 0 1.5rem;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;}
-    .zl-phone{position:relative;flex:none;width:210px;height:430px;background:#0b1220;border-radius:34px;padding:8px;box-shadow:0 30px 60px -20px rgba(15,23,42,.35);scroll-snap-align:start;}
+    .zl-phone{position:relative;flex:none;width:244px;background:#0b1220;border-radius:34px;padding:8px;box-shadow:0 30px 60px -20px rgba(15,23,42,.35);scroll-snap-align:start;}
     .zl-phone::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:56px;height:6px;border-radius:999px;background:#1e293b;z-index:2;}
-    .zl-phone img{width:100%;height:100%;object-fit:cover;border-radius:26px;display:block;}
+    .zl-phone img{width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;border-radius:26px;display:block;}
     .zl-shots::-webkit-scrollbar{height:6px;}
     .zl-shots::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:999px;}
 
