@@ -25,7 +25,7 @@ Welcome to **Zonely Leads** – a dynamic web platform built to deliver exceptio
 ## ✍️ Author
 
 **Author**: H Md Norozzaman  
-📧 Email: [norozzaman996@gmail.com](mailto:norozzaman996@gmail.com)
+📧 Email: [norozzaman995@gmail.com](mailto:norozzaman995@gmail.com)
 
 ---
 
