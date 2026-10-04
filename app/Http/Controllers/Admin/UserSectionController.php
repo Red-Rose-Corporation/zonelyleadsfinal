@@ -7,6 +7,7 @@ use App\Models\Faq;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\ImageOptimizer;
+use App\Support\ProfileSectionDefs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -53,7 +54,14 @@ class UserSectionController extends Controller
         $services = Service::where('user_id', $user->id)->orderBy('id')->get();
         $faqs     = Faq::where('user_id', $user->id)->orderBy('sort_order')->orderBy('id')->get();
 
-        return view('admin.profiles2.sections', compact('user', 'services', 'faqs'));
+        // Simple repeatable sections (experience, education, ...) driven by ProfileSectionDefs.
+        $itemSections = [];
+        foreach (ProfileSectionDefs::all() as $key => $def) {
+            $query = ($def['model'])::where('user_id', $user->id);
+            $itemSections[$key] = ['def' => $def, 'items' => ($def['order'])($query)->get()];
+        }
+
+        return view('admin.profiles2.sections', compact('user', 'services', 'faqs', 'itemSections'));
     }
 
     /* ---------------------------------------------------------------- Services */
@@ -209,5 +217,56 @@ class UserSectionController extends Controller
         $this->log('photo.removed', $user);
 
         return $this->back($user, 'photo')->with('success', 'Profile photo removed.');
+    }
+
+    /* ------------------------------- Experience, education, certifications, ... */
+
+    private function itemDef(string $section): array
+    {
+        $defs = ProfileSectionDefs::all();
+        abort_unless(isset($defs[$section]), 404);
+        return $defs[$section];
+    }
+
+    public function storeItem(Request $request, $id, string $section)
+    {
+        $user = $this->target($id);
+        $def  = $this->itemDef($section);
+
+        $data = $request->validate(ProfileSectionDefs::rules($def, $request));
+        $data = ProfileSectionDefs::prepare($def, $data, $request);
+        $data['user_id'] = $user->id;
+
+        $row = ($def['model'])::create($data);
+        $this->log($section . '.created', $user, $row->id);
+
+        return $this->back($user, 'items-' . $section)->with('success', $def['title'] . ': entry added.');
+    }
+
+    public function updateItem(Request $request, $id, string $section, $rid)
+    {
+        $user = $this->target($id);
+        $def  = $this->itemDef($section);
+        $row  = ($def['model'])::where('user_id', $user->id)->findOrFail($rid);
+
+        $data = $request->validate(ProfileSectionDefs::rules($def, $request));
+        $data = ProfileSectionDefs::prepare($def, $data, $request);
+
+        $row->update($data);
+        $this->log($section . '.updated', $user, $row->id);
+
+        return $this->back($user, 'items-' . $section)->with('success', $def['title'] . ': entry updated.');
+    }
+
+    public function destroyItem($id, string $section, $rid)
+    {
+        $user = $this->target($id);
+        $def  = $this->itemDef($section);
+        $row  = ($def['model'])::where('user_id', $user->id)->findOrFail($rid);
+
+        $row->delete();
+        $this->log($section . '.deleted', $user, $rid);
+
+        return $this->back($user, 'items-' . $section)->with('success', $def['title'] . ': entry deleted.');
     }
 }

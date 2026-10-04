@@ -282,6 +282,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::delete('faqs/{fid}', [UserSectionController::class, 'destroyFaq'])->whereNumber('fid')->name('.faqs.destroy');
                 Route::post('photo', [UserSectionController::class, 'updatePhoto'])->name('.photo');
                 Route::delete('photo', [UserSectionController::class, 'destroyPhoto'])->name('.photo.destroy');
+
+                // Experience, education, certifications, memberships, languages, contacts
+                $itemSections = 'experiences|educations|certifications|memberships|languages|contacts';
+                Route::post('items/{section}', [UserSectionController::class, 'storeItem'])->where('section', $itemSections)->name('.items.store');
+                Route::put('items/{section}/{rid}', [UserSectionController::class, 'updateItem'])->where('section', $itemSections)->whereNumber('rid')->name('.items.update');
+                Route::delete('items/{section}/{rid}', [UserSectionController::class, 'destroyItem'])->where('section', $itemSections)->whereNumber('rid')->name('.items.destroy');
             });
         });
 

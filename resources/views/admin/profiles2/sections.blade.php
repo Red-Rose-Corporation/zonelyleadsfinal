@@ -40,6 +40,9 @@
     <div class="d-flex gap-2 flex-wrap mb-4">
         <a href="#services" class="btn btn-sm btn-light border"><i class="fas fa-briefcase me-1"></i> Services &amp; Pricing ({{ $services->count() }})</a>
         <a href="#faqs" class="btn btn-sm btn-light border"><i class="fas fa-circle-question me-1"></i> FAQs ({{ $faqs->count() }})</a>
+        @foreach($itemSections as $k => $sec)
+        <a href="#items-{{ $k }}" class="btn btn-sm btn-light border"><i class="fas {{ $sec['def']['icon'] }} me-1"></i> {{ $sec['def']['title'] }} ({{ $sec['items']->count() }})</a>
+        @endforeach
         <a href="#photo" class="btn btn-sm btn-light border"><i class="fas fa-image me-1"></i> Profile Photo</a>
     </div>
 
@@ -254,6 +257,11 @@
             </details>
         </div>
     </div>
+
+    {{-- ============================ Experience, education, certifications, memberships, languages, contacts --}}
+    @foreach($itemSections as $k => $sec)
+        @include('admin.profiles2._item_section', ['user' => $user, 'key' => $k, 'def' => $sec['def'], 'items' => $sec['items']])
+    @endforeach
 
     {{-- ============================================================ PHOTO --}}
     <div class="section-card mb-5" id="photo">
