@@ -63,6 +63,21 @@
                     @endif
                 </div>
 
+                {{-- Profile sections (sellers): services & pricing, FAQs, photo --}}
+                @if($user->type === 'seller')
+                <div class="section-card mb-4">
+                    <div class="card-header bg-info text-dark p-3">
+                        <h6 class="mb-0"><i class="fas fa-layer-group me-2"></i>Profile Sections</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <p class="small text-muted mb-3">Edit this seller's Services &amp; Pricing, FAQs and photo without logging in as them.</p>
+                        <a href="{{ route('admin.profiles.sections', $user->id) }}" class="btn btn-info btn-sm w-100 text-dark fw-semibold">
+                            <i class="fas fa-pen-to-square me-1"></i> Manage Services, FAQs &amp; Photo
+                        </a>
+                    </div>
+                </div>
+                @endif
+
                 {{-- Admin Controls --}}
                 <div class="section-card mb-4">
                     <div class="card-header bg-warning text-dark p-3">
@@ -290,9 +305,11 @@
                                        value="{{ old('name',$user->name) }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold">Email</label>
-                                <input type="email" name="email" class="form-control" required
-                                       value="{{ old('email',$user->email) }}">
+                                <label class="form-label fw-semibold"><i class="fas fa-lock me-1 text-muted"></i>Email</label>
+                                {{-- Locked: no name attribute, so it is never submitted; the server ignores any email anyway. --}}
+                                <input type="email" class="form-control" value="{{ $user->email }}" readonly disabled
+                                       title="The email is locked. The user changes it from their own settings.">
+                                <div class="form-text">Locked. Only the user can change their email.</div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Phone</label>

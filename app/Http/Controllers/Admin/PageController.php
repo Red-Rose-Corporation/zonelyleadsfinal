@@ -188,7 +188,7 @@ class PageController extends Controller
 
         $validated = $request->validate([
             'name'                => 'required|string|max:255',
-            'email'               => 'required|email|unique:users,email,'.$id,
+            // 'email' is intentionally not accepted here: it is locked for admins (only the user changes it).
             'phone'               => 'nullable|string|max:50',
             'whatsapp'            => 'nullable|string|max:50',
             'designation'         => 'nullable|string|max:255',

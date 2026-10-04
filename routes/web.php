@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ManagerController;
 use App\Http\Controllers\Admin\ServiceController as AdminServiceController;
+use App\Http\Controllers\Admin\UserSectionController;
 use App\Http\Controllers\Admin\TwilioController;
 use App\Http\Controllers\Admin\PhonePoolController;
 use App\Http\Controllers\Admin\PricingController;
@@ -268,6 +269,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('update/{id}', [PageController::class, 'profiles_update'])->name('update');
             Route::delete('destroy/{id}', [PageController::class, 'profiles_destroy'])->name('destroy');
             Route::post('verify/{id}', [PageController::class, 'profiles_verify'])->name('verify');
+
+            // Manage a seller's public sections (services & pricing, FAQs, photo) without logging in as them
+            Route::prefix('sections/{id}')->where(['id' => '[0-9]+'])->name('sections')->group(function () {
+                Route::get('/', [UserSectionController::class, 'edit'])->name('');
+                Route::post('services', [UserSectionController::class, 'storeService'])->name('.services.store');
+                Route::put('services/{sid}', [UserSectionController::class, 'updateService'])->whereNumber('sid')->name('.services.update');
+                Route::post('services/{sid}/toggle', [UserSectionController::class, 'toggleService'])->whereNumber('sid')->name('.services.toggle');
+                Route::delete('services/{sid}', [UserSectionController::class, 'destroyService'])->whereNumber('sid')->name('.services.destroy');
+                Route::post('faqs', [UserSectionController::class, 'storeFaq'])->name('.faqs.store');
+                Route::put('faqs/{fid}', [UserSectionController::class, 'updateFaq'])->whereNumber('fid')->name('.faqs.update');
+                Route::delete('faqs/{fid}', [UserSectionController::class, 'destroyFaq'])->whereNumber('fid')->name('.faqs.destroy');
+                Route::post('photo', [UserSectionController::class, 'updatePhoto'])->name('.photo');
+                Route::delete('photo', [UserSectionController::class, 'destroyPhoto'])->name('.photo.destroy');
+            });
         });
 
         // Leads module
