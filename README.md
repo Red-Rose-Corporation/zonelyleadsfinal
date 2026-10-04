@@ -17,8 +17,8 @@ Welcome to **Zonely Leads** – a dynamic web platform built to deliver exceptio
 
 ## 🛠️ Developer Info
 
-**Developer**: MD NAYEEM SARKER  
-📧 Email: [dev.ab.nayeem@gmail.com](mailto:dev.ab.nayeem@gmail.com)
+**Developer**: Norozzaman  
+📧 Email: [norozzaman995@gmail.com](mailto:norozzaman995@gmail.com)
 
 ---
 
