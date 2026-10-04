@@ -133,6 +133,39 @@ class ProfileSectionDefs
         ];
     }
 
+    /** Same timezone choices as the seller's own Working Hours form. */
+    public static function timezones(): array
+    {
+        return [
+            'America/New_York'    => 'Eastern Time (ET)',
+            'America/Chicago'     => 'Central Time (CT)',
+            'America/Denver'      => 'Mountain Time (MT)',
+            'America/Phoenix'     => 'Mountain Time – Arizona',
+            'America/Los_Angeles' => 'Pacific Time (PT)',
+            'America/Anchorage'   => 'Alaska Time',
+            'Pacific/Honolulu'    => 'Hawaii Time',
+            'America/Puerto_Rico' => 'Atlantic Time',
+            'Europe/London'       => 'London (GMT/BST)',
+            'Europe/Paris'        => 'Central European Time',
+            'Asia/Dubai'          => 'Dubai (GST)',
+            'Asia/Karachi'        => 'Pakistan (PKT)',
+            'Asia/Dhaka'          => 'Bangladesh (BST)',
+            'Asia/Kolkata'        => 'India (IST)',
+            'Australia/Sydney'    => 'Sydney (AEST)',
+        ];
+    }
+
+    public static function responseTimes(): array
+    {
+        return [
+            '30_min'   => 'Within 30 minutes',
+            '1_hour'   => 'Within 1 hour',
+            '4_hours'  => 'Within 4 hours',
+            '24_hours' => 'Within 24 hours',
+            '48_hours' => 'Within 2 days',
+        ];
+    }
+
     /** Validation rules built from the field list (plus any per-section override). */
     public static function rules(array $def, Request $request): array
     {

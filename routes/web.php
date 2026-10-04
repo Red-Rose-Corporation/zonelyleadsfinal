@@ -283,6 +283,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::post('photo', [UserSectionController::class, 'updatePhoto'])->name('.photo');
                 Route::delete('photo', [UserSectionController::class, 'destroyPhoto'])->name('.photo.destroy');
 
+                // Gallery, working hours, phone visibility
+                Route::post('gallery', [UserSectionController::class, 'storeGallery'])->name('.gallery.store');
+                Route::put('gallery/{gid}', [UserSectionController::class, 'updateGalleryCaption'])->whereNumber('gid')->name('.gallery.caption');
+                Route::delete('gallery/{gid}', [UserSectionController::class, 'destroyGallery'])->whereNumber('gid')->name('.gallery.destroy');
+                Route::put('hours', [UserSectionController::class, 'updateHours'])->name('.hours');
+                Route::put('visibility', [UserSectionController::class, 'updateVisibility'])->name('.visibility');
+
                 // Experience, education, certifications, memberships, languages, contacts
                 $itemSections = 'experiences|educations|certifications|memberships|languages|contacts';
                 Route::post('items/{section}', [UserSectionController::class, 'storeItem'])->where('section', $itemSections)->name('.items.store');

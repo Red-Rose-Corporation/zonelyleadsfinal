@@ -44,6 +44,9 @@
         <a href="#items-{{ $k }}" class="btn btn-sm btn-light border"><i class="fas {{ $sec['def']['icon'] }} me-1"></i> {{ $sec['def']['title'] }} ({{ $sec['items']->count() }})</a>
         @endforeach
         <a href="#photo" class="btn btn-sm btn-light border"><i class="fas fa-image me-1"></i> Profile Photo</a>
+        <a href="#gallery" class="btn btn-sm btn-light border"><i class="fas fa-images me-1"></i> Gallery ({{ $gallery->count() }})</a>
+        <a href="#hours" class="btn btn-sm btn-light border"><i class="fas fa-business-time me-1"></i> Working Hours</a>
+        <a href="#visibility" class="btn btn-sm btn-light border"><i class="fas fa-eye me-1"></i> Phone Visibility</a>
     </div>
 
     {{-- Validation errors and flash messages are rendered by the admin layout. --}}
@@ -264,7 +267,7 @@
     @endforeach
 
     {{-- ============================================================ PHOTO --}}
-    <div class="section-card mb-5" id="photo">
+    <div class="section-card mb-4" id="photo">
         <div class="card-header bg-secondary text-white p-3">
             <h6 class="mb-0"><i class="fas fa-image me-2"></i>Profile Photo</h6>
         </div>
@@ -300,6 +303,9 @@
             </div>
         </div>
     </div>
+
+
+    @include('admin.profiles2._extras', ['user' => $user, 'gallery' => $gallery])
 
 </div>
 @endsection

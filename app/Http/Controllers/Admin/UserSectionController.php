@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Faq;
+use App\Models\SellerGallery;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\ImageOptimizer;
 use App\Support\ProfileSectionDefs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Lets an admin manage a seller's public-profile sections (Services & Pricing,
@@ -61,7 +64,9 @@ class UserSectionController extends Controller
             $itemSections[$key] = ['def' => $def, 'items' => ($def['order'])($query)->get()];
         }
 
-        return view('admin.profiles2.sections', compact('user', 'services', 'faqs', 'itemSections'));
+        $gallery = SellerGallery::where('user_id', $user->id)->orderBy('sort_order')->orderBy('id')->get();
+
+        return view('admin.profiles2.sections', compact('user', 'services', 'faqs', 'itemSections', 'gallery'));
     }
 
     /* ---------------------------------------------------------------- Services */
@@ -217,6 +222,132 @@ class UserSectionController extends Controller
         $this->log('photo.removed', $user);
 
         return $this->back($user, 'photo')->with('success', 'Profile photo removed.');
+    }
+
+    /* ----------------------------------------------------------------- Gallery */
+
+    public function storeGallery(Request $request, $id)
+    {
+        $user = $this->target($id);
+
+        if ($user->gallery()->count() >= 12) {
+            return $this->back($user, 'gallery')->with('error', 'Maximum 12 gallery photos allowed.');
+        }
+
+        $request->validate([
+            'photo'   => 'required|image|mimes:jpg,jpeg,png,webp,gif|max:10240',
+            'caption' => 'nullable|string|max:150',
+        ]);
+
+        try {
+            $path = ImageOptimizer::saveGalleryPhoto($request->file('photo'));
+        } catch (\Throwable $e) {
+            Log::warning('admin gallery upload failed: ' . $e->getMessage());
+            return $this->back($user, 'gallery')->with('error', 'Could not save the photo. Please try a different image.');
+        }
+
+        $photo = SellerGallery::create([
+            'user_id'    => $user->id,
+            'image_path' => $path,
+            'caption'    => $request->caption,
+            'sort_order' => ($user->gallery()->max('sort_order') ?? -1) + 1,
+        ]);
+        $this->log('gallery.created', $user, $photo->id);
+
+        return $this->back($user, 'gallery')->with('success', 'Gallery photo added.');
+    }
+
+    public function updateGalleryCaption(Request $request, $id, $gid)
+    {
+        $user  = $this->target($id);
+        $photo = SellerGallery::where('user_id', $user->id)->findOrFail($gid);
+
+        $data = $request->validate(['caption' => 'nullable|string|max:150']);
+        $photo->update(['caption' => $data['caption'] ?? null]);
+        $this->log('gallery.caption', $user, $photo->id);
+
+        return $this->back($user, 'gallery')->with('success', 'Caption saved.');
+    }
+
+    /** Removes the gallery entry only; the image file stays in storage (nothing is destroyed irreversibly). */
+    public function destroyGallery($id, $gid)
+    {
+        $user  = $this->target($id);
+        $photo = SellerGallery::where('user_id', $user->id)->findOrFail($gid);
+
+        $photo->delete();
+        $this->log('gallery.deleted', $user, $gid);
+
+        return $this->back($user, 'gallery')->with('success', 'Gallery photo removed.');
+    }
+
+    /* --------------------------------------------- Working hours & visibility */
+
+    public function updateHours(Request $request, $id)
+    {
+        $user = $this->target($id);
+
+        // Same rules as the seller's own Working Hours form.
+        $data = $request->validate([
+            'show_office_hours'                  => 'nullable|boolean',
+            'office_hours'                       => 'nullable|array',
+            'office_hours.timezone'              => ['nullable', 'string', Rule::in(array_keys(ProfileSectionDefs::timezones()))],
+            'office_hours.response_time'         => ['nullable', Rule::in(array_keys(ProfileSectionDefs::responseTimes()))],
+            'office_hours.emergency_available'   => 'nullable|boolean',
+            'office_hours.note'                  => 'nullable|string|max:200',
+            'office_hours.days'                  => 'nullable|array',
+            'office_hours.days.*'                => 'nullable|array',
+            'office_hours.days.*.open'           => 'nullable|boolean',
+            'office_hours.days.*.slots'          => 'nullable|array|max:2',
+            'office_hours.days.*.slots.*.from'   => ['nullable', 'string', 'regex:/^\d{2}:\d{2}$/'],
+            'office_hours.days.*.slots.*.to'     => ['nullable', 'string', 'regex:/^\d{2}:\d{2}$/'],
+        ]);
+
+        $office = $data['office_hours'] ?? [];
+        $errors = [];
+        foreach (['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as $day) {
+            if (!isset($office['days'][$day])) {
+                continue;
+            }
+            $slots = [];
+            foreach (($office['days'][$day]['slots'] ?? []) as $slot) {
+                $from = $slot['from'] ?? null;
+                $to   = $slot['to'] ?? null;
+                if (!$from && !$to) {
+                    continue; // empty slot row
+                }
+                if (!$from || !$to || $to <= $from) {
+                    $errors['office_hours.days.' . $day] = strtoupper($day) . ': each time slot needs a start time and a later end time.';
+                    continue;
+                }
+                $slots[] = ['from' => $from, 'to' => $to];
+            }
+            $office['days'][$day]['slots'] = $slots;
+        }
+        if ($errors) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        // Keep the seller's booking schedule untouched; only replace the working-hours part.
+        $schedule = is_array($user->schedule) ? $user->schedule : [];
+        $schedule['show_office_hours'] = $data['show_office_hours'] ?? '0';
+        $schedule['office_hours']      = $office;
+
+        $user->update(['schedule' => $schedule]);
+        $this->log('hours.updated', $user);
+
+        return $this->back($user, 'hours')->with('success', 'Working hours saved.');
+    }
+
+    public function updateVisibility(Request $request, $id)
+    {
+        $user = $this->target($id);
+
+        $request->validate(['show_phone' => 'nullable|boolean']);
+        $user->update(['show_phone' => $request->boolean('show_phone')]);
+        $this->log('visibility.updated', $user);
+
+        return $this->back($user, 'visibility')->with('success', 'Visibility saved.');
     }
 
     /* ------------------------------- Experience, education, certifications, ... */
