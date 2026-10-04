@@ -261,7 +261,7 @@
                             @endif
 
                             @if($user->slug)
-                            <a href="{{ route('service.show', $user->slug) }}" target="_blank"
+                            <a href="{{ route('frontend.service.show', $user->slug) }}" target="_blank"
                                class="btn btn-sm btn-outline-secondary w-100">
                                 <i class="fas fa-external-link-alt me-1"></i> View Live on Profile
                             </a>
