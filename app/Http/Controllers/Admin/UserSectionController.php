@@ -291,7 +291,7 @@ class UserSectionController extends Controller
         $data = $request->validate([
             'show_office_hours'                  => 'nullable|boolean',
             'office_hours'                       => 'nullable|array',
-            'office_hours.timezone'              => ['nullable', 'string', Rule::in(array_keys(ProfileSectionDefs::timezones()))],
+            'office_hours.timezone'              => 'nullable|string|timezone',
             'office_hours.response_time'         => ['nullable', Rule::in(array_keys(ProfileSectionDefs::responseTimes()))],
             'office_hours.emergency_available'   => 'nullable|boolean',
             'office_hours.note'                  => 'nullable|string|max:200',
