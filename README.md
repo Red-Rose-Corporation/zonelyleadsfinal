@@ -17,7 +17,7 @@ Welcome to **Zonely Leads** – a dynamic web platform built to deliver exceptio
 
 ## 🛠️ Developer Info
 
-**Developer**: Norozzaman  
+**Developer**: MD NOROZZAMAN  
 📧 Email: [norozzaman995@gmail.com](mailto:norozzaman995@gmail.com)
 
 ---
@@ -32,7 +32,7 @@ Welcome to **Zonely Leads** – a dynamic web platform built to deliver exceptio
 ## 📄 License
 
 This project is **proprietary and not open-source**.  
-All rights are reserved by MD Nayeem Sarker and Redrose Corporation.  
+All rights are reserved by MD NOROZZAMAN and Zonely Labs.  
 Unauthorized use, copying, or distribution is strictly prohibited.  
 See the [LICENSE](LICENSE) file for full details.
 
