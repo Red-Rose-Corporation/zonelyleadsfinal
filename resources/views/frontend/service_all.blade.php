@@ -104,11 +104,12 @@
         <div class="group bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg hover:border-teal-100 transition-all duration-300 flex flex-col">
 
             {{-- Photo --}}
-            <div class="relative h-44 sm:h-52 bg-slate-100 overflow-hidden">
+            <div class="relative w-full bg-slate-100 overflow-hidden" style="aspect-ratio:4/5">
+                {{-- 4:5 on every screen so all cards crop the same way; matches the profile-page hero photo. --}}
                 @if($user->profile_photo)
                 <img src="{{ asset($user->profile_photo) }}"
                      onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
-                     class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-500" style="object-position:center 15%"
+                     class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-500" style="object-position:center 20%"
                      alt="{{ $user->name }}" loading="lazy">
                 <div class="hidden w-full h-full bg-teal-700 items-center justify-center text-white font-black text-3xl">
                     {{ $initials }}
