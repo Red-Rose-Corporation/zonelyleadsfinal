@@ -189,6 +189,12 @@
     .sh::after { content: ''; position: absolute; width: 48px; height: 3px; background: #5EEAD4; bottom: -8px; left: 0; border-radius: 9999px; }
     .sh-center::after { left: 50%; transform: translateX(-50%); }
     .map-container { border-radius: 16px; overflow: hidden; }
+    /* Gallery slider beside Pricing: on md+ the photo has a fixed 4:3 frame instead of stretching to
+       whatever height the Services column reaches when accordions are opened. Below md (stacked) the
+       frame is the same 180px it always rendered at; the height is explicit because the img inside uses
+       h-full, which needs a definite parent height now that the grid no longer stretches the card. */
+    .gal-frame { flex: none; height: 180px; }
+    @media (min-width: 768px) { .gal-frame { height: auto; aspect-ratio: 4 / 3; } }
     .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
     .accordion-content.open { max-height: 500px; }
     .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
@@ -407,8 +413,8 @@
             </div>
             @endif
 
-            {{-- Pricing (untouched inside) + Gallery slider — side by side, items-stretch so Gallery follows Pricing height --}}
-            <section id="pricing" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            {{-- Pricing (untouched inside) + Gallery slider — side by side; the gallery keeps its own fixed-ratio frame --}}
+            <section id="pricing" class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
 
                 {{-- LEFT: Pricing — zero changes inside --}}
                 @if($activeServices->count())
@@ -513,7 +519,7 @@
                         </div>
                         <span class="text-xs text-slate-400 font-medium" id="galCounter">1 / {{ $user->gallery->count() }}</span>
                     </div>
-                    <div class="relative flex-1" style="min-height:180px">
+                    <div class="relative gal-frame">
                         <img id="galImg"
                              src="{{ $user->gallery->first()->image_url }}"
                              alt="{{ $user->gallery->first()->caption ?: $galleryLabel }}"
