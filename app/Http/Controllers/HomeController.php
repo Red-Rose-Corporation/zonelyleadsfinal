@@ -527,8 +527,12 @@ class HomeController extends Controller
         $blog  = Blog::where('slug', $slug)->firstOrFail();
         // Count the view without touching updated_at: that column feeds the post's
         // dateModified and the sitemap lastmod, which must only change on a real edit.
-        $blog->timestamps = false;
-        $blog->increment('pageview');
+        // Use the base query builder (no automatic updated_at) rather than switching
+        // $blog->timestamps off, which also stops created_at/updated_at being cast to
+        // Carbon and breaks the view.
+        Blog::whereKey($blog->getKey())->toBase()->increment('pageview');
+        $blog->setAttribute('pageview', (int) $blog->pageview + 1);
+        $blog->syncOriginalAttribute('pageview');
         $blogs = $this->sideBlogs($blog->id);
         $meta_title = 'Zonely - Discover & Hire Local Experts Near Me';
         $meta_description = 'Find trusted local experts near you with Zonely. Compare lawyers, consultants, and more professionals. Read reviews and contact verified pros instantly';
