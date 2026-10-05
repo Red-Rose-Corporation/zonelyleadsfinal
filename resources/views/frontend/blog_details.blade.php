@@ -30,6 +30,23 @@
 </script>
 @endsection
 
+@section('css')
+{{-- The "prose" classes below need Tailwind's typography plugin, which this site does not load,
+     and Tailwind's reset strips heading/list/paragraph styling. Restore readable defaults for
+     blog bodies so <h2>/<h3>, lists, links and tables look like what they are. --}}
+<style>
+.prose p{margin:0 0 1rem}
+.prose h2{font-size:1.5rem;line-height:1.3;font-weight:700;color:#0f172a;margin:2.25rem 0 .75rem}
+.prose h3{font-size:1.125rem;line-height:1.4;font-weight:700;color:#0f172a;margin:1.5rem 0 .5rem}
+.prose ul{list-style:disc;padding-left:1.5rem;margin:0 0 1rem}
+.prose ol{list-style:decimal;padding-left:1.5rem;margin:0 0 1rem}
+.prose li{margin:.35rem 0}
+.prose a{color:#0f766e;text-decoration:underline}
+.prose table{width:100%;border-collapse:collapse;margin:1rem 0}
+.prose img{max-width:100%;height:auto}
+</style>
+@endsection
+
 @section('content')
 <div class="mt-16 sm:mt-20 max-w-3xl mx-auto px-4 sm:px-6 pt-8 pb-16">
 
