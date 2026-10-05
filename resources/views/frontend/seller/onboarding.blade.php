@@ -6,7 +6,7 @@
     $motherCat = $user->category?->parent?->title ?? $user->category?->title ?? '';
     $motherCat = strtolower($motherCat);
     $isHealthcare = str_contains($motherCat, 'health') || str_contains($motherCat, 'wellness') || str_contains($motherCat, 'medical');
-    $isHome       = str_contains($motherCat, 'home')   || str_contains($motherCat, 'repair')   || str_contains($motherCat, 'service');
+    $isHome       = str_contains($motherCat, 'home')   || str_contains($motherCat, 'repair');
     $isBeauty     = str_contains($motherCat, 'beauty') || str_contains($motherCat, 'personal care') || str_contains($motherCat, 'salon');
 
     $certHint = $isHealthcare ? 'Medical license, board certifications, specializations'
