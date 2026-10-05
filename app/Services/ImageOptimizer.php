@@ -37,17 +37,40 @@ class ImageOptimizer
         }
     }
 
+    /**
+     * Profile photos are stored 4:5 (max 800×1000) so every listing card, the profile
+     * hero and the OG image crop them the same way. coverDown never upscales: a
+     * photo smaller than 800×1000 keeps its pixels and just gets the 4:5 crop.
+     * Crop is anchored to the top so heads stay in frame.
+     *
+     * Returns [cropped, uncropped] WebP-encoded strings from a single decode.
+     * The uncropped copy (max 1600px) is kept so the crop can be redone later.
+     */
+    public static function encodeProfilePhoto(string $path): array
+    {
+        $image   = (new ImageManager(new Driver()))->read($path);
+        $full    = (clone $image)->scaleDown(width: 1600, height: 1600)->toWebp(quality: 85);
+        $cropped = $image->coverDown(800, 1000, 'top')->toWebp(quality: 85);
+
+        return [(string) $cropped, (string) $full];
+    }
+
     public static function saveProfilePhoto(UploadedFile $file, string $folder = 'profiles'): string
     {
-        $filename = $folder . '/' . Str::uuid() . '.webp';
+        $uuid     = Str::uuid();
+        $filename = $folder . '/' . $uuid . '.webp';
 
         try {
-            $manager = new ImageManager(new Driver());
-            $encoded = $manager->read($file->getPathname())
-                ->scaleDown(width: 800)
-                ->toWebp(quality: 82);
+            [$cropped, $full] = self::encodeProfilePhoto($file->getPathname());
 
-            Storage::disk('r2')->put($filename, (string) $encoded, 'public');
+            Storage::disk('r2')->put($filename, $cropped, 'public');
+
+            // Best-effort backup of the uncropped photo; never blocks the upload.
+            try {
+                Storage::disk('r2')->put($folder . '/full/' . $uuid . '.webp', $full, 'public');
+            } catch (\Throwable $e) {
+                // ignore
+            }
 
             return Storage::disk('r2')->url($filename);
         } catch (\Throwable $e) {
