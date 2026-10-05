@@ -93,12 +93,27 @@
     @endphp
 
     @if($users->count())
+    @php
+        // US state names -> USPS codes for the compact "City, ST" line. Anything not in this
+        // list (other countries, already-abbreviated values) is shown exactly as stored.
+        $stateCodes = [
+            'alabama'=>'AL','alaska'=>'AK','arizona'=>'AZ','arkansas'=>'AR','california'=>'CA','colorado'=>'CO',
+            'connecticut'=>'CT','delaware'=>'DE','district of columbia'=>'DC','florida'=>'FL','georgia'=>'GA',
+            'hawaii'=>'HI','idaho'=>'ID','illinois'=>'IL','indiana'=>'IN','iowa'=>'IA','kansas'=>'KS','kentucky'=>'KY',
+            'louisiana'=>'LA','maine'=>'ME','maryland'=>'MD','massachusetts'=>'MA','michigan'=>'MI','minnesota'=>'MN',
+            'mississippi'=>'MS','missouri'=>'MO','montana'=>'MT','nebraska'=>'NE','nevada'=>'NV','new hampshire'=>'NH',
+            'new jersey'=>'NJ','new mexico'=>'NM','new york'=>'NY','north carolina'=>'NC','north dakota'=>'ND','ohio'=>'OH',
+            'oklahoma'=>'OK','oregon'=>'OR','pennsylvania'=>'PA','rhode island'=>'RI','south carolina'=>'SC',
+            'south dakota'=>'SD','tennessee'=>'TN','texas'=>'TX','utah'=>'UT','vermont'=>'VT','virginia'=>'VA',
+            'washington'=>'WA','west virginia'=>'WV','wisconsin'=>'WI','wyoming'=>'WY',
+        ];
+    @endphp
     <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         @foreach($users as $user)
         @php
             $specialty = $user->title ?? $user->designation ?? $user->category?->title ?? 'Professional';
             $specialty = Str::before($specialty, '|');
-            $specialty = Str::limit(trim($specialty), 40);
+            $specialty = Str::limit(trim($specialty), 70);
             $initials  = strtoupper(substr($user->name, 0, 2));
         @endphp
         <div class="group bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg hover:border-teal-100 transition-all duration-300 flex flex-col">
@@ -128,43 +143,54 @@
             </div>
 
             {{-- Info --}}
-            <div class="p-4 flex flex-col flex-1 justify-between">
-                <div>
-                    <h3 class="font-serif text-base sm:text-lg text-slate-900 leading-snug truncate">
-                        {{ $isAllServicePage ? $specialty : $user->name }}
-                    </h3>
-                    @unless($isAllServicePage)
-                    <p class="text-xs text-slate-500 mt-0.5 truncate">{{ $specialty }}</p>
-                    @endunless
-                    @if($user->city)
-                    <p class="text-xs text-slate-400 mt-1.5 flex items-center gap-1">
-                        <i class="fa-solid fa-location-dot text-[10px] text-teal-400"></i>
-                        {{ $user->city }}@if($user->state), {{ $user->state }}@endif
-                    </p>
+            @php
+                // Real review data only (withCount/withAvg come from the controller query).
+                // No reviews yet => say so, instead of showing an invented rating.
+                $cardCount = $user->reviews_count ?? 0;
+                $cardAvg   = $cardCount ? round($user->reviews_avg_rating, 1) : null;
+                $stateFull = trim((string) $user->state);
+                $stateShort = $stateFull !== '' ? ($stateCodes[strtolower($stateFull)] ?? $stateFull) : '';
+                $clamp2 = 'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;';
+            @endphp
+            <div class="p-4 sm:p-5 flex flex-col flex-1">
+                <div class="flex-1">
+                    @if($isAllServicePage)
+                    {{-- The listing page leads with the keyword-rich headline, so give it two lines. --}}
+                    <h3 class="font-serif text-base sm:text-lg text-slate-900 leading-snug" style="{{ $clamp2 }}min-height:2.75em;">{{ $specialty }}</h3>
+                    @else
+                    <h3 class="font-serif text-base sm:text-lg text-slate-900 leading-snug truncate">{{ $user->name }}</h3>
+                    <p class="text-[13px] text-slate-500 mt-1" style="{{ $clamp2 }}line-height:1.4;min-height:2.8em;">{{ $specialty }}</p>
                     @endif
-                    @php
-                        // Real review data only (withCount/withAvg come from the controller query).
-                        // No reviews yet => say so, instead of showing an invented rating.
-                        $cardCount = $user->reviews_count ?? 0;
-                        $cardAvg   = $cardCount ? round($user->reviews_avg_rating, 1) : null;
-                    @endphp
-                    <div class="flex items-center gap-1 mt-2">
-                        @if($cardAvg)
-                        @for($i=1;$i<=5;$i++)<i class="fa-solid fa-star text-amber-400 text-[9px]{{ $i > $cardAvg ? ' opacity-30' : '' }}"></i>@endfor
-                        <span class="text-xs font-semibold text-slate-600 ml-1">{{ $cardAvg }} ({{ $cardCount }})</span>
-                        @else
-                        <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">No reviews yet</span>
-                        @endif
-                    </div>
                 </div>
 
-                <div class="flex items-center gap-2 mt-4">
-                    <a href="{{ route('frontend.service.show', $user->slug ?? $user->id) }}"
-                       class="flex-1 text-center bg-amber-500 hover:bg-amber-400 text-slate-900 text-xs font-bold px-4 py-2.5 rounded-xl transition"
-                       style="min-height:unset;">
-                        View Profile
-                    </a>
+                <div class="mt-3 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs">
+                    @if($user->city)
+                    <span class="flex items-center gap-1 text-slate-500 min-w-0" @if($stateFull !== '' && $stateShort !== $stateFull) title="{{ $user->city }}, {{ $stateFull }}" @endif>
+                        <i class="fa-solid fa-location-dot text-[11px] text-teal-500 shrink-0"></i>
+                        <span class="truncate">{{ $user->city }}@if($stateShort !== ''), {{ $stateShort }}@endif</span>
+                    </span>
+                    @endif
+                    <span class="flex items-center gap-1 ml-auto shrink-0">
+                        @if($cardAvg)
+                        <span class="flex items-center" role="img" aria-label="Rated {{ $cardAvg }} out of 5 from {{ $cardCount }} {{ \Illuminate\Support\Str::plural('review', $cardCount) }}">
+                            @for($i=1;$i<=5;$i++)<i class="fa-solid fa-star text-amber-400 text-[10px]{{ $i > $cardAvg ? ' opacity-30' : '' }}"></i>@endfor
+                        </span>
+                        <span class="font-semibold text-slate-600">{{ $cardAvg }} ({{ $cardCount }})</span>
+                        @else
+                        <span class="hidden sm:flex items-center text-slate-300" aria-hidden="true">
+                            @for($i=1;$i<=5;$i++)<i class="fa-regular fa-star text-[10px]"></i>@endfor
+                        </span>
+                        <span class="text-[11px] text-slate-400">No reviews yet</span>
+                        @endif
+                    </span>
                 </div>
+
+                <a href="{{ route('frontend.service.show', $user->slug ?? $user->id) }}"
+                   aria-label="View profile of {{ $user->name }}"
+                   class="mt-4 flex items-center justify-center gap-1.5 w-full bg-amber-500 hover:bg-amber-400 text-slate-900 text-sm font-semibold px-4 py-2.5 rounded-xl transition"
+                   style="min-height:unset;">
+                    View profile <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                </a>
             </div>
 
         </div>
