@@ -13,8 +13,11 @@
     {{-- SEO ────────────────────────────────────────── --}}
     @php
         $canonicalUrl  = url()->current();
-        $ogTitle       = trim($__env->yieldContent('og_title'))       ?: ($meta_title ?? config('app.name'));
-        $ogDescription = trim($__env->yieldContent('og_description'))  ?: ($meta_description ?? '');
+        // @section('x', $value) HTML-escapes $value, and the {{ }} below escapes again,
+        // so "CR&R" or "O'Brien" came out as "CR&amp;R" / "O&#039;Brien" in meta and OG tags.
+        // Decode the yielded value once so it is escaped exactly once on output.
+        $ogTitle       = html_entity_decode(trim($__env->yieldContent('og_title')), ENT_QUOTES | ENT_HTML5, 'UTF-8')       ?: ($meta_title ?? config('app.name'));
+        $ogDescription = html_entity_decode(trim($__env->yieldContent('og_description')), ENT_QUOTES | ENT_HTML5, 'UTF-8')  ?: ($meta_description ?? '');
         $ogImage       = trim($__env->yieldContent('og_image'))        ?: 'https://pub-182a04cb186a460899e4b9f34efc96a6.r2.dev/uploads/zonelysharingcard.png';
         if ($ogImage && !str_starts_with($ogImage, 'http')) {
             $ogImage = asset($ogImage);

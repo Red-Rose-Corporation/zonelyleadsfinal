@@ -13,8 +13,8 @@
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
-  "headline": "{{ addslashes($blog->name) }}",
-  "description": "{{ addslashes(Str::limit(strip_tags($blog->short_description ?? $blog->description ?? ''), 200)) }}",
+  "headline": @json($blog->name),
+  "description": @json(Str::limit(strip_tags($blog->short_description ?? $blog->description ?? ''), 200)),
   "url": "{{ url()->current() }}",
   "datePublished": "{{ $blog->created_at?->toIso8601String() }}",
   "dateModified": "{{ $blog->updated_at?->toIso8601String() }}",
