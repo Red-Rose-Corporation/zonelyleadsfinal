@@ -525,6 +525,9 @@ class HomeController extends Controller
     function blog_show($slug)
     {
         $blog  = Blog::where('slug', $slug)->firstOrFail();
+        // Count the view without touching updated_at: that column feeds the post's
+        // dateModified and the sitemap lastmod, which must only change on a real edit.
+        $blog->timestamps = false;
         $blog->increment('pageview');
         $blogs = $this->sideBlogs($blog->id);
         $meta_title = 'Zonely - Discover & Hire Local Experts Near Me';
