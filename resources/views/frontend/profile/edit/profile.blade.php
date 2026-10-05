@@ -88,7 +88,7 @@
                     </label>
                     <input id="photoInput" type="file" name="profile_photo" accept="image/*" class="hidden"
                            onchange="previewPhoto(this)">
-                    <p class="text-xs text-slate-400 mt-2">JPG, PNG or WEBP · Max 10MB</p>
+                    <p class="text-xs text-slate-400 mt-2">JPG, PNG or WEBP · Max 10MB · Min 400×400 px (800×1000 best)</p>
                 </div>
             </div>
         </div>

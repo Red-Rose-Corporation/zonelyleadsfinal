@@ -141,7 +141,9 @@ class SellerController extends Controller
             'title'         => 'nullable|string|max:20',
             'city'          => 'nullable|string|max:100',
             'state'         => 'nullable|string|max:100',
-            'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:10240',
+            'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:10240|dimensions:min_width=400,min_height=400',
+        ], [
+            'profile_photo.dimensions' => 'That photo is too small and would look blurry. Please upload one at least 400×400 px (800×1000 or larger is best).',
         ]);
 
         // Remove profile_photo from $data — only set if new file uploaded

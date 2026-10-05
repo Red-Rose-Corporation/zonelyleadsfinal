@@ -45,9 +45,14 @@
                             <input type="file" name="profile_photo" accept="image/*" class="hidden"
                                    onchange="document.getElementById('photoForm').submit()">
                         </label>
-                        <p class="text-xs text-slate-400 mt-0.5">JPG, PNG, WebP · max 10MB</p>
+                        <p class="text-xs text-slate-400 mt-0.5">JPG, PNG, WebP · max 10MB · min 400×400 px (800×1000 best)</p>
                     </div>
                 </div>
+                @error('profile_photo')
+                <p class="mt-3 p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-start gap-2">
+                    <i class="fa-solid fa-circle-exclamation mt-0.5"></i> <span>{{ $message }}</span>
+                </p>
+                @enderror
             </form>
         </div>
 

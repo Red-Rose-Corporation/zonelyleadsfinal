@@ -131,7 +131,9 @@ class ProfileController extends Controller
                 'about'         => 'nullable|string|max:3000',
                 'title'         => 'nullable|string|max:255',
                 'experience'    => 'nullable|integer|min:0|max:99',
-                'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:10240',
+                'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:10240|dimensions:min_width=400,min_height=400',
+            ], [
+                'profile_photo.dimensions' => 'That photo is too small and would look blurry. Please upload one at least 400×400 px (800×1000 or larger is best).',
             ]);
 
             if ($request->hasFile('profile_photo')) {
