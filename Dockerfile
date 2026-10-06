@@ -20,4 +20,4 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 RUN npm ci && npm run build
 
 EXPOSE 8080
-CMD ["/bin/sh", "-c", "php artisan config:cache; php artisan route:cache; php artisan view:cache; php artisan storage:link; php artisan migrate --force; php artisan db:seed --force; exec php -d upload_max_filesize=10M -d post_max_size=20M -S 0.0.0.0:${PORT:-8080} -t public"]
+CMD ["/bin/sh", "-c", "php artisan config:cache; php artisan route:cache; php artisan view:cache; php artisan storage:link; php artisan migrate --force; php artisan db:seed --force; exec php -d upload_max_filesize=10M -d post_max_size=20M -S 0.0.0.0:${PORT:-8080} -t public server.php"]
