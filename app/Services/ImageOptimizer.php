@@ -48,11 +48,71 @@ class ImageOptimizer
      */
     public static function encodeProfilePhoto(string $path): array
     {
-        $image   = (new ImageManager(new Driver()))->read($path);
-        $full    = (clone $image)->scaleDown(width: 1600, height: 1600)->toWebp(quality: 85);
-        $cropped = $image->coverDown(800, 1000, 'top')->toWebp(quality: 85);
+        return self::withImageMemory($path, function () use ($path) {
+            // One decode only. Cloning the full-size image doubled the memory and exhausted the
+            // 128 MB default limit on ordinary 8-12 megapixel phone photos. Shrink to at most 1600px
+            // first (a small image), keep that as the uncropped copy, and crop the 4:5 version from it.
+            $image = (new ImageManager(new Driver()))->read($path);
+            $image->scaleDown(width: 1600, height: 1600);
+            $full    = (string) $image->toWebp(quality: 85);
+            $cropped = (string) $image->coverDown(800, 1000, 'top')->toWebp(quality: 85);
 
-        return [(string) $cropped, (string) $full];
+            return [$cropped, $full];
+        });
+    }
+
+    /** Largest photo we will decode, in pixels (about 8400 x 8400). */
+    private const MAX_PIXELS = 70000000;
+
+    /**
+     * GD holds the whole decoded photo in memory (about 6 bytes per pixel at peak). PHP's default
+     * 128 MB limit is enough for roughly 16 megapixels; a 48 MP phone photo ends the request with a
+     * fatal error that cannot be caught. Raise the limit just for this job when the photo needs it,
+     * refuse absurdly large ones with a message, and put the limit back afterwards.
+     *
+     * @throws \DomainException if the photo is too large to process safely
+     */
+    private static function withImageMemory(string $path, callable $job)
+    {
+        $info = @getimagesize($path);
+        $old  = ini_get('memory_limit');
+
+        if ($info) {
+            $pixels = (int) $info[0] * (int) $info[1];
+            if ($pixels > self::MAX_PIXELS) {
+                throw new \DomainException('That photo is extremely large. Please use a smaller one (for example a lower camera resolution).');
+            }
+
+            $needMb  = (int) ceil($pixels * 6 / 1048576) + 64;
+            $limitMb = self::memoryLimitMb($old);
+            if ($limitMb !== -1 && $limitMb < $needMb) {
+                @ini_set('memory_limit', $needMb . 'M');
+            }
+        }
+
+        try {
+            return $job();
+        } finally {
+            if ($old !== false && ini_get('memory_limit') !== $old) {
+                @ini_set('memory_limit', $old);
+            }
+        }
+    }
+
+    /** PHP memory_limit ("128M", "1G", "-1", or plain bytes) as megabytes; -1 means unlimited. */
+    private static function memoryLimitMb($value): int
+    {
+        $value = trim((string) $value);
+        if ($value === '' || $value === '-1') {
+            return -1;
+        }
+        $n = (float) $value;
+        switch (strtoupper(substr($value, -1))) {
+            case 'G': return (int) ($n * 1024);
+            case 'M': return (int) $n;
+            case 'K': return (int) ($n / 1024);
+            default:  return (int) ($n / 1048576);
+        }
     }
 
     /**
@@ -66,10 +126,12 @@ class ImageOptimizer
      */
     public static function saveServicePhoto(UploadedFile $file): string
     {
-        $manager = new ImageManager(new Driver());
-        $image   = $manager->read($file->getPathname());
-        $anchor  = $image->width() >= $image->height() ? 'center' : 'top';
-        $webp    = (string) $image->coverDown(1200, 900, $anchor)->toWebp(quality: 85);
+        $webp = self::withImageMemory($file->getPathname(), function () use ($file) {
+            $image  = (new ImageManager(new Driver()))->read($file->getPathname());
+            $anchor = $image->width() >= $image->height() ? 'center' : 'top';
+
+            return (string) $image->coverDown(1200, 900, $anchor)->toWebp(quality: 85);
+        });
 
         $filename = 'services/' . Str::uuid() . '.webp';
 
