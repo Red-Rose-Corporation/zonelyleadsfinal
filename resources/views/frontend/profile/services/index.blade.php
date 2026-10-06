@@ -34,18 +34,27 @@
             $ptMap = ['starting_at'=>'starting at','per_month'=>'per month','per_hour'=>'per hour','flat_rate'=>'flat rate','free'=>'free','contact'=>'Negotiable'];
             $ptLabel = $ptMap[$service->pricing_type ?? 'starting_at'] ?? 'starting at';
             $features = array_filter(array_map('trim', explode("\n", $service->features ?? '')));
+            $svcPhotos = $service->relationLoaded('photos') ? $service->photos : collect();
         @endphp
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 gap-4">
                 <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center shrink-0">
+                    <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center shrink-0 {{ $svcPhotos->count() ? 'relative overflow-hidden' : '' }}">
                         <i class="fa-solid fa-briefcase text-teal-700 text-sm"></i>
+                        @if($svcPhotos->count())
+                        <img src="{{ $svcPhotos->first()->thumb_url }}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover"
+                             onerror="if(this.dataset.f!=='1'){this.dataset.f='1';this.src='{{ $svcPhotos->first()->url }}';}else{this.style.display='none';}">
+                        @endif
                     </div>
                     <div class="min-w-0">
                         <p class="font-bold text-slate-900 text-sm truncate">{{ $service->title }}</p>
                         @if($features)
                         <p class="text-xs text-slate-400 mt-0.5">{{ count($features) }} feature{{ count($features) > 1 ? 's' : '' }}</p>
                         @endif
+                        <a href="{{ route('user.services.edit', $service->id) }}#photos" class="inline-flex items-center gap-1 text-[11px] font-semibold mt-1 {{ $svcPhotos->count() ? 'text-slate-400 hover:text-teal-700' : 'text-teal-700 hover:text-teal-800' }}">
+                            <i class="fa-solid fa-camera"></i>
+                            {{ $svcPhotos->count() ? $svcPhotos->count() . ' ' . \Illuminate\Support\Str::plural('photo', $svcPhotos->count()) : 'Add photos' }}
+                        </a>
                     </div>
                 </div>
                 <div class="flex items-center gap-4 shrink-0">

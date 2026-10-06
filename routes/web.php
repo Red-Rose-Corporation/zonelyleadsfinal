@@ -171,6 +171,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     */
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('dashboard', [ProfileController::class, 'dashboard'])->name('dashboard');
+        // Optional service photos (declared before the resource so nothing can shadow them)
+        Route::post('services/{id}/photos', [ServiceController::class, 'photoStore'])->whereNumber('id')->name('services.photos.store');
+        Route::post('services/{id}/photos/from-gallery', [ServiceController::class, 'photoFromGallery'])->whereNumber('id')->name('services.photos.gallery');
+        Route::post('services/{id}/photos/{pid}/main', [ServiceController::class, 'photoMain'])->whereNumber(['id', 'pid'])->name('services.photos.main');
+        Route::delete('services/{id}/photos/{pid}', [ServiceController::class, 'photoDestroy'])->whereNumber(['id', 'pid'])->name('services.photos.destroy');
         Route::resource('services', ServiceController::class);
         Route::resource('educations', EducationController::class);
         Route::resource('experiences', ExperienceController::class);
