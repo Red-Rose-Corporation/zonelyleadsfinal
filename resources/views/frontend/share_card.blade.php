@@ -153,12 +153,11 @@
 <body>
     <div class="card">
         <div class="card-header">
-            @if($user->profile_photo)
-            <img src="{{ asset($user->profile_photo) }}" alt="{{ $user->name }}" class="avatar"
-                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-            <div class="avatar-fallback" style="display:none;">{{ strtoupper(substr($user->name,0,2)) }}</div>
+            @if(\App\Support\Avatar::photoUrl($user->profile_photo))
+            <img src="{{ \App\Support\Avatar::photoUrl($user->profile_photo) }}" alt="{{ $user->name }}" class="avatar"
+                 onerror="this.onerror=null;this.src='{{ \App\Support\Avatar::brandUrl() }}';">
             @else
-            <div class="avatar-fallback">{{ strtoupper(substr($user->name,0,2)) }}</div>
+            <img src="{{ \App\Support\Avatar::brandUrl() }}" alt="{{ $user->name }}" class="avatar">
             @endif
 
             <div class="badge">

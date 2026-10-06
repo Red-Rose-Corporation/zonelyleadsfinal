@@ -18,16 +18,10 @@
 
         {{-- Seller Quick Info --}}
         <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 mb-6 flex items-center gap-4">
-            @if($seller->profile_photo)
-                <img src="{{ asset($seller->profile_photo) }}"
-                     alt="{{ $seller->name }}"
-                     onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($seller->name) }}&size=80&background=3b82f6&color=fff'"
-                     class="w-14 h-14 rounded-2xl object-cover shrink-0">
-            @else
-                <div class="w-14 h-14 rounded-2xl bg-teal-700 text-white flex items-center justify-center font-bold text-lg shrink-0">
-                    {{ strtoupper(substr($seller->name, 0, 2)) }}
-                </div>
-            @endif
+            <img src="{{ \App\Support\Avatar::photoUrl($seller->profile_photo) ?: \App\Support\Avatar::brandUrl() }}"
+                 alt="{{ $seller->name }}"
+                 onerror="this.onerror=null;this.src='{{ \App\Support\Avatar::brandUrl() }}';"
+                 class="w-14 h-14 rounded-2xl object-cover shrink-0">
             <div>
                 <p class="font-bold text-slate-900">{{ $seller->name }}</p>
                 <p class="text-xs text-slate-500">{{ $seller->title ?? $seller->designation ?? 'Professional' }}</p>

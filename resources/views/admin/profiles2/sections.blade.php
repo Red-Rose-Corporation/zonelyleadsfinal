@@ -375,11 +375,18 @@
                         <div class="form-text">JPG, PNG, WebP or GIF, up to 10&nbsp;MB. It is resized automatically. Use a photo the professional has approved.</div>
                     </form>
                     @if($user->profile_photo)
-                    <form method="POST" action="{{ route('admin.profiles.sections.photo.destroy', $user->id) }}" class="mt-2"
-                          onsubmit="return confirm('Remove this profile photo?')">
+                    <form method="POST" action="{{ route('admin.profiles.sections.photo.destroy', $user->id) }}" class="mt-2 d-flex gap-2 flex-wrap align-items-center"
+                          onsubmit="return confirm('Remove this profile photo? The profile will show the Zonely image and the seller will be notified.')">
                         @csrf @method('DELETE')
+                        <select name="reason" class="form-select form-select-sm" style="width:auto;max-width:260px" aria-label="Reason shown to the seller">
+                            <option value="">Reason (shown to the seller): none</option>
+                            <option value="unclear">Blurry or unclear</option>
+                            <option value="not_you">Not a clear photo of them or their business</option>
+                            <option value="inappropriate">Does not meet photo guidelines</option>
+                        </select>
                         <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash me-1"></i> Remove photo</button>
                     </form>
+                    <div class="form-text">After removal the public profile shows the Zonely brand image, and the seller gets a notification asking for a new photo.</div>
                     @endif
                 </div>
             </div>

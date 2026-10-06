@@ -248,23 +248,21 @@
 
         <div class="grid sm:grid-cols-2 gap-4">
             @forelse(($users ?? collect())->take(8) as $user)
-            @php $initials = strtoupper(substr($user->name, 0, 2)); @endphp
+            @php $initials = \App\Support\Avatar::initials($user->name); $photoUrl = \App\Support\Avatar::photoUrl($user->profile_photo); $brandImg = \App\Support\Avatar::brandUrl(); @endphp
             <div class="pro-card bg-white border border-slate-100 rounded-2xl overflow-hidden flex shadow-sm">
 
                 {{-- Photo --}}
                 <div class="relative w-28 sm:w-36 shrink-0 self-stretch">
-                    @if($user->profile_photo)
-                    <img src="{{ str_starts_with($user->profile_photo, 'http') ? $user->profile_photo : asset($user->profile_photo) }}"
+                    @if($photoUrl)
+                    <img src="{{ $photoUrl }}"
                          alt="{{ $user->name }}{{ $user->city ? ' — ' . $user->city : '' }}"
-                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                         onerror="this.onerror=null;this.src='{{ $brandImg }}';this.nextElementSibling.style.display='';"
                          class="w-full h-full object-cover object-center absolute inset-0" style="min-height:160px;">
-                    <div class="w-full h-full bg-teal-700 items-center justify-center text-white font-black text-2xl absolute inset-0" style="display:none;min-height:160px;">
-                        {{ $initials }}
-                    </div>
+                    <span class="av-chip av-chip--tl" style="display:none">{{ $initials }}</span>
                     @else
-                    <div class="w-full h-full bg-teal-700 flex items-center justify-center text-white font-black text-2xl absolute inset-0" style="min-height:160px;">
-                        {{ $initials }}
-                    </div>
+                    <img src="{{ $brandImg }}" alt="{{ $user->name }}{{ $user->city ? ' — ' . $user->city : '' }}"
+                         class="w-full h-full object-cover object-center absolute inset-0" style="min-height:160px;" loading="lazy">
+                    <span class="av-chip av-chip--tl">{{ $initials }}</span>
                     @endif
                     @if($user->status)
                     <span class="absolute bottom-3 left-3 bg-emerald-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full tracking-widest uppercase flex items-center gap-1">

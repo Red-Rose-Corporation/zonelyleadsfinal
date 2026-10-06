@@ -6,19 +6,10 @@
 
         {{-- Header --}}
         <div class="text-center mb-8">
-            @if($review->seller->profile_photo)
-            <img src="{{ asset($review->seller->profile_photo) }}"
+            <img src="{{ \App\Support\Avatar::photoUrl($review->seller->profile_photo) ?: \App\Support\Avatar::brandUrl() }}"
                  alt="{{ $review->seller->name }}"
                  class="w-20 h-20 rounded-2xl object-cover mx-auto mb-4 shadow"
-                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-            <div class="hidden w-20 h-20 rounded-2xl bg-teal-700 text-white mx-auto mb-4 items-center justify-center font-bold text-2xl shadow">
-                {{ strtoupper(substr($review->seller->name ?? 'P', 0, 2)) }}
-            </div>
-            @else
-            <div class="w-20 h-20 rounded-2xl bg-teal-700 text-white mx-auto mb-4 flex items-center justify-center font-bold text-2xl shadow">
-                {{ strtoupper(substr($review->seller->name ?? 'P', 0, 2)) }}
-            </div>
-            @endif
+                 onerror="this.onerror=null;this.src='{{ \App\Support\Avatar::brandUrl() }}';">
             <h1 class="text-xl font-bold text-slate-900">{{ $review->seller->name ?? 'Professional' }}</h1>
             <p class="text-sm text-slate-500 mt-1">{{ $review->seller->title ?? $review->seller->designation ?? '' }}</p>
             <p class="text-xs text-teal-700 font-semibold mt-3">

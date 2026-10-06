@@ -114,25 +114,25 @@
             $specialty = $user->title ?? $user->designation ?? $user->category?->title ?? 'Professional';
             $specialty = Str::before($specialty, '|');
             $specialty = Str::limit(trim($specialty), 70);
-            $initials  = strtoupper(substr($user->name, 0, 2));
+            $initials  = \App\Support\Avatar::initials($user->name);
+            $photoUrl  = \App\Support\Avatar::photoUrl($user->profile_photo);
+            $brandImg  = \App\Support\Avatar::brandUrl();
         @endphp
         <div class="group bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-lg hover:border-teal-100 transition-all duration-300 flex flex-col">
 
             {{-- Photo --}}
             <div class="relative w-full bg-slate-100 overflow-hidden" style="aspect-ratio:4/5">
                 {{-- 4:5 on every screen so all cards crop the same way; matches the profile-page hero photo. --}}
-                @if($user->profile_photo)
-                <img src="{{ asset($user->profile_photo) }}"
-                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+                @if($photoUrl)
+                <img src="{{ $photoUrl }}"
+                     onerror="this.onerror=null;this.src='{{ $brandImg }}';this.classList.remove('grayscale','group-hover:grayscale-0');this.style.objectPosition='center';this.nextElementSibling.style.display='';"
                      class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-500" style="object-position:center 20%"
                      alt="{{ $user->name }}" loading="lazy">
-                <div class="hidden w-full h-full bg-teal-700 items-center justify-center text-white font-black text-3xl">
-                    {{ $initials }}
-                </div>
+                <span class="av-chip" style="display:none">{{ $initials }}</span>
                 @else
-                <div class="w-full h-full bg-teal-700 flex items-center justify-center text-white font-black text-3xl">
-                    {{ $initials }}
-                </div>
+                {{-- No photo (never added, or removed by an admin): the Zonely brand image plus the seller's initials --}}
+                <img src="{{ $brandImg }}" class="w-full h-full object-cover" alt="{{ $user->name }}" loading="lazy">
+                <span class="av-chip">{{ $initials }}</span>
                 @endif
 
                 @if($user->status)

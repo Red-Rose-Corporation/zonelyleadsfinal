@@ -100,9 +100,9 @@
                 };
             @endphp
             <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition">
-                <img src="{{ asset($lead->seller?->profile_photo ?? '') }}" alt="{{ $lead->seller?->name }}"
+                <img src="{{ \App\Support\Avatar::photoUrl($lead->seller?->profile_photo) ?: \App\Support\Avatar::brandUrl() }}" alt="{{ $lead->seller?->name }}"
                      class="w-12 h-12 rounded-2xl object-cover border border-slate-100 shrink-0 shadow-sm"
-                     onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($lead->seller?->name ?? 'S') }}&background=0d9488&color=fff&size=80'">
+                     onerror="this.onerror=null;this.src='{{ \App\Support\Avatar::brandUrl() }}';">
                 <div class="flex-1 min-w-0">
                     <p class="font-bold text-sm text-slate-900 truncate">{{ $lead->seller?->name ?? 'Professional' }}</p>
                     <p class="text-xs text-slate-500 truncate">{{ $lead->service ?? 'General Inquiry' }}</p>
@@ -155,9 +155,9 @@
                 };
             @endphp
             <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-50 last:border-0">
-                <img src="{{ asset($lead->seller?->profile_photo ?? '') }}" alt="{{ $lead->seller?->name }}"
+                <img src="{{ \App\Support\Avatar::photoUrl($lead->seller?->profile_photo) ?: \App\Support\Avatar::brandUrl() }}" alt="{{ $lead->seller?->name }}"
                      class="w-12 h-12 rounded-2xl object-cover border border-slate-100 shrink-0 shadow-sm grayscale opacity-70"
-                     onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($lead->seller?->name ?? 'S') }}&background=94a3b8&color=fff&size=80'">
+                     onerror="this.onerror=null;this.src='{{ \App\Support\Avatar::brandUrl() }}';">
                 <div class="flex-1 min-w-0">
                     <p class="font-bold text-sm text-slate-700 truncate">{{ $lead->seller?->name ?? 'Professional' }}</p>
                     <p class="text-xs text-slate-400 truncate">{{ $lead->service ?? 'General Inquiry' }}</p>

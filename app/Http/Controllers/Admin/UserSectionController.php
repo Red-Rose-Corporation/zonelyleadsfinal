@@ -296,14 +296,35 @@ class UserSectionController extends Controller
         return $this->back($user, 'photo')->with('success', 'Profile photo updated.');
     }
 
-    public function destroyPhoto($id)
+    /** Reasons an admin can give when removing a photo; shown to the seller in plain words. */
+    private const PHOTO_REMOVAL_REASONS = [
+        'unclear'       => 'it was blurry or unclear',
+        'not_you'       => 'it was not a clear photo of you or your business',
+        'inappropriate' => 'it did not meet our photo guidelines',
+    ];
+
+    public function destroyPhoto(Request $request, $id)
     {
         $user = $this->target($id);
+        $hadPhoto = (bool) $user->profile_photo;
 
         $user->update(['profile_photo' => null]);
         $this->log('photo.removed', $user);
 
-        return $this->back($user, 'photo')->with('success', 'Profile photo removed.');
+        // Let the seller know, so they can add a better photo. A failure here must never undo the removal.
+        if ($hadPhoto) {
+            try {
+                $reason  = self::PHOTO_REMOVAL_REASONS[$request->input('reason')] ?? null;
+                $message = 'Your profile photo was removed' . ($reason ? ' because ' . $reason : ' by our team') . '. '
+                         . 'Until you add a new one, your page shows the Zonely image. '
+                         . 'Please upload a clear, well-lit photo (at least 800×1000 px works best).';
+                \App\Services\NotificationService::send($user, 'system', 'Please add a new profile photo', $message, route('profile.edit'));
+            } catch (\Throwable $e) {
+                Log::warning('photo removal notification failed: ' . $e->getMessage());
+            }
+        }
+
+        return $this->back($user, 'photo')->with('success', 'Profile photo removed.' . ($hadPhoto ? ' The seller was notified.' : ''));
     }
 
     /* ----------------------------------------------------------------- Gallery */

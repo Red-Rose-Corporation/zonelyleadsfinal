@@ -128,7 +128,7 @@
   "name": "{{ addslashes($user->name) }}",
   "description": "{{ addslashes(Str::limit(strip_tags($user->about ?? $user->bio ?? ''), 200)) }}",
   "url": "{{ url()->current() }}",
-  "image": "{{ $user->profile_photo ? (str_starts_with($user->profile_photo, 'http') ? $user->profile_photo : asset($user->profile_photo)) : '' }}",
+  "image": "{{ \App\Support\Avatar::photoUrl($user->profile_photo) ?: \App\Support\Avatar::brandUrl() }}",
   "@id": "{{ url()->current() }}",
   "address": {
     "@type": "PostalAddress",
@@ -275,13 +275,11 @@
                 <div class="flex-shrink-0 w-full max-w-xs mx-auto md:mx-0 md:max-w-sm">
                     <div class="pro-glass rounded-3xl p-6 text-center">
                         <div class="relative inline-block">
-                            <img src="{{ str_starts_with($user->profile_photo ?? '', 'http') ? $user->profile_photo : asset($user->profile_photo ?? '') }}"
+                            {{-- Own photo, or the Zonely brand image when there is none / it fails to load --}}
+                            <img src="{{ \App\Support\Avatar::photoUrl($user->profile_photo) ?: \App\Support\Avatar::brandUrl() }}"
                                  alt="{{ $user->name }}"
                                  class="w-36 h-48 sm:w-48 sm:h-60 object-cover rounded-2xl border-4 border-white/30 shadow-xl mx-auto"
-                                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                            <div style="display:none;" class="w-36 h-48 sm:w-48 sm:h-60 bg-teal-600/40 border-4 border-white/30 rounded-2xl mx-auto items-center justify-center text-white font-black text-4xl shadow-xl">
-                                {{ strtoupper(substr($user->name, 0, 2)) }}
-                            </div>
+                                 onerror="this.onerror=null;this.src='{{ \App\Support\Avatar::brandUrl() }}';">
                         </div>
                         <div class="mt-4">
                             <h3 class="text-xl font-bold">{{ $user->name }}</h3>
@@ -1207,10 +1205,10 @@
         </div>
         {{-- Profile mini-card --}}
         <div class="flex items-center gap-3 bg-slate-50 rounded-2xl p-3 mb-5">
-            <img src="{{ str_starts_with($user->profile_photo ?? '', 'http') ? $user->profile_photo : asset($user->profile_photo ?? '') }}"
+            <img src="{{ \App\Support\Avatar::photoUrl($user->profile_photo) ?: \App\Support\Avatar::brandUrl() }}"
                  alt="{{ $user->name }}"
                  class="w-12 h-12 rounded-xl object-cover flex-shrink-0"
-                 onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=0F766E&color=fff&size=48'">
+                 onerror="this.onerror=null;this.src='{{ \App\Support\Avatar::brandUrl() }}';">
             <div class="min-w-0">
                 <div class="font-bold text-slate-800 text-sm truncate">{{ $user->name }}</div>
                 <div class="text-xs text-slate-500 truncate">{{ $user->category?->title ?? $user->title ?? 'Professional' }}{{ $cityName ? ' · '.$cityName : '' }}</div>

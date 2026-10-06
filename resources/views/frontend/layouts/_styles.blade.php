@@ -118,6 +118,9 @@
         .text-7xl { font-size:3rem; }
     }
 
+    /* ── Initials chip on the Zonely brand image (profiles without a photo) ─── */
+    .av-chip { position:absolute; right:10px; bottom:10px; display:flex; align-items:center; justify-content:center; min-width:30px; height:26px; padding:0 9px; border-radius:9999px; background:rgba(255,255,255,.92); color:#115e59; font-family:'DM Serif Display',Georgia,serif; font-size:13px; line-height:1; box-shadow:0 2px 8px rgba(15,23,42,.18); }
+    .av-chip--tl { right:auto; bottom:auto; left:8px; top:8px; }
     /* ── Prevent iOS input zoom (needs 16px) ─── */
     @media (max-width:767px) {
         input,textarea,select { font-size:16px !important; }
