@@ -153,10 +153,16 @@ class ImageOptimizer
      */
     public static function saveServicePhoto(UploadedFile $file): string
     {
+        return self::saveServicePhotoFromPath($file->getPathname());
+    }
+
+    /** Same as saveServicePhoto() for an image file already on disk (for example a gallery photo). */
+    public static function saveServicePhotoFromPath(string $path): string
+    {
         // One decode, two sizes: the large 4:3 photo (opened card and lightbox) and a small thumbnail
         // (closed card row), so a tiny thumbnail never downloads the large file.
-        [$large, $thumb] = self::withImageMemory($file->getPathname(), function () use ($file) {
-            $image  = (new ImageManager(new Driver()))->read($file->getPathname());
+        [$large, $thumb] = self::withImageMemory($path, function () use ($path) {
+            $image  = (new ImageManager(new Driver()))->read($path);
             $anchor = $image->width() >= $image->height() ? 'center' : 'top';
             $image->coverDown(1200, 900, $anchor);
 

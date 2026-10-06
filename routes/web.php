@@ -277,6 +277,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::put('services/{sid}', [UserSectionController::class, 'updateService'])->whereNumber('sid')->name('.services.update');
                 Route::post('services/{sid}/toggle', [UserSectionController::class, 'toggleService'])->whereNumber('sid')->name('.services.toggle');
                 Route::delete('services/{sid}', [UserSectionController::class, 'destroyService'])->whereNumber('sid')->name('.services.destroy');
+                Route::post('services/{sid}/photos', [UserSectionController::class, 'storeServicePhoto'])->whereNumber('sid')->name('.services.photos.store');
+                Route::post('services/{sid}/photos/from-gallery', [UserSectionController::class, 'storeServicePhotoFromGallery'])->whereNumber('sid')->name('.services.photos.gallery');
+                Route::post('services/{sid}/photos/{pid}/main', [UserSectionController::class, 'makeServicePhotoMain'])->whereNumber(['sid', 'pid'])->name('.services.photos.main');
+                Route::delete('services/{sid}/photos/{pid}', [UserSectionController::class, 'destroyServicePhoto'])->whereNumber(['sid', 'pid'])->name('.services.photos.destroy');
                 Route::post('faqs', [UserSectionController::class, 'storeFaq'])->name('.faqs.store');
                 Route::put('faqs/{fid}', [UserSectionController::class, 'updateFaq'])->whereNumber('fid')->name('.faqs.update');
                 Route::delete('faqs/{fid}', [UserSectionController::class, 'destroyFaq'])->whereNumber('fid')->name('.faqs.destroy');

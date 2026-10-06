@@ -67,13 +67,95 @@
             @endif
 
             @forelse($services as $svc)
-            <div class="border rounded-3 mb-3">
+            @php $svcPhotos = $svc->photos; $photoCount = $svcPhotos->count(); $maxPhotos = \App\Models\Service::MAX_PHOTOS; @endphp
+            <div class="border rounded-3 mb-3" id="service-{{ $svc->id }}">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 p-3">
-                    <div>
-                        <div class="fw-semibold">{{ $svc->title }}</div>
-                        <div class="small text-muted">{{ $priceLabel($svc) }}</div>
+                    <div class="d-flex align-items-center gap-3">
+                        @if($photoCount)
+                        <img src="{{ $svcPhotos->first()->thumb_url }}" alt="" width="64" height="48"
+                             style="width:64px;height:48px;object-fit:cover;border-radius:6px;background:#eef1f4"
+                             onerror="if(this.dataset.f!=='1'){this.dataset.f='1';this.src='{{ $svcPhotos->first()->url }}';}else{this.style.visibility='hidden';}">
+                        @endif
+                        <div>
+                            <div class="fw-semibold">{{ $svc->title }}</div>
+                            <div class="small text-muted">{{ $priceLabel($svc) }}</div>
+                        </div>
                     </div>
-                    <span class="badge {{ $svc->is_active ? 'bg-success' : 'bg-secondary' }}">{{ $svc->is_active ? 'Visible' : 'Hidden' }}</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge {{ $photoCount ? 'bg-info text-dark' : 'bg-light text-muted border' }}" title="Optional photos shown on the public profile">
+                            <i class="fas fa-camera me-1"></i>{{ $photoCount }}/{{ $maxPhotos }}
+                        </span>
+                        <span class="badge {{ $svc->is_active ? 'bg-success' : 'bg-secondary' }}">{{ $svc->is_active ? 'Visible' : 'Hidden' }}</span>
+                    </div>
+                </div>
+
+                {{-- ---------- Service photos (optional, up to 3; the first one is the thumbnail) ---------- --}}
+                <div class="border-top p-3">
+                    <div class="small fw-semibold mb-2"><i class="fas fa-camera me-1"></i>Photos <span class="text-muted fw-normal">(optional &middot; up to {{ $maxPhotos }} &middot; the first is the thumbnail)</span></div>
+
+                    @if($photoCount)
+                    <div class="d-flex flex-wrap gap-3 mb-2">
+                        @foreach($svcPhotos as $idx => $ph)
+                        <div style="width:132px">
+                            <div class="position-relative">
+                                <img src="{{ $ph->thumb_url }}" alt="Service photo {{ $idx + 1 }}" width="132" height="99" loading="lazy"
+                                     style="width:132px;height:99px;object-fit:cover;border-radius:8px;border:1px solid #dee2e6;background:#eef1f4"
+                                     onerror="if(this.dataset.f!=='1'){this.dataset.f='1';this.src='{{ $ph->url }}';}">
+                                @if($idx === 0)
+                                <span class="badge bg-success position-absolute" style="top:6px;left:6px">Main</span>
+                                @endif
+                            </div>
+                            <div class="d-flex gap-1 mt-1">
+                                @if($idx > 0)
+                                <form method="POST" action="{{ route('admin.profiles.sections.services.photos.main', [$user->id, $svc->id, $ph->id]) }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary py-0 px-2" title="Use as the thumbnail">Make main</button>
+                                </form>
+                                @endif
+                                <form method="POST" action="{{ route('admin.profiles.sections.services.photos.destroy', [$user->id, $svc->id, $ph->id]) }}"
+                                      onsubmit="return confirm('Remove this photo?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Remove this photo"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    @else
+                    <p class="small text-muted mb-2">No photos. The service card on the public profile looks exactly as before.</p>
+                    @endif
+
+                    @if($photoCount < $maxPhotos)
+                    <form method="POST" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center gap-2"
+                          action="{{ route('admin.profiles.sections.services.photos.store', [$user->id, $svc->id]) }}"
+                          onsubmit="var b=this.querySelector('button');b.disabled=true;b.textContent='Uploading...';">
+                        @csrf
+                        <input type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="form-control form-control-sm" style="max-width:280px" required>
+                        <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-upload me-1"></i>Add photo</button>
+                    </form>
+                    <div class="small text-muted mt-1">JPG, PNG or WebP &middot; at least {{ \App\Services\ServicePhotoManager::MIN_WIDTH }}&times;{{ \App\Services\ServicePhotoManager::MIN_HEIGHT }} px &middot; up to 10 MB. Cropped to 4:3 automatically.</div>
+
+                    @if($gallery->count())
+                    <details class="mt-2">
+                        <summary class="small fw-semibold text-primary" style="cursor:pointer">Or choose from this seller's gallery ({{ $gallery->count() }})</summary>
+                        <div class="d-flex flex-wrap gap-2 mt-2">
+                            @foreach($gallery as $g)
+                            <form method="POST" action="{{ route('admin.profiles.sections.services.photos.gallery', [$user->id, $svc->id]) }}">
+                                @csrf
+                                <input type="hidden" name="gallery_id" value="{{ $g->id }}">
+                                <button type="submit" class="p-0 border-0 bg-transparent" title="Use this photo{{ $g->caption ? ': ' . $g->caption : '' }}">
+                                    <img src="{{ $g->image_url }}" alt="" width="96" height="72" loading="lazy"
+                                         style="width:96px;height:72px;object-fit:cover;border-radius:6px;border:1px solid #dee2e6;background:#eef1f4">
+                                </button>
+                            </form>
+                            @endforeach
+                        </div>
+                        <div class="small text-muted mt-1">Click a photo to use it. The gallery photo itself stays where it is.</div>
+                    </details>
+                    @endif
+                    @else
+                    <div class="small text-muted">Maximum of {{ $maxPhotos }} photos reached. Remove one to add another.</div>
+                    @endif
                 </div>
 
                 <details class="border-top" {{ old('_form') === 'service-'.$svc->id ? 'open' : '' }}>

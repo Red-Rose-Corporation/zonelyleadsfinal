@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\SellerGallery;
 use App\Models\Service;
 use App\Models\ServicePhoto;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Add, remove and reorder the optional photos of a service. Used by both the seller and the admin
@@ -43,14 +45,16 @@ class ServicePhotoManager
      * @throws \DomainException when the service already has the maximum number of photos
      * @throws \RuntimeException when the photo could not be stored
      */
-    public function add(Service $service, UploadedFile $file): ServicePhoto
+    public function add(Service $service, UploadedFile|string $file): ServicePhoto
     {
         if ($service->photos()->count() >= Service::MAX_PHOTOS) {
             throw new \DomainException('A service can have up to ' . Service::MAX_PHOTOS . ' photos. Remove one to add another.');
         }
 
         // Store first: if this fails nothing is written to the database.
-        $path = ImageOptimizer::saveServicePhoto($file);
+        $path = is_string($file)
+            ? ImageOptimizer::saveServicePhotoFromPath($file)
+            : ImageOptimizer::saveServicePhoto($file);
 
         try {
             return DB::transaction(function () use ($service, $path) {
@@ -73,6 +77,61 @@ class ServicePhotoManager
             (new ServicePhoto(['path' => $path]))->deleteStoredFile(); // do not leave an orphan file
             throw $e;
         }
+    }
+
+    /**
+     * Use one of the seller's gallery photos as a service photo (a processed copy is stored, the gallery
+     * photo itself is untouched). Same minimum size as an upload.
+     *
+     * @throws \DomainException when the gallery photo is missing, too small, or the limit is reached
+     */
+    public function addFromGallery(Service $service, SellerGallery $gallery): ServicePhoto
+    {
+        $bytes = $this->readGalleryBytes((string) $gallery->image_path);
+        if ($bytes === null) {
+            throw new \DomainException('That gallery photo could not be read. Please upload the photo directly instead.');
+        }
+
+        $tmp = tempnam(sys_get_temp_dir(), 'svc');
+        try {
+            file_put_contents($tmp, $bytes);
+            $size = @getimagesize($tmp);
+            if (!$size || $size[0] < self::MIN_WIDTH || $size[1] < self::MIN_HEIGHT) {
+                throw new \DomainException('That gallery photo is too small and would look blurry as a service photo. Please upload a larger one (at least '
+                    . self::MIN_WIDTH . '×' . self::MIN_HEIGHT . ' px).');
+            }
+
+            return $this->add($service, $tmp);
+        } finally {
+            @unlink($tmp);
+        }
+    }
+
+    /** Raw bytes of a stored gallery image (R2 URL or local path), or null if it cannot be read. */
+    private function readGalleryBytes(string $path): ?string
+    {
+        try {
+            if (str_starts_with($path, 'http')) {
+                $key = ltrim((string) parse_url($path, PHP_URL_PATH), '/');
+                if ($key !== '' && Storage::disk('r2')->exists($key)) {
+                    $data = Storage::disk('r2')->get($key);
+                    if (is_string($data) && $data !== '') {
+                        return $data;
+                    }
+                }
+                // A photo stored locally while R2 was unavailable: its URL ends in /storage/<path>
+                $key = preg_replace('#^storage/#', '', $key);
+                if ($key !== '' && Storage::disk('public')->exists($key)) {
+                    return Storage::disk('public')->get($key);
+                }
+            } elseif ($path !== '' && Storage::disk('public')->exists($path)) {
+                return Storage::disk('public')->get($path);
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        return null;
     }
 
     public function remove(ServicePhoto $photo): void

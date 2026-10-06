@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Faq;
 use App\Models\SellerGallery;
 use App\Models\Service;
+use App\Models\ServicePhoto;
 use App\Models\User;
 use App\Services\ImageOptimizer;
+use App\Services\ServicePhotoManager;
 use App\Support\ProfileSectionDefs;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -54,7 +56,7 @@ class UserSectionController extends Controller
     public function edit($id)
     {
         $user     = $this->target($id);
-        $services = Service::where('user_id', $user->id)->orderBy('id')->get();
+        $services = Service::where('user_id', $user->id)->with('photos')->orderBy('id')->get();
         $faqs     = Faq::where('user_id', $user->id)->orderBy('sort_order')->orderBy('id')->get();
 
         // Simple repeatable sections (experience, education, ...) driven by ProfileSectionDefs.
@@ -139,6 +141,84 @@ class UserSectionController extends Controller
         $this->log('service.deleted', $user, $sid);
 
         return $this->back($user, 'services')->with('success', 'Service "' . $title . '" deleted.');
+    }
+
+    /* ----------------------------------------------------------- Service photos */
+
+    private function servicePhotoBack(User $user, $sid, string $kind, string $message)
+    {
+        return $this->back($user, 'service-' . $sid)->with($kind, $message);
+    }
+
+    /** One upload per request, so a failed or oversized photo never affects the others. */
+    public function storeServicePhoto(Request $request, $id, $sid)
+    {
+        $user    = $this->target($id);
+        $service = Service::where('user_id', $user->id)->findOrFail($sid);
+
+        $validator = \Illuminate\Support\Facades\Validator::make(
+            $request->all(),
+            ['photo' => ServicePhotoManager::fileRule()],
+            ServicePhotoManager::fileMessages('photo')
+        );
+        if ($validator->fails()) {
+            return $this->servicePhotoBack($user, $sid, 'error', $validator->errors()->first('photo'));
+        }
+
+        try {
+            $photo = app(ServicePhotoManager::class)->add($service, $request->file('photo'));
+        } catch (\DomainException $e) {
+            return $this->servicePhotoBack($user, $sid, 'error', $e->getMessage());
+        } catch (\Throwable $e) {
+            Log::warning('admin service photo upload failed: ' . $e->getMessage());
+            return $this->servicePhotoBack($user, $sid, 'error', 'Could not save the photo. Please try a different image.');
+        }
+
+        $this->log('service.photo.added', $user, $photo->id);
+        return $this->servicePhotoBack($user, $sid, 'success', 'Photo added.');
+    }
+
+    public function storeServicePhotoFromGallery(Request $request, $id, $sid)
+    {
+        $user    = $this->target($id);
+        $service = Service::where('user_id', $user->id)->findOrFail($sid);
+        $gallery = SellerGallery::where('user_id', $user->id)->findOrFail($request->input('gallery_id'));
+
+        try {
+            $photo = app(ServicePhotoManager::class)->addFromGallery($service, $gallery);
+        } catch (\DomainException $e) {
+            return $this->servicePhotoBack($user, $sid, 'error', $e->getMessage());
+        } catch (\Throwable $e) {
+            Log::warning('admin service photo from gallery failed: ' . $e->getMessage());
+            return $this->servicePhotoBack($user, $sid, 'error', 'Could not use that gallery photo. Please upload the photo directly instead.');
+        }
+
+        $this->log('service.photo.from_gallery', $user, $photo->id);
+        return $this->servicePhotoBack($user, $sid, 'success', 'Photo added from the gallery.');
+    }
+
+    public function makeServicePhotoMain($id, $sid, $pid)
+    {
+        $user    = $this->target($id);
+        $service = Service::where('user_id', $user->id)->findOrFail($sid);
+        $photo   = ServicePhoto::where('service_id', $service->id)->findOrFail($pid);
+
+        app(ServicePhotoManager::class)->makeMain($photo);
+        $this->log('service.photo.main', $user, $photo->id);
+
+        return $this->servicePhotoBack($user, $sid, 'success', 'Main photo changed.');
+    }
+
+    public function destroyServicePhoto($id, $sid, $pid)
+    {
+        $user    = $this->target($id);
+        $service = Service::where('user_id', $user->id)->findOrFail($sid);
+        $photo   = ServicePhoto::where('service_id', $service->id)->findOrFail($pid);
+
+        app(ServicePhotoManager::class)->remove($photo);
+        $this->log('service.photo.removed', $user, $pid);
+
+        return $this->servicePhotoBack($user, $sid, 'success', 'Photo removed.');
     }
 
     /* -------------------------------------------------------------------- FAQs */
