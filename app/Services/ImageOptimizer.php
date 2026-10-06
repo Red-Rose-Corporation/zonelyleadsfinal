@@ -126,26 +126,38 @@ class ImageOptimizer
      */
     public static function saveServicePhoto(UploadedFile $file): string
     {
-        $webp = self::withImageMemory($file->getPathname(), function () use ($file) {
+        // One decode, two sizes: the large 4:3 photo (opened card and lightbox) and a small thumbnail
+        // (closed card row), so a tiny thumbnail never downloads the large file.
+        [$large, $thumb] = self::withImageMemory($file->getPathname(), function () use ($file) {
             $image  = (new ImageManager(new Driver()))->read($file->getPathname());
             $anchor = $image->width() >= $image->height() ? 'center' : 'top';
+            $image->coverDown(1200, 900, $anchor);
 
-            return (string) $image->coverDown(1200, 900, $anchor)->toWebp(quality: 85);
+            return [
+                (string) $image->toWebp(quality: 85),
+                (string) $image->scaleDown(width: 480)->toWebp(quality: 80),
+            ];
         });
 
-        $filename = 'services/' . Str::uuid() . '.webp';
+        $base     = 'services/' . Str::uuid();
+        $filename = $base . '.webp';
+        $thumbKey = $base . '_t.webp';
 
         try {
-            if (Storage::disk('r2')->put($filename, $webp, 'public') !== false) {
+            if (Storage::disk('r2')->put($filename, $large, 'public') !== false) {
+                // The thumbnail is optional: if it fails the page falls back to the large photo.
+                try { Storage::disk('r2')->put($thumbKey, $thumb, 'public'); } catch (\Throwable $e) {}
+
                 return Storage::disk('r2')->url($filename);
             }
         } catch (\Throwable $e) {
             // fall through to the local disk
         }
 
-        if (Storage::disk('public')->put($filename, $webp) === false) {
+        if (Storage::disk('public')->put($filename, $large) === false) {
             throw new \RuntimeException('Could not store the service photo.');
         }
+        Storage::disk('public')->put($thumbKey, $thumb);
 
         // Relative path, so ServicePhoto builds the URL and delete_file() can remove it later.
         return $filename;
