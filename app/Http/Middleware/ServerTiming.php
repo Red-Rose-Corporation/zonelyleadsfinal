@@ -47,6 +47,10 @@ class ServerTiming
             $boot, $connect, $dbMs, $count, $total
         ));
 
+        // Railway sets these inside every container; shows which replica/region answered.
+        $replica = trim((getenv('RAILWAY_REPLICA_REGION') ?: '-') . ' ' . substr((string) (getenv('RAILWAY_REPLICA_ID') ?: '-'), 0, 8));
+        $response->headers->set('X-Replica', $replica);
+
         return $response;
     }
 }
