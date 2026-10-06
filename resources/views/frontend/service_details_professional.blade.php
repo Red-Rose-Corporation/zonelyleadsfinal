@@ -1405,6 +1405,14 @@
         if (e.key === 'Escape') svpClose();
         else if (e.key === 'ArrowRight') svpStep(1);
         else if (e.key === 'ArrowLeft') svpStep(-1);
+        else if (e.key === 'Tab') {
+            // keep keyboard focus inside the viewer while it is open
+            const f = Array.prototype.filter.call(document.querySelectorAll('#svpLb button'), function (b) { return b.offsetParent !== null; });
+            if (!f.length) return;
+            const first = f[0], last = f[f.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
     });
     (function () {
         const lb = document.getElementById('svpLb');
