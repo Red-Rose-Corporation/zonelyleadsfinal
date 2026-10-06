@@ -139,6 +139,8 @@ class ProfileController extends Controller
             if ($request->hasFile('profile_photo')) {
                 try {
                     $user->profile_photo = ImageOptimizer::saveProfilePhoto($request->file('profile_photo'));
+                } catch (\Illuminate\Validation\ValidationException $e) {
+                    throw $e; // e.g. photo far too large: show the message, do not store the original
                 } catch (\Throwable $e) {
                     try {
                         $path = $request->file('profile_photo')->store('profiles', 'public');

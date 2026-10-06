@@ -203,6 +203,8 @@ class UserSectionController extends Controller
 
         try {
             $path = ImageOptimizer::saveProfilePhoto($request->file('profile_photo'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->back($user, 'photo')->with('error', collect($e->errors())->flatten()->first());
         } catch (\Throwable $e) {
             Log::warning('admin profile photo upload failed: ' . $e->getMessage());
             return $this->back($user, 'photo')->with('error', 'Could not save the photo. Please try a different image.');
@@ -241,6 +243,8 @@ class UserSectionController extends Controller
 
         try {
             $path = ImageOptimizer::saveGalleryPhoto($request->file('photo'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->back($user, 'gallery')->with('error', collect($e->errors())->flatten()->first());
         } catch (\Throwable $e) {
             Log::warning('admin gallery upload failed: ' . $e->getMessage());
             return $this->back($user, 'gallery')->with('error', 'Could not save the photo. Please try a different image.');

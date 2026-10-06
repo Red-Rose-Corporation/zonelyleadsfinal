@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
 
@@ -15,26 +16,52 @@ class ImageOptimizer
      * Returns full public URL (https://...) to store in DB.
      */
     /**
-     * Resize gallery photo: max 1200×900, WebP quality 85, stored in R2.
-     * Returns full public URL or storage path.
+     * Gallery photo: at most 1200x900 (the profile shows it in a 4:3 frame, so more pixels are wasted
+     * bytes), WebP quality 82. Never enlarges. Returns the public URL.
+     *
+     * A photo that is too large to process safely is refused with a ValidationException (shown to the
+     * person as a normal form error) instead of falling back to storing the huge original.
      */
     public static function saveGalleryPhoto(UploadedFile $file): string
     {
         $filename = 'gallery/' . Str::uuid() . '.webp';
 
         try {
-            $manager = new ImageManager(new Driver());
-            $encoded = $manager->read($file->getPathname())
-                ->scaleDown(width: 1600, height: 1200)
-                ->toWebp(quality: 88);
+            $webp = self::withImageMemory($file->getPathname(), function () use ($file) {
+                return (string) (new ImageManager(new Driver()))->read($file->getPathname())
+                    ->scaleDown(width: 1200, height: 900)
+                    ->toWebp(quality: 82);
+            });
 
-            Storage::disk('r2')->put($filename, (string) $encoded, 'public');
-
-            return Storage::disk('r2')->url($filename);
+            return self::storeWebp($filename, $webp);
+        } catch (\DomainException $e) {
+            throw ValidationException::withMessages(['photo' => $e->getMessage()]);
         } catch (\Throwable $e) {
             $path = $file->store('gallery', 'public');
             return asset('storage/' . $path);
         }
+    }
+
+    /**
+     * Store WebP bytes on R2, or on the local public disk if R2 fails. The R2 disk has `throw => false`,
+     * so a failed put() returns false instead of raising: that must never be saved as a good photo.
+     * Returns the public URL.
+     */
+    private static function storeWebp(string $key, string $data): string
+    {
+        try {
+            if (Storage::disk('r2')->put($key, $data, 'public') !== false) {
+                return Storage::disk('r2')->url($key);
+            }
+        } catch (\Throwable $e) {
+            // fall through to the local disk
+        }
+
+        if (Storage::disk('public')->put($key, $data) === false) {
+            throw new \RuntimeException('Could not store the photo.');
+        }
+
+        return asset('storage/' . $key);
     }
 
     /**
@@ -171,7 +198,7 @@ class ImageOptimizer
         try {
             [$cropped, $full] = self::encodeProfilePhoto($file->getPathname());
 
-            Storage::disk('r2')->put($filename, $cropped, 'public');
+            $url = self::storeWebp($filename, $cropped);
 
             // Best-effort backup of the uncropped photo; never blocks the upload.
             try {
@@ -180,9 +207,11 @@ class ImageOptimizer
                 // ignore
             }
 
-            return Storage::disk('r2')->url($filename);
+            return $url;
+        } catch (\DomainException $e) {
+            throw ValidationException::withMessages(['profile_photo' => $e->getMessage()]);
         } catch (\Throwable $e) {
-            // R2 failed — fall back to local public disk
+            // Could not process or store: fall back to the local public disk as-is
             $path = $file->store($folder, 'public');
             return asset('storage/' . $path);
         }
