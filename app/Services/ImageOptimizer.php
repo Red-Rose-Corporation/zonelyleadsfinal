@@ -55,6 +55,40 @@ class ImageOptimizer
         return [(string) $cropped, (string) $full];
     }
 
+    /**
+     * Service photo: 4:3 crop, at most 1200x900, WebP. coverDown never enlarges, so a small image
+     * cannot come out blurry (callers also enforce a minimum size). Landscape and square images are
+     * cropped from the centre, portrait ones keep the top so heads stay in frame.
+     *
+     * Throws if the photo could not be stored anywhere: the R2 disk has `throw => false`, so put()
+     * returns false on failure instead of raising, and that must not be saved as a good photo.
+     * Returns the public URL (R2) or a local public-disk path.
+     */
+    public static function saveServicePhoto(UploadedFile $file): string
+    {
+        $manager = new ImageManager(new Driver());
+        $image   = $manager->read($file->getPathname());
+        $anchor  = $image->width() >= $image->height() ? 'center' : 'top';
+        $webp    = (string) $image->coverDown(1200, 900, $anchor)->toWebp(quality: 85);
+
+        $filename = 'services/' . Str::uuid() . '.webp';
+
+        try {
+            if (Storage::disk('r2')->put($filename, $webp, 'public') !== false) {
+                return Storage::disk('r2')->url($filename);
+            }
+        } catch (\Throwable $e) {
+            // fall through to the local disk
+        }
+
+        if (Storage::disk('public')->put($filename, $webp) === false) {
+            throw new \RuntimeException('Could not store the service photo.');
+        }
+
+        // Relative path, so ServicePhoto builds the URL and delete_file() can remove it later.
+        return $filename;
+    }
+
     public static function saveProfilePhoto(UploadedFile $file, string $folder = 'profiles'): string
     {
         $uuid     = Str::uuid();
