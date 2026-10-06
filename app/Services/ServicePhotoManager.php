@@ -25,9 +25,15 @@ class ServicePhotoManager
         return 'required|image|mimes:jpg,jpeg,png,webp|max:10240|dimensions:min_width=' . self::MIN_WIDTH . ',min_height=' . self::MIN_HEIGHT;
     }
 
+    /** Plain-language messages for every way the upload rule can fail. */
     public static function fileMessages(string $field = 'photo'): array
     {
         return [
+            $field . '.required'   => 'Please choose a photo.',
+            $field . '.uploaded'   => 'The photo could not be uploaded. It may be too large (10 MB is the limit). Please try a smaller one.',
+            $field . '.image'      => 'Please choose a photo (JPG, PNG or WebP).',
+            $field . '.mimes'      => 'Please use a JPG, PNG or WebP photo. If it came from an iPhone, share it as JPG.',
+            $field . '.max'        => 'That photo is too large (10 MB is the limit). Please try a smaller one.',
             $field . '.dimensions' => 'That photo is too small and would look blurry. Please use one at least '
                 . self::MIN_WIDTH . '×' . self::MIN_HEIGHT . ' px (1200×900 or larger is best).',
         ];
@@ -48,7 +54,14 @@ class ServicePhotoManager
 
         try {
             return DB::transaction(function () use ($service, $path) {
-                $next = ($service->photos()->max('sort_order') ?? -1) + 1;
+                // Lock the service row so two uploads at the same moment cannot both pass the limit.
+                Service::whereKey($service->id)->lockForUpdate()->first();
+
+                if (ServicePhoto::where('service_id', $service->id)->count() >= Service::MAX_PHOTOS) {
+                    throw new \DomainException('A service can have up to ' . Service::MAX_PHOTOS . ' photos. Remove one to add another.');
+                }
+
+                $next = (ServicePhoto::where('service_id', $service->id)->max('sort_order') ?? -1) + 1;
 
                 return ServicePhoto::create([
                     'service_id' => $service->id,
@@ -65,8 +78,12 @@ class ServicePhotoManager
     public function remove(ServicePhoto $photo): void
     {
         $service = $photo->service;
-        $photo->deleteStoredFile();
+        $file    = new ServicePhoto(['path' => $photo->path]);
+
+        // Row first, file second: if the row cannot be deleted the photo stays intact and visible,
+        // instead of a row pointing at a file that is already gone.
         $photo->delete();
+        $file->deleteStoredFile();
 
         if ($service) {
             $this->resequence($service);
