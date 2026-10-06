@@ -217,6 +217,14 @@ class HomeController extends Controller
             ->with(['contacts','languages','educations','memberships','services.category','reviews.reviewer','category','twilioNumber','faqs','experiences','certifications','gallery'])
             ->firstOrFail();
 
+        // Optional service photos. Loaded on their own so that, if anything about them ever fails,
+        // the page still renders exactly as it did before photos existed.
+        try {
+            $user->services->load('photos');
+        } catch (\Throwable $e) {
+            // no photos
+        }
+
         $isOverdue = $user->isOverdue();
 
         return view('frontend.service_details_professional', compact('user', 'isOverdue'));

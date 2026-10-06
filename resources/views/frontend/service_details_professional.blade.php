@@ -197,6 +197,41 @@
     @media (min-width: 768px) { .gal-frame { height: auto; aspect-ratio: 4 / 3; } }
     .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
     .accordion-content.open { max-height: 500px; }
+    /* Service photos (only cards whose service has photos carry .svp-*; all other cards are untouched) */
+    .accordion-content.svp-open.open { max-height: 1400px; }
+    .svp-card { container-type: inline-size; }
+    .svp-card .svp-th { position: relative; width: 50px; height: 50px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(15,23,42,.06); }
+    .svp-th img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    @container (max-width: 360px) { .svp-card .svp-th { width: 42px; height: 42px; } }
+    /* On narrow cards let a photo card's title use two lines instead of being cut to a few letters */
+    @container (max-width: 400px) { .svp-card .svp-title { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } }
+    .svp-in { display: grid; grid-template-columns: minmax(0,1fr); align-items: start; }
+    .svp-gal { min-width: 0; padding: 4px 20px 12px; }
+    @container (min-width: 430px) { .svp-in { grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); } .svp-gal { padding: 16px 20px 12px 0; } }
+    .svp-main { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; border: 0; border-radius: 12px; overflow: hidden; background: #e2e8f0; box-shadow: inset 0 0 0 1px rgba(15,23,42,.06); cursor: zoom-in; }
+    .svp-main img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
+    .svp-main:focus-visible, .svp-tb:focus-visible, .svp-lb button:focus-visible { outline: 2px solid #0f766e; outline-offset: 2px; }
+    .svp-bdg { position: absolute; left: 8px; bottom: 8px; display: flex; align-items: baseline; gap: 5px; padding: 4px 9px; border-radius: 9px; background: rgba(255,255,255,.95); box-shadow: 0 1px 4px rgba(15,23,42,.18); }
+    .svp-bdg b { font-size: 16px; color: #115e59; }
+    .svp-bdg small { font-size: 11px; color: #475569; font-weight: 600; }
+    .svp-zm { position: absolute; right: 8px; bottom: 8px; display: flex; align-items: center; gap: 4px; padding: 4px 9px; border-radius: 9999px; background: rgba(15,23,42,.72); color: #fff; font-size: 11px; font-weight: 600; }
+    .svp-strip { display: flex; gap: 8px; margin-top: 8px; }
+    .svp-tb { flex: none; width: 56px; height: 42px; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; background: #e2e8f0; cursor: pointer; }
+    .svp-tb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .svp-tb.on { border-color: #0f766e; }
+    .svp-lb { position: fixed; inset: 0; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 16px; background: rgba(10,15,25,.92); }
+    .svp-lb.on { display: flex; }
+    .svp-lb-top { position: absolute; top: 12px; left: 16px; right: 16px; display: flex; align-items: center; justify-content: space-between; color: #fff; font-size: 14px; }
+    .svp-lb-top b { font-size: 16px; } .svp-lb-top span { opacity: .75; margin-left: 8px; }
+    .svp-lb-x { width: 38px; height: 38px; border: 0; border-radius: 9999px; background: rgba(255,255,255,.12); color: #fff; font-size: 18px; cursor: pointer; }
+    .svp-lb-img { max-width: min(1000px, 92vw); max-height: 68vh; display: flex; align-items: center; justify-content: center; }
+    .svp-lb-img img { max-width: 100%; max-height: 68vh; border-radius: 10px; object-fit: contain; display: block; }
+    .svp-lb-ar { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: 0; border-radius: 9999px; background: rgba(255,255,255,.14); color: #fff; font-size: 18px; cursor: pointer; }
+    .svp-lb-pv { left: 14px; } .svp-lb-nx { right: 14px; }
+    .svp-lb-ts { display: flex; gap: 10px; margin-top: 16px; }
+    .svp-lb-ts button { width: 68px; height: 52px; padding: 0; border: 2px solid transparent; border-radius: 8px; overflow: hidden; background: #334155; opacity: .7; cursor: pointer; }
+    .svp-lb-ts button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .svp-lb-ts button.on { border-color: #5EEAD4; opacity: 1; }
     .faq-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
     .faq-content.open { max-height: 200px; }
     .booking-body { max-height: 0; overflow: hidden; transition: max-height 0.45s ease-out, opacity 0.3s ease; opacity: 0; }
@@ -434,15 +469,17 @@
                             $hasPrice = $svc->price && !in_array($svc->pricing_type, ['free','contact']);
                             $svcIcon  = $svcIcons[$svcIdx % count($svcIcons)]; $svcIdx++;
                         @endphp
-                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md hover:border-teal-100 transition-all duration-200">
+                        @php $svcPhotos = $svc->relationLoaded('photos') ? $svc->photos : collect(); $hasSvcPhotos = $svcPhotos->count() > 0; @endphp
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md hover:border-teal-100 transition-all duration-200{{ $hasSvcPhotos ? ' svp-card' : '' }}">
                             <div class="h-1 bg-gradient-to-r from-teal-600 to-indigo-500"></div>
-                            <button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-teal-50/30 transition-colors">
+                            <button onclick="toggleAccordion(this)" aria-expanded="false" {!! $hasSvcPhotos ? 'onpointerenter="svpWarm(this)" onfocus="svpWarm(this)"' : '' !!} class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-teal-50/30 transition-colors">
                                 <div class="flex items-center gap-3 sm:gap-6 min-w-0">
-                                    <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">
+                                    <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors{{ $hasSvcPhotos ? ' svp-th' : '' }}">
                                         <i class="fas {{ $svcIcon }} text-teal-700 text-base"></i>
+                                        @if($hasSvcPhotos)<img src="{{ $svcPhotos->first()->thumb_url }}" alt="" width="50" height="50" loading="lazy" decoding="async" onerror="if(this.dataset.f!=='1'){this.dataset.f='1';this.src='{{ $svcPhotos->first()->url }}';}else{this.style.display='none';}">@endif
                                     </div>
                                     <div class="min-w-0">
-                                        <p class="font-bold text-base text-slate-900 leading-snug truncate">{{ $svc->title }}</p>
+                                        <p class="font-bold text-base text-slate-900 leading-snug truncate{{ $hasSvcPhotos ? ' svp-title' : '' }}">{{ $svc->title }}</p>
                                         @if($features)
                                         <p class="text-xs text-slate-400 mt-0.5">{{ count($features) }} {{ Str::plural('item', count($features)) }} included</p>
                                         @elseif($svc->description)
@@ -466,7 +503,8 @@
                                     </div>
                                 </div>
                             </button>
-                            <div class="accordion-content border-t border-slate-100">
+                            <div class="accordion-content border-t border-slate-100{{ $hasSvcPhotos ? ' svp-open' : '' }}">
+                                @if($hasSvcPhotos)<div class="svp-in"><div class="svp-text">@endif
                                 @if($features)
                                 <div class="px-5 pt-4 pb-3 space-y-2">
                                     @foreach($features as $feature)
@@ -482,6 +520,7 @@
                                 @if($svc->description)
                                 <p class="px-5 pt-2 pb-3 text-sm text-slate-500 leading-relaxed">{{ $svc->description }}</p>
                                 @endif
+                                @if($hasSvcPhotos)</div>@include('frontend.partials.service_photos_panel', ['svc' => $svc, 'svcPhotos' => $svcPhotos, 'hasPrice' => $hasPrice, 'ptLabel' => $ptLabel])</div>@endif
                                 <div class="px-5 pb-4 pt-3 flex items-center gap-3 border-t border-slate-100 bg-slate-50/50">
                                     <a href="#contact" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
                                         <i class="fas fa-paper-plane text-xs"></i> Get a Quote
@@ -650,15 +689,17 @@
                         $hasPrice = $svc->price && !in_array($svc->pricing_type, ['free','contact']);
                         $svcIcon  = $svcIcons2[$svcIdx2 % count($svcIcons2)]; $svcIdx2++;
                     @endphp
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md hover:border-teal-100 transition-all duration-200">
+                    @php $svcPhotos = $svc->relationLoaded('photos') ? $svc->photos : collect(); $hasSvcPhotos = $svcPhotos->count() > 0; @endphp
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden group hover:shadow-md hover:border-teal-100 transition-all duration-200{{ $hasSvcPhotos ? ' svp-card' : '' }}">
                         <div class="h-1 bg-gradient-to-r from-teal-600 to-indigo-500"></div>
-                        <button onclick="toggleAccordion(this)" class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-teal-50/30 transition-colors">
+                        <button onclick="toggleAccordion(this)" aria-expanded="false" {!! $hasSvcPhotos ? 'onpointerenter="svpWarm(this)" onfocus="svpWarm(this)"' : '' !!} class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-teal-50/30 transition-colors">
                             <div class="flex items-center gap-3 sm:gap-6 min-w-0">
-                                <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors">
+                                <div class="w-11 h-11 bg-teal-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-teal-100 transition-colors{{ $hasSvcPhotos ? ' svp-th' : '' }}">
                                     <i class="fas {{ $svcIcon }} text-teal-700 text-base"></i>
+                                    @if($hasSvcPhotos)<img src="{{ $svcPhotos->first()->thumb_url }}" alt="" width="50" height="50" loading="lazy" decoding="async" onerror="if(this.dataset.f!=='1'){this.dataset.f='1';this.src='{{ $svcPhotos->first()->url }}';}else{this.style.display='none';}">@endif
                                 </div>
                                 <div class="min-w-0">
-                                    <p class="font-bold text-base text-slate-900 leading-snug truncate">{{ $svc->title }}</p>
+                                    <p class="font-bold text-base text-slate-900 leading-snug truncate{{ $hasSvcPhotos ? ' svp-title' : '' }}">{{ $svc->title }}</p>
                                     @if($features)
                                     <p class="text-xs text-slate-400 mt-0.5">{{ count($features) }} {{ Str::plural('item', count($features)) }} included</p>
                                     @elseif($svc->description)
@@ -682,7 +723,8 @@
                                 </div>
                             </div>
                         </button>
-                        <div class="accordion-content border-t border-slate-100">
+                        <div class="accordion-content border-t border-slate-100{{ $hasSvcPhotos ? ' svp-open' : '' }}">
+                            @if($hasSvcPhotos)<div class="svp-in"><div class="svp-text">@endif
                             @if($features)
                             <div class="px-5 pt-4 pb-3 space-y-2">
                                 @foreach($features as $feature)
@@ -698,6 +740,7 @@
                             @if($svc->description)
                             <p class="px-5 pt-2 pb-3 text-sm text-slate-500 leading-relaxed">{{ $svc->description }}</p>
                             @endif
+                            @if($hasSvcPhotos)</div>@include('frontend.partials.service_photos_panel', ['svc' => $svc, 'svcPhotos' => $svcPhotos, 'hasPrice' => $hasPrice, 'ptLabel' => $ptLabel])</div>@endif
                             <div class="px-5 pb-4 pt-3 flex items-center gap-3 border-t border-slate-100 bg-slate-50/50">
                                 <a href="#contact" class="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-sm">
                                     <i class="fas fa-paper-plane text-xs"></i> Get a Quote
@@ -1274,6 +1317,10 @@
 </div>
 @endif
 
+@if($activeServices->contains(fn ($sv) => $sv->relationLoaded('photos') && $sv->photos->count()))
+@include('frontend.partials.service_photo_lightbox')
+@endif
+
 </div>
 @endsection
 
@@ -1283,8 +1330,95 @@
         const content = btn.nextElementSibling;
         const chevron = btn.querySelector('.accordion-icon');
         content.classList.toggle('open');
+        btn.setAttribute('aria-expanded', content.classList.contains('open') ? 'true' : 'false');
         if (chevron) chevron.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : '';
     }
+
+    // ---- Service photos ------------------------------------------------------------------------
+    // Start loading a card's photos as soon as someone points at or focuses its header, so they are
+    // ready when it opens (lazy images inside a closed card would otherwise wait until it is open).
+    function svpWarm(btn) {
+        const c = btn.nextElementSibling;
+        if (!c || c.dataset.warm) return;
+        c.dataset.warm = '1';
+        c.querySelectorAll('img[loading="lazy"]').forEach(function (i) { i.loading = 'eager'; });
+    }
+    function svpPick(btn, k) {
+        const gal = btn.closest('.svp-gal');
+        const photos = JSON.parse(gal.dataset.photos);
+        const img = gal.querySelector('.svp-main img');
+        img.style.display = '';
+        img.src = photos[k];
+        gal.dataset.cur = k;
+        gal.querySelectorAll('.svp-tb').forEach(function (b, x) { b.classList.toggle('on', x === k); b.setAttribute('aria-pressed', x === k ? 'true' : 'false'); });
+    }
+    let _svp = null;
+    function svpOpen(gal) {
+        _svp = { gal: gal, photos: JSON.parse(gal.dataset.photos), title: gal.dataset.title || '', i: parseInt(gal.dataset.cur || '0', 10) || 0, opener: document.activeElement };
+        svpPaint();
+        document.getElementById('svpLb').classList.add('on');
+        document.body.style.overflow = 'hidden';
+        document.getElementById('svpLbX').focus();
+    }
+    function svpClose() {
+        if (!_svp) return;
+        document.getElementById('svpLb').classList.remove('on');
+        document.body.style.overflow = '';
+        const thumbs = _svp.gal.querySelectorAll('.svp-tb');
+        if (thumbs[_svp.i]) svpPick(thumbs[_svp.i], _svp.i);
+        else _svp.gal.querySelector('.svp-main img').src = _svp.photos[_svp.i];
+        if (_svp.opener && _svp.opener.focus) _svp.opener.focus();
+        _svp = null;
+    }
+    function svpStep(d) {
+        if (!_svp) return;
+        const n = _svp.photos.length;
+        _svp.i = (_svp.i + d + n) % n;
+        svpPaint();
+    }
+    function svpPaint() {
+        const n = _svp.photos.length;
+        document.getElementById('svpLbT').textContent = _svp.title;
+        document.getElementById('svpLbC').textContent = n > 1 ? (_svp.i + 1) + ' / ' + n : '';
+        const img = document.getElementById('svpLbI');
+        img.src = _svp.photos[_svp.i];
+        img.alt = _svp.title + ' photo ' + (_svp.i + 1);
+        document.getElementById('svpLbTs').innerHTML = '';
+        if (n > 1) {
+            _svp.photos.forEach(function (u, k) {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = k === _svp.i ? 'on' : '';
+                b.setAttribute('aria-label', 'Photo ' + (k + 1));
+                b.onclick = function () { _svp.i = k; svpPaint(); };
+                const t = document.createElement('img');
+                t.src = u; t.alt = '';
+                b.appendChild(t);
+                document.getElementById('svpLbTs').appendChild(b);
+            });
+            new Image().src = _svp.photos[(_svp.i + 1) % n];
+        }
+        document.querySelectorAll('#svpLb .svp-lb-ar').forEach(function (b) { b.style.display = n > 1 ? '' : 'none'; });
+    }
+    document.addEventListener('keydown', function (e) {
+        if (!_svp) return;
+        if (e.key === 'Escape') svpClose();
+        else if (e.key === 'ArrowRight') svpStep(1);
+        else if (e.key === 'ArrowLeft') svpStep(-1);
+    });
+    (function () {
+        const lb = document.getElementById('svpLb');
+        if (!lb) return;
+        lb.addEventListener('click', function (e) { if (e.target === lb) svpClose(); });
+        let tx = null;
+        lb.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; }, { passive: true });
+        lb.addEventListener('touchend', function (e) {
+            if (tx === null) return;
+            const dx = e.changedTouches[0].clientX - tx;
+            if (Math.abs(dx) > 50) svpStep(dx < 0 ? 1 : -1);
+            tx = null;
+        });
+    })();
 
     function toggleFaq(btn) {
         const content = btn.nextElementSibling;
