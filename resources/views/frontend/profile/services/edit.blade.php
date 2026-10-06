@@ -45,6 +45,8 @@
             <span class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-lg {{ $photos->count() ? 'bg-teal-50 text-teal-700' : 'bg-slate-100 text-slate-500' }}">{{ $photos->count() }}/{{ $maxPhotos }}</span>
         </div>
 
+        <div id="svcPhotoFlash" class="hidden mt-3 p-3 text-xs rounded-xl" role="status"></div>
+
         @if(session('photo_success'))
         <div class="mt-3 p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs rounded-xl flex items-center gap-2">
             <i class="fa-solid fa-circle-check"></i> {{ session('photo_success') }}
@@ -69,14 +71,14 @@
                 </div>
                 <div class="flex items-center gap-1.5 mt-1.5">
                     @if($idx > 0)
-                    <form action="{{ route('user.services.photos.main', [$service->id, $ph->id]) }}" method="POST" class="flex-1">
+                    <form action="{{ route('user.services.photos.main', [$service->id, $ph->id]) }}" method="POST" class="flex-1" data-ajax>
                         @csrf
                         <button type="submit" class="w-full text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-teal-700 hover:text-white rounded-lg py-1.5 transition">Make main</button>
                     </form>
                     @else
                     <span class="flex-1 text-[11px] text-slate-400 text-center py-1.5">Thumbnail</span>
                     @endif
-                    <form action="{{ route('user.services.photos.destroy', [$service->id, $ph->id]) }}" method="POST" onsubmit="return confirm('Remove this photo?')">
+                    <form action="{{ route('user.services.photos.destroy', [$service->id, $ph->id]) }}" method="POST" data-ajax onsubmit="return confirm('Remove this photo?')">
                         @csrf @method('DELETE')
                         <button type="submit" aria-label="Remove photo {{ $idx + 1 }}" class="w-8 h-7 text-xs text-slate-500 bg-slate-100 hover:bg-red-500 hover:text-white rounded-lg transition"><i class="fa-solid fa-trash"></i></button>
                     </form>
@@ -112,7 +114,7 @@
             <summary class="text-xs font-semibold text-teal-700 cursor-pointer">Or choose from your photo gallery ({{ $gallery->count() }})</summary>
             <div class="flex flex-wrap gap-2 mt-2">
                 @foreach($gallery as $g)
-                <form action="{{ route('user.services.photos.gallery', $service->id) }}" method="POST">
+                <form action="{{ route('user.services.photos.gallery', $service->id) }}" method="POST" data-ajax>
                     @csrf
                     <input type="hidden" name="gallery_id" value="{{ $g->id }}">
                     <button type="submit" class="block rounded-lg overflow-hidden border border-slate-200 hover:border-teal-500 transition" style="width:84px;height:63px" title="Use this photo">
@@ -267,23 +269,38 @@ document.querySelector('[name=title]').addEventListener('input', updatePreview);
 document.querySelector('[name=price]').addEventListener('input', updatePreview);
 document.querySelector('[name=pricing_type]').addEventListener('change', updatePreview);
 </script>
-@if($slotsLeft > 0)
 <script>
-// Photo uploader: checks the photo, shrinks big ones in the browser (much faster on mobile data), uploads
-// with a progress bar, then reloads to show the result. The server re-checks everything.
+// Service photos: checks and shrinks photos in the browser, uploads with a progress bar and then refreshes
+// ONLY the Photos card, so anything typed in the service form below is never lost. The server re-checks everything.
 (function () {
-    var zone  = document.getElementById('svcPhotoZone');
-    if (!zone) return;
-    var input = document.getElementById('svcPhotoInput');
-    var queue = document.getElementById('svcPhotoQueue');
-    var url   = zone.dataset.url;
-    var slots = parseInt(zone.dataset.slots, 10) || 0;
-    var token = (document.querySelector('meta[name="csrf-token"]') || {}).content || '';
     var MIN_W = {{ \App\Services\ServicePhotoManager::MIN_WIDTH }}, MIN_H = {{ \App\Services\ServicePhotoManager::MIN_HEIGHT }};
     var MAX_SIDE = 2000, SKIP_BELOW = 1.5 * 1024 * 1024;
-    var busy = false, anySuccess = false;
+    var busy = false;
 
-    function row(file) {
+    function token() { return (document.querySelector('meta[name="csrf-token"]') || {}).content || ''; }
+    function card() { return document.getElementById('photos'); }
+
+    function flash(text, bad) {
+        var f = document.getElementById('svcPhotoFlash');
+        if (!f) return;
+        if (!text) { f.className = 'hidden'; f.textContent = ''; return; }
+        f.textContent = text;
+        f.className = 'mt-3 p-3 text-xs rounded-xl ' + (bad ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700');
+    }
+
+    // Reload just the card from the server and swap it in.
+    function refresh() {
+        return fetch(window.location.pathname, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { if (!r.ok) throw new Error('refresh'); return r.text(); })
+            .then(function (html) {
+                var fresh = new DOMParser().parseFromString(html, 'text/html').getElementById('photos');
+                if (!fresh || !card()) throw new Error('refresh');
+                card().replaceWith(fresh);
+                bind();
+            });
+    }
+
+    function row(queue, file) {
         var el = document.createElement('div');
         el.className = 'flex items-center gap-3 p-2.5 bg-slate-50 border border-slate-100 rounded-xl';
         var img = document.createElement('img');
@@ -308,7 +325,7 @@ document.querySelector('[name=pricing_type]').addEventListener('change', updateP
         el.appendChild(img); el.appendChild(box);
         queue.appendChild(el);
         return {
-            status: function (t, bad) { status.textContent = t; status.className = 'text-[11px] mt-0.5 ' + (bad ? 'text-red-600 font-semibold' : 'text-slate-400'); },
+            status: function (t) { status.textContent = t; },
             progress: function (n) { bar.style.width = n + '%'; },
             fail: function (t) { status.textContent = t; status.className = 'text-[11px] mt-0.5 text-red-600 font-semibold'; track.style.display = 'none'; },
             done: function () { bar.style.width = '100%'; status.textContent = 'Uploaded'; status.className = 'text-[11px] mt-0.5 text-emerald-600 font-semibold'; }
@@ -324,7 +341,7 @@ document.querySelector('[name=pricing_type]').addEventListener('change', updateP
         });
     }
 
-    // Returns the file to upload: a resized JPEG when that is smaller, otherwise the original.
+    // A resized JPEG when that is smaller than the original, otherwise the original.
     function shrink(file, im) {
         var w = im.naturalWidth, h = im.naturalHeight, scale = Math.min(1, MAX_SIDE / Math.max(w, h));
         if (scale === 1 && file.size <= SKIP_BELOW) return Promise.resolve(file);
@@ -343,11 +360,11 @@ document.querySelector('[name=pricing_type]').addEventListener('change', updateP
         } catch (e) { return Promise.resolve(file); }
     }
 
-    function send(file, r) {
+    function send(url, file, r) {
         return new Promise(function (resolve) {
             var x = new XMLHttpRequest();
             x.open('POST', url);
-            x.setRequestHeader('X-CSRF-TOKEN', token);
+            x.setRequestHeader('X-CSRF-TOKEN', token());
             x.setRequestHeader('Accept', 'application/json');
             x.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
             x.upload.onprogress = function (e) { if (e.lengthComputable) r.progress(Math.round(e.loaded / e.total * 100)); };
@@ -365,8 +382,8 @@ document.querySelector('[name=pricing_type]').addEventListener('change', updateP
         });
     }
 
-    function one(file) {
-        var r = row(file);
+    function one(url, queue, file, result) {
+        var r = row(queue, file);
         if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
             r.fail('Please use a JPG, PNG or WebP photo. If it came from an iPhone, share it as JPG.');
             return Promise.resolve();
@@ -379,8 +396,8 @@ document.querySelector('[name=pricing_type]').addEventListener('change', updateP
             r.status('Preparing...');
             return shrink(file, im).then(function (out) {
                 r.status('Uploading' + (out !== file ? ' (resized)' : '') + '...');
-                return send(out, r).then(function (res) {
-                    if (res.ok) { anySuccess = true; r.done(); } else { r.fail(res.message); }
+                return send(url, out, r).then(function (res) {
+                    if (res.ok) { result.added++; r.done(); } else { result.errors.push(res.message); r.fail(res.message); }
                 });
             });
         }, function () {
@@ -389,10 +406,13 @@ document.querySelector('[name=pricing_type]').addEventListener('change', updateP
     }
 
     function run(list) {
-        if (busy) return;
+        var zone = document.getElementById('svcPhotoZone'), queue = document.getElementById('svcPhotoQueue');
+        if (busy || !zone || !queue) return;
         var files = Array.prototype.slice.call(list || []);
         if (!files.length) return;
+        var slots = parseInt(zone.dataset.slots, 10) || 0, url = zone.dataset.url;
         queue.innerHTML = '';
+        flash('');
         if (files.length > slots) {
             var note = document.createElement('p');
             note.className = 'text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2';
@@ -400,20 +420,45 @@ document.querySelector('[name=pricing_type]').addEventListener('change', updateP
             queue.appendChild(note);
             files = files.slice(0, slots);
         }
-        busy = true; anySuccess = false;
+        busy = true;
         zone.style.opacity = '.6';
-        files.reduce(function (p, f) { return p.then(function () { return one(f); }); }, Promise.resolve()).then(function () {
-            busy = false; zone.style.opacity = '';
-            input.value = '';
-            if (anySuccess) setTimeout(function () { window.location.href = window.location.pathname + '#photos'; window.location.reload(); }, 700);
+        var result = { added: 0, errors: [] };
+        files.reduce(function (p, f) { return p.then(function () { return one(url, queue, f, result); }); }, Promise.resolve()).then(function () {
+            busy = false;
+            if (!result.added) { zone.style.opacity = ''; var inp = document.getElementById('svcPhotoInput'); if (inp) inp.value = ''; return; }
+            var msg = result.added + (result.added > 1 ? ' photos added.' : ' photo added.');
+            refresh().then(function () { flash(msg + (result.errors.length ? ' ' + result.errors.join(' ') : ''), result.errors.length > 0); })
+                     .catch(function () { window.location.href = window.location.pathname + '#photos'; window.location.reload(); });
         });
     }
 
-    input.addEventListener('change', function () { run(input.files); });
-    ['dragenter', 'dragover'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('border-teal-400', 'bg-teal-50/40'); }); });
-    ['dragleave', 'drop'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('border-teal-400', 'bg-teal-50/40'); }); });
-    zone.addEventListener('drop', function (e) { run(e.dataTransfer && e.dataTransfer.files); });
+    function bind() {
+        var zone = document.getElementById('svcPhotoZone'), input = document.getElementById('svcPhotoInput');
+        if (!zone || !input) return;
+        input.addEventListener('change', function () { run(input.files); });
+        ['dragenter', 'dragover'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.add('border-teal-400'); }); });
+        ['dragleave', 'drop'].forEach(function (ev) { zone.addEventListener(ev, function (e) { e.preventDefault(); zone.classList.remove('border-teal-400'); }); });
+        zone.addEventListener('drop', function (e) { run(e.dataTransfer && e.dataTransfer.files); });
+    }
+
+    // Make main / Remove / use a gallery photo: do it in place instead of reloading the whole page.
+    document.addEventListener('submit', function (e) {
+        var f = e.target;
+        if (e.defaultPrevented || !f.hasAttribute || !f.hasAttribute('data-ajax') || !f.closest('#photos')) return;
+        e.preventDefault();
+        if (busy) return;
+        busy = true;
+        fetch(f.action, { method: 'POST', body: new FormData(f), credentials: 'same-origin', headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, j: j }; }); })
+            .then(function (o) {
+                busy = false;
+                if (o.status >= 200 && o.status < 300 && o.j.ok) return refresh().then(function () { flash(o.j.message || 'Done.'); });
+                flash(o.status === 419 ? 'Your session expired. Please reload the page and try again.' : (o.j.message || 'Something went wrong. Please try again.'), true);
+            })
+            .catch(function () { busy = false; flash('No connection. Please check your internet and try again.', true); });
+    });
+
+    bind();
 })();
 </script>
-@endif
 @endsection

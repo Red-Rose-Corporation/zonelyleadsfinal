@@ -210,6 +210,8 @@
     @container (min-width: 430px) { .svp-in { grid-template-columns: minmax(0,1fr) minmax(0,1.05fr); } .svp-gal { padding: 16px 20px 12px 0; } }
     .svp-main { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; border: 0; border-radius: 12px; overflow: hidden; background: #e2e8f0; box-shadow: inset 0 0 0 1px rgba(15,23,42,.06); cursor: zoom-in; }
     .svp-main img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; display: block; }
+    /* Older browsers without aspect-ratio (Safari before 15) still get the 4:3 frame */
+    @supports not (aspect-ratio: 1) { .svp-main { height: 0; padding-top: 75%; } .svp-main img { position: absolute; top: 0; left: 0; } }
     .svp-main:focus-visible, .svp-tb:focus-visible, .svp-lb button:focus-visible { outline: 2px solid #0f766e; outline-offset: 2px; }
     .svp-bdg { position: absolute; left: 8px; bottom: 8px; display: flex; align-items: baseline; gap: 5px; padding: 4px 9px; border-radius: 9px; background: rgba(255,255,255,.95); box-shadow: 0 1px 4px rgba(15,23,42,.18); }
     .svp-bdg b { font-size: 16px; color: #115e59; }
