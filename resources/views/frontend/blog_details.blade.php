@@ -28,6 +28,8 @@
   }
 }
 </script>
+{{-- Breadcrumb + FAQ markup, printed only for the posts opted in inside BlogStructuredData::ENABLED_SLUGS. --}}
+{!! \App\Support\BlogStructuredData::scripts($blog->slug, $blog->name, $blog->description) !!}
 @endsection
 
 @section('css')
